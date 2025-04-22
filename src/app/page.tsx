@@ -40,7 +40,7 @@ export default function Home() {
         if (newProgress >= 100) {
           clearInterval(interval);
           // Simulate a translated file URL
-          setTranslatedFileUrl('/translated-presentation.pptx');
+          setTranslatedFileUrl('/dummy-translated-presentation.pptx');
           setIsTranslating(false);
           toast({
             title: 'Success',
@@ -55,8 +55,18 @@ export default function Home() {
 
   const handleDownload = () => {
     if (translatedFileUrl) {
-      // Simulate download by opening the URL in a new tab
-      window.open(translatedFileUrl, '_blank');
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = translatedFileUrl;
+      link.download = 'translated-presentation.pptx'; // Set the desired file name
+      document.body.appendChild(link);
+
+      // Programmatically trigger the download
+      link.click();
+
+      // Remove the temporary link
+      document.body.removeChild(link);
+
     } else {
       toast({
         title: 'Error',
