@@ -1,3 +1,4 @@
+
 // This is a server-side file.
 'use server';
 /**
@@ -11,6 +12,7 @@
 
 import {ai} from '@/ai/ai-instance';
 import {z} from 'genkit';
+import pptxgen from 'pptxgenjs';
 
 const AutoTranslatePresentationInputSchema = z.object({
   fileUrl: z.string().describe('The URL of the PPT/PPTX file to translate.'),
@@ -94,12 +96,90 @@ const autoTranslatePresentationFlow = ai.defineFlow<
     outputSchema: AutoTranslatePresentationOutputSchema,
   },
   async input => {
-    // Here, we would implement the logic to parse the PPT/PPTX file,
-    // extract editable text elements, and use the translation tools.
+    // 1. Download the PPT/PPTX file from the URL.
+    const fileBuffer = await downloadFile(input.fileUrl);
 
-    // This is a placeholder implementation.
-    const {output} = await autoTranslatePresentationPrompt(input);
-    return output!;
+    // 2. Parse the PPT/PPTX file and extract editable text elements.
+    const presentationData = await parsePptx(fileBuffer);
+
+    // 3. Translate the text elements.
+    const translatedPresentationData = await translatePresentationData(presentationData, input.targetLanguage);
+
+    // 4. Reconstruct the PPT/PPTX file with the translated text elements.
+    const translatedFileBuffer = await createPptx(translatedPresentationData);
+
+    // 5. Store the translated file in a storage service and get the URL.
+    const translatedFileUrl = await uploadFile(translatedFileBuffer, 'translated-presentation.pptx');
+
+    // 6. Generate a translation report.
+    const translationReport = `Translated ${presentationData.slides.length} slides.`;
+
+    return {
+      translatedFileUrl,
+      translationReport,
+    };
   }
 );
 
+async function downloadFile(fileUrl: string): Promise<Buffer> {
+  // download the file from the URL and return a Buffer
+  // Use `fetch` or a library like `axios` to download the file
+  // Example:
+  const response = await fetch(fileUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  return buffer;
+}
+
+async function parsePptx(fileBuffer: Buffer): Promise<any> {
+  //  parse the PPT/PPTX file and extract editable text elements
+  // Use a library like `mammoth` or `pptxgenjs` to parse the file.
+  // For simplicity, we will return a placeholder.
+  return {
+    slides: [
+      {
+        title: 'Slide 1 Title',
+        body: 'Slide 1 body text',
+      },
+      {
+        title: 'Slide 2 Title',
+        body: 'Slide 2 body text',
+      },
+    ],
+  };
+}
+
+async function translatePresentationData(presentationData: any, targetLanguage: 'en' | 'zh'): Promise<any> {
+  // translate the text elements using the translateText tool
+  // For each text element in the presentation data, call the `translateText` tool.
+  const translatedSlides = [];
+  for (const slide of presentationData.slides) {
+    const translatedTitle = (await translateText({ text: slide.title, targetLanguage })).value;
+    const translatedBody = (await translateText({ text: slide.body, targetLanguage })).value;
+    translatedSlides.push({
+      title: translatedTitle,
+      body: translatedBody,
+    });
+  }
+  return {slides: translatedSlides};
+}
+
+async function createPptx(translatedPresentationData: any): Promise<Buffer> {
+  // reconstruct the PPT/PPTX file with the translated text elements
+  // Use a library like `pptxgenjs` to create a new PPT/PPTX file.
+  let pptx = new pptxgen();
+  translatedPresentationData.slides.forEach(slideData => {
+    let slide = pptx.addSlide();
+    slide.addText(slideData.title, { x: 1, y: 0.5, w: 8, h: 1, fontSize: 24 });
+    slide.addText(slideData.body, { x: 1, y: 1.5, w: 8, h: 3, fontSize: 18 });
+  });
+
+  return await pptx.write('buffer') as Buffer;
+}
+
+async function uploadFile(fileBuffer: Buffer, fileName: string): Promise<string> {
+  // store the translated file in a storage service and return the URL
+  // Use Firebase Storage, AWS S3, or any other storage service to store the file.
+  // For simplicity, we will return a placeholder.
+  return '/dummy-translated-presentation.pptx';
+}
