@@ -2,3 +2,4 @@
 # Add .env and other sensitive files here if not already present.
 
 .env
+__pycache__

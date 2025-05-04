@@ -8,9 +8,6 @@ from dotenv import load_dotenv
 from pptx.util import Pt
 from pptx_utils import measure_text_bbox, fit_font_size_to_bbox
 
-# Import API routes to register them
-import api
-
 # Load Gemini API key from .env
 load_dotenv()
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
@@ -91,12 +88,35 @@ def translate_pptx(input_stream, src_lang, dest_lang):
             text_frame = shape.text_frame
             # Get original font properties from the first run (if available)
             if text_frame.paragraphs and text_frame.paragraphs[0].runs:
-                run = text_frame.paragraphs[0].runs[0]
-                font_name = run.font.name or "Arial"
-                original_font_size = int(run.font.size.pt) if run.font.size else 18
+                original_run = text_frame.paragraphs[0].runs[0]
+                font_name = original_run.font.name or "Arial"
+                original_font_size = int(original_run.font.size.pt) if original_run.font.size else 18
+                # Enhanced font color extraction: run -> paragraph -> text_frame
+                font_color = None
+                # 1. Try run-level color
+                if original_run.font.color is not None:
+                    try:
+                        font_color = original_run.font.color.rgb
+                    except AttributeError:
+                        font_color = None
+                # 2. Try paragraph-level color
+                if not font_color:
+                    para = text_frame.paragraphs[0]
+                    if para.font and para.font.color is not None:
+                        try:
+                            font_color = para.font.color.rgb
+                        except AttributeError:
+                            font_color = None
+                # 3. Try text_frame-level color
+                if not font_color and hasattr(text_frame, 'font') and text_frame.font is not None:
+                    try:
+                        font_color = text_frame.font.color.rgb
+                    except AttributeError:
+                        font_color = None
             else:
                 font_name = "Arial"
                 original_font_size = 18
+                font_color = None
             # Measure the bounding box of the original text
             original_text = shape.text
             orig_w, orig_h = measure_text_bbox(original_text, font_name, original_font_size)
@@ -108,6 +128,8 @@ def translate_pptx(input_stream, src_lang, dest_lang):
             run.text = translated
             run.font.name = font_name
             run.font.size = Pt(best_font_size)
+            if font_color:
+                run.font.color.rgb = font_color
         else:
             shape.text = translated
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx')
