@@ -1,5 +1,6 @@
 from pptx.util import Pt
 from PIL import ImageFont, ImageDraw, Image
+from config import MIN_FONT_SIZE
 
 def measure_text_bbox(text, font_name, font_size):
     """Measure the bounding box (width, height) of the rendered text using Pillow."""
@@ -15,7 +16,7 @@ def measure_text_bbox(text, font_name, font_size):
     height = bbox[3] - bbox[1]
     return width, height
 
-def fit_font_size_to_bbox(target_width, target_height, text, font_name, max_font_size, min_font_size=8):
+def fit_font_size_to_bbox(target_width, target_height, text, font_name, max_font_size, min_font_size=MIN_FONT_SIZE):
     """Find the font size for translated text so its bounding box matches the original as close as possible."""
     # Use binary search for efficiency
     best_size = min_font_size

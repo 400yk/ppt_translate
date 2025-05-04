@@ -7,11 +7,11 @@ import ast  # Added for safe eval fallback
 from dotenv import load_dotenv
 from pptx.util import Pt
 from pptx_utils import measure_text_bbox, fit_font_size_to_bbox
+from config import DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, GEMINI_API_URL
 
 # Load Gemini API key from .env
 load_dotenv()
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
 from flask_cors import CORS
 app = Flask(__name__)
@@ -89,8 +89,8 @@ def translate_pptx(input_stream, src_lang, dest_lang):
             # Get original font properties from the first run (if available)
             if text_frame.paragraphs and text_frame.paragraphs[0].runs:
                 original_run = text_frame.paragraphs[0].runs[0]
-                font_name = original_run.font.name or "Arial"
-                original_font_size = int(original_run.font.size.pt) if original_run.font.size else 18
+                font_name = original_run.font.name or DEFAULT_FONT_NAME
+                original_font_size = int(original_run.font.size.pt) if original_run.font.size else DEFAULT_FONT_SIZE
                 # Enhanced font color extraction: run -> paragraph -> text_frame
                 font_color = None
                 # 1. Try run-level color
@@ -114,8 +114,8 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                     except AttributeError:
                         font_color = None
             else:
-                font_name = "Arial"
-                original_font_size = 18
+                font_name = DEFAULT_FONT_NAME
+                original_font_size = DEFAULT_FONT_SIZE
                 font_color = None
             # Measure the bounding box of the original text
             original_text = shape.text
