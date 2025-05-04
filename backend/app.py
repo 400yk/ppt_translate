@@ -6,12 +6,32 @@ import requests
 import ast  # Added for safe eval fallback
 from dotenv import load_dotenv
 from pptx.util import Pt
-from pptx_utils import measure_text_bbox, fit_font_size_to_bbox
-from config import DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, GEMINI_API_URL
+from pptx_utils import measure_text_bbox, fit_font_size_to_bbox, fit_font_size_for_title
+from config import DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, GEMINI_API_URL, DEFAULT_TITLE_FONT_SIZE
+from pptx.enum.shapes import PP_PLACEHOLDER
 
-# Load Gemini API key from .env
-load_dotenv()
+# Load Gemini API key from .env - try multiple locations
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.dirname(current_dir)
+
+# Try loading .env from different possible locations
+env_paths = [
+    os.path.join(root_dir, '.env'),  # root project directory
+    os.path.join(current_dir, '.env'),  # backend directory
+    '.env'  # current working directory
+]
+
+for env_path in env_paths:
+    if os.path.exists(env_path):
+        print(f"Loading environment from: {env_path}")
+        load_dotenv(env_path)
+        break
+else:
+    print("Warning: Could not find .env file in any of the expected locations")
+
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+if not GEMINI_API_KEY:
+    print("ERROR: GEMINI_API_KEY not found in environment variables")
 
 from flask_cors import CORS
 app = Flask(__name__)
@@ -19,6 +39,11 @@ CORS(app)
 
 def gemini_batch_translate(texts, src_lang, dest_lang):
     """Batch translate a list of texts using Gemini API."""
+    # Check if API key is available
+    if not GEMINI_API_KEY:
+        print("ERROR: Missing Gemini API key. Translation will return original text.")
+        return texts
+        
     # Join texts as a JSON list to preserve order and mapping
     import json
     joined = json.dumps(texts, ensure_ascii=False)
@@ -60,9 +85,23 @@ def gemini_batch_translate(texts, src_lang, dest_lang):
                     print(f"Fallback ast.literal_eval failed: {e2}\nRaw: {translated_json}")
                     return texts  # fallback
         elif 'error' in result:
-            raise Exception(f"Gemini API error: {result['error']['message']}")
+            error_msg = result.get('error', {}).get('message', 'Unknown error')
+            print(f"Gemini API error: {error_msg}")
+            
+            # Special handling for auth errors
+            if 'API key not valid' in error_msg or '403' in error_msg:
+                print("Authentication error: Please check your Gemini API key.")
+            
+            raise Exception(f"Gemini API error: {error_msg}")
         else:
             raise Exception("Unexpected Gemini API response")
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 403:
+            print(f"Gemini API authentication error (403 Forbidden): Please check your API key.")
+            print(f"API Response: {e.response.text}")
+        else:
+            print(f"Gemini HTTP error: {e}")
+        return texts  # fallback to original
     except Exception as e:
         print(f"Gemini translation error: {e}")
         return texts  # fallback to original
@@ -90,7 +129,21 @@ def translate_pptx(input_stream, src_lang, dest_lang):
             if text_frame.paragraphs and text_frame.paragraphs[0].runs:
                 original_run = text_frame.paragraphs[0].runs[0]
                 font_name = original_run.font.name or DEFAULT_FONT_NAME
-                original_font_size = int(original_run.font.size.pt) if original_run.font.size else DEFAULT_FONT_SIZE
+                
+                # Check if this is a title placeholder
+                is_title = False
+                if shape.is_placeholder:
+                    ph_type = shape.placeholder_format.type
+                    # Title placeholders have types: TITLE (1) or CENTER_TITLE (3)
+                    if ph_type in (PP_PLACEHOLDER.TITLE, PP_PLACEHOLDER.CENTER_TITLE):
+                        is_title = True
+                
+                # Use appropriate default font size based on whether it's a title
+                if original_run.font.size:
+                    original_font_size = int(original_run.font.size.pt)
+                else:
+                    original_font_size = DEFAULT_TITLE_FONT_SIZE if is_title else DEFAULT_FONT_SIZE
+                
                 # Enhanced font color extraction: run -> paragraph -> text_frame
                 font_color = None
                 # 1. Try run-level color
@@ -115,13 +168,28 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                         font_color = None
             else:
                 font_name = DEFAULT_FONT_NAME
-                original_font_size = DEFAULT_FONT_SIZE
+                
+                # Check if this is a title placeholder
+                is_title = False
+                if shape.is_placeholder:
+                    ph_type = shape.placeholder_format.type
+                    if ph_type in (PP_PLACEHOLDER.TITLE, PP_PLACEHOLDER.CENTER_TITLE):
+                        is_title = True
+                
+                original_font_size = DEFAULT_TITLE_FONT_SIZE if is_title else DEFAULT_FONT_SIZE
                 font_color = None
+                
             # Measure the bounding box of the original text
             original_text = shape.text
             orig_w, orig_h = measure_text_bbox(original_text, font_name, original_font_size)
-            # Find the font size for the translated text so its bounding box matches the original
-            best_font_size = fit_font_size_to_bbox(orig_w, orig_h, translated, font_name, original_font_size)
+            
+            # For titles, only constrain height, not width
+            if is_title:
+                best_font_size = fit_font_size_for_title(orig_h, translated, font_name, original_font_size)
+            else:
+                # For regular content, constrain both dimensions
+                best_font_size = fit_font_size_to_bbox(orig_w, orig_h, translated, font_name, original_font_size)
+                
             text_frame.clear()
             p = text_frame.paragraphs[0]
             run = p.add_run()

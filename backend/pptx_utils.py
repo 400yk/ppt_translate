@@ -35,3 +35,24 @@ def fit_font_size_to_bbox(target_width, target_height, text, font_name, max_font
         else:
             low = mid + 1
     return best_size
+
+def fit_font_size_for_title(target_height, text, font_name, max_font_size, min_font_size=MIN_FONT_SIZE):
+    """Find the font size for translated title text where only height is restricted, not width.
+    This allows titles to expand horizontally as needed while maintaining vertical constraints."""
+    # Use binary search for efficiency
+    best_size = min_font_size
+    low, high = min_font_size, max_font_size
+    best_diff = float('inf')
+    while low <= high:
+        mid = (low + high) // 2
+        _, h = measure_text_bbox(text, font_name, mid)
+        diff = abs(h - target_height)
+        if diff < best_diff:
+            best_diff = diff
+            best_size = mid
+        # Only check height constraint, ignoring width
+        if h > target_height:
+            high = mid - 1
+        else:
+            low = mid + 1
+    return best_size
