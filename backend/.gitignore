@@ -1,0 +1,4 @@
+# This file is used to instruct git which files/folders to ignore.
+# Add .env and other sensitive files here if not already present.
+
+.env
