@@ -40,7 +40,8 @@
   },
   "upload": {
     "title": "上传您的演示文稿",
-    "description": "选择或拖放您的PowerPoint文件（.ppt或.pptx）"
+    "description": "选择或拖放您的PowerPoint文件（.ppt或.pptx）",
+    "release": "松开鼠标上传"
   },
   "footer": {
     "description": "翻译您的PowerPoint幻灯片，同时保留所有格式和布局。"

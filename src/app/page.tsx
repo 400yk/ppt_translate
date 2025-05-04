@@ -50,16 +50,19 @@ const nativeLanguageNames = {
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
+  const [progressStep, setProgressStep] = useState<string | null>(null);
   const [translatedFileUrl, setTranslatedFileUrl] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [srcLang, setSrcLang] = useState<LanguageCode>("zh"); // Default source language: Chinese
   const [destLang, setDestLang] = useState<LanguageCode>("en"); // Default target language: English
   const [invalidFileType, setInvalidFileType] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const {toast} = useToast();
   const {t, locale, setLocale} = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const router = useRouter();
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   // Check authentication and redirect if necessary
   useEffect(() => {
@@ -204,7 +207,7 @@ export default function Home() {
           }
           return newProgress;
         });
-      }, 300);
+      }, 20);
 
       // Get auth token from localStorage
       let token;
@@ -310,6 +313,62 @@ export default function Home() {
     }
   };
 
+  // Handle drag events
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isTranslating) return;
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isTranslating) return;
+    
+    // Only set dragging to false if the drag leaves the entire drop zone
+    // Check if the related target is not contained within the dropzone
+    if (dropZoneRef.current && !dropZoneRef.current.contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isTranslating) return;
+    // Set the dropEffect to 'copy' to show a copy icon
+    e.dataTransfer.dropEffect = 'copy';
+    setIsDragging(true);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (isTranslating) return;
+    
+    const droppedFiles = e.dataTransfer.files;
+    if (droppedFiles.length > 0) {
+      const droppedFile = droppedFiles[0];
+      
+      // Use the same validation as in handleFileChange
+      if (validateFileExtension(droppedFile.name)) {
+        setInvalidFileType(false);
+        setFile(droppedFile);
+        setTranslatedFileUrl(null);
+        setProgress(0);
+      } else {
+        setInvalidFileType(true);
+        toast({
+          title: 'Warning',
+          description: t('errors.invalid_file_type'),
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
   // If still loading auth state, show a spinner
   if (isLoading) {
     return (
@@ -381,16 +440,29 @@ export default function Home() {
       </div>
       
       <div className="flex flex-col items-center justify-center w-full max-w-3xl mx-auto">
-        {/* Rest of the component remains the same */}
-        <div className={`w-full mb-8 p-8 border-2 border-dashed rounded-lg 
-          transition-all duration-300 ${styles.dropZone}
-          ${file ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary'}`}>
+        {/* Update the drop zone div to handle drag and drop events */}
+        <div 
+          ref={dropZoneRef}
+          className={`w-full mb-8 p-8 border-2 border-dashed rounded-lg 
+            transition-all duration-300 ${styles.dropZone}
+            ${isDragging ? `${styles.draggingActive} border-primary` : ''}
+            ${file ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary'}`}
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           <div className="flex flex-col items-center justify-center">
             {!file && (
               <>
-                <Icons.upload className="mb-4 h-10 w-10 text-gray-400" />
+                <Icons.upload className={`mb-4 h-10 w-10 ${isDragging ? 'text-primary animate-bounce' : 'text-gray-400'}`} />
                 <h3 className="mb-2 text-lg font-medium">{t('upload.title')}</h3>
                 <p className="mb-4 text-sm text-gray-500">{t('upload.description')}</p>
+                {isDragging && (
+                  <div className="mt-4 p-2 bg-primary/10 text-primary rounded-md">
+                    <p className="text-sm font-medium">{t('upload.release')}</p>
+                  </div>
+                )}
               </>
             )}
             

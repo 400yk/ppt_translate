@@ -40,7 +40,8 @@
   },
   "upload": {
     "title": "Upload Your Presentation",
-    "description": "Select or drag and drop your PowerPoint file (.ppt or .pptx)"
+    "description": "Select or drag and drop your PowerPoint file (.ppt or .pptx)",
+    "release": "Release to upload"
   },
   "footer": {
     "description": "Translate your PowerPoint slides while preserving all formatting and layout."

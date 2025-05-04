@@ -332,4 +332,29 @@
   100% {
     transform: scale(1.05);
   }
+}
+
+/* Drop zone styles */
+.dropZone {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Animation for the drop zone during dragging */
+@keyframes pulseDropZone {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+.draggingActive {
+  animation: pulseDropZone 1.5s infinite;
+  border-color: var(--primary);
+  background-color: rgba(59, 130, 246, 0.05);
 } 
