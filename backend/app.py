@@ -5,6 +5,11 @@ from pptx import Presentation
 import requests
 import ast  # Added for safe eval fallback
 from dotenv import load_dotenv
+from pptx.util import Pt
+from pptx_utils import measure_text_bbox, fit_font_size_to_bbox
+
+# Import API routes to register them
+import api
 
 # Load Gemini API key from .env
 load_dotenv()
@@ -77,31 +82,38 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                 texts.append(shape.text)
     # Batch translate
     translated_texts = gemini_batch_translate(texts, src_lang, dest_lang)
-    # Debug: print lengths and samples
     print(f"Collected {len(texts)} texts from PPTX.")
     print(f"Received {len(translated_texts)} translated texts.")
     print(f"Sample original: {texts[:3]}")
     print(f"Sample translated: {translated_texts[:3]}")
-    # Write back translations, use text_frame.text if available for robustness
     for shape, translated in zip(text_shapes, translated_texts):
         if hasattr(shape, "text_frame") and hasattr(shape.text_frame, "text"):
-            shape.text_frame.text = translated
+            text_frame = shape.text_frame
+            # Get original font properties from the first run (if available)
+            if text_frame.paragraphs and text_frame.paragraphs[0].runs:
+                run = text_frame.paragraphs[0].runs[0]
+                font_name = run.font.name or "Arial"
+                original_font_size = int(run.font.size.pt) if run.font.size else 18
+            else:
+                font_name = "Arial"
+                original_font_size = 18
+            # Measure the bounding box of the original text
+            original_text = shape.text
+            orig_w, orig_h = measure_text_bbox(original_text, font_name, original_font_size)
+            # Find the font size for the translated text so its bounding box matches the original
+            best_font_size = fit_font_size_to_bbox(orig_w, orig_h, translated, font_name, original_font_size)
+            text_frame.clear()
+            p = text_frame.paragraphs[0]
+            run = p.add_run()
+            run.text = translated
+            run.font.name = font_name
+            run.font.size = Pt(best_font_size)
         else:
             shape.text = translated
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx')
     prs.save(temp_file.name)
     temp_file.close()
     return temp_file.name
-
-@app.route('/translate', methods=['POST'])
-def translate():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
-    file = request.files['file']
-    src_lang = request.form.get('src_lang', 'zh')
-    dest_lang = request.form.get('dest_lang', 'en')
-    translated_pptx_path = translate_pptx(file, src_lang, dest_lang)
-    return send_file(translated_pptx_path, as_attachment=True, download_name='translated.pptx')
 
 if __name__ == '__main__':
     app.run(debug=True)
