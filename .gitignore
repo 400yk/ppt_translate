@@ -43,3 +43,4 @@ tmp
 
 backend/.env
 backend/__pycache__/
+backend/app.db

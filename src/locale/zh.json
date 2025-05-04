@@ -10,15 +10,61 @@
   "translating": "翻译中...",
   "progress_label": "翻译进度：",
   "no_file_selected": "",
+  "common": {
+    "loading": "加载中..."
+  },
   "errors": {
     "no_file": "请先上传文件。",
     "same_language": "源语言和目标语言不能相同。",
     "translation_failed": "翻译过程中发生错误。",
     "download_failed": "下载已翻译文件失败。",
-    "invalid_file_type": "请上传PowerPoint文件（.ppt或.pptx）。"
+    "invalid_file_type": "请上传PowerPoint文件（.ppt或.pptx）。",
+    "unknown_error": "发生未知错误。",
+    "required_fields": "必填字段",
+    "fill_all_fields": "请填写所有必填字段。",
+    "login_failed": "登录失败",
+    "password_mismatch": "密码不匹配",
+    "passwords_dont_match": "两次输入的密码不一致。",
+    "invalid_invitation": "邀请码无效",
+    "enter_valid_code": "请输入有效的邀请码。",
+    "verification_error": "验证邀请码时出错。"
   },
   "success": {
     "translation_complete": "文件已成功翻译！"
+  },
+  "buttons": {
+    "translate": "翻译",
+    "download": "下载",
+    "translating": "翻译中...",
+    "select_file": "选择文件"
+  },
+  "upload": {
+    "title": "上传您的演示文稿",
+    "description": "选择或拖放您的PowerPoint文件（.ppt或.pptx）"
+  },
+  "footer": {
+    "description": "翻译您的PowerPoint幻灯片，同时保留所有格式和布局。"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "username": "用户名",
+    "username_placeholder": "输入您的用户名",
+    "email": "电子邮箱",
+    "email_placeholder": "输入您的电子邮箱",
+    "password": "密码",
+    "password_placeholder": "输入您的密码",
+    "login_success": "登录成功",
+    "welcome_back": "欢迎回来！",
+    "logout": "退出登录",
+    "no_account": "还没有账号？",
+    "have_account": "已有账号？",
+    "confirm_password": "确认密码",
+    "confirm_password_placeholder": "确认您的密码",
+    "invitation_code": "邀请码",
+    "invitation_code_placeholder": "输入您的邀请码",
+    "valid_code": "有效的邀请码。剩余使用次数：{0}。",
+    "invalid_code": "无效的邀请码。"
   },
   "languages": {
     "zh": "中文",

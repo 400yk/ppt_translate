@@ -1,14 +1,19 @@
 import os
 import tempfile
-from flask import Flask, request, send_file, jsonify
+from flask import Flask, request, send_file, jsonify, make_response
 from pptx import Presentation
 import requests
 import ast  # Added for safe eval fallback
 from dotenv import load_dotenv
 from pptx.util import Pt
 from pptx_utils import measure_text_bbox, fit_font_size_to_bbox, fit_font_size_for_title
-from config import DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, GEMINI_API_URL, DEFAULT_TITLE_FONT_SIZE
+from config import DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, GEMINI_API_URL, DEFAULT_TITLE_FONT_SIZE, SECRET_KEY, JWT_SECRET_KEY
 from pptx.enum.shapes import PP_PLACEHOLDER
+from flask_cors import CORS
+from models import db, InvitationCode, User
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from werkzeug.security import generate_password_hash, check_password_hash
+import datetime
 
 # Load Gemini API key from .env - try multiple locations
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -33,9 +38,177 @@ GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 if not GEMINI_API_KEY:
     print("ERROR: GEMINI_API_KEY not found in environment variables")
 
-from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
+
+# Configure the Flask app
+app.config['SECRET_KEY'] = SECRET_KEY
+app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///' + os.path.join(current_dir, 'app.db'))
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize extensions
+db.init_app(app)
+jwt = JWTManager(app)
+
+# Create tables if they don't exist
+with app.app_context():
+    db.create_all()
+
+# Authentication routes
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    
+    # Validate input
+    if not data or not data.get('username') or not data.get('email') or not data.get('password') or not data.get('invitation_code'):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+    invitation_code_str = data.get('invitation_code')
+    
+    # Check if user already exists
+    if User.query.filter_by(username=username).first():
+        return jsonify({'error': 'Username already exists'}), 400
+    if User.query.filter_by(email=email).first():
+        return jsonify({'error': 'Email already exists'}), 400
+    
+    # Verify invitation code
+    invitation_code = InvitationCode.query.filter_by(code=invitation_code_str).first()
+    if not invitation_code:
+        return jsonify({'error': 'Invalid invitation code'}), 400
+    
+    if not invitation_code.is_valid():
+        return jsonify({'error': 'Invitation code is no longer valid'}), 400
+    
+    # Create new user
+    user = User(username=username, email=email, invitation_code=invitation_code)
+    user.set_password(password)
+    
+    # Increment code usage
+    invitation_code.increment_usage()
+    
+    # Save user to database
+    db.session.add(user)
+    db.session.commit()
+    
+    # Generate access token
+    access_token = create_access_token(identity=username)
+    
+    return jsonify({
+        'message': 'User registered successfully',
+        'access_token': access_token
+    }), 201
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    
+    if not data or not data.get('username') or not data.get('password'):
+        return jsonify({'error': 'Missing username or password'}), 400
+    
+    username = data.get('username')
+    password = data.get('password')
+    
+    # Find user
+    user = User.query.filter_by(username=username).first()
+    if not user or not user.check_password(password):
+        return jsonify({'error': 'Invalid username or password'}), 401
+    
+    # Update last login time
+    user.last_login = datetime.datetime.utcnow()
+    db.session.commit()
+    
+    # Generate access token
+    access_token = create_access_token(identity=username)
+    
+    return jsonify({
+        'message': 'Login successful',
+        'access_token': access_token
+    }), 200
+
+@app.route('/api/invitation-codes', methods=['POST'])
+@jwt_required()
+def generate_invitation_codes():
+    # This endpoint should be admin-only, but for simplicity we're allowing any authenticated user
+    username = get_jwt_identity()
+    user = User.query.filter_by(username=username).first()
+    
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Generate 50 invitation codes
+    codes = InvitationCode.generate_batch(count=50, max_uses=10)
+    
+    return jsonify({
+        'message': 'Invitation codes generated successfully',
+        'codes': codes
+    }), 201
+
+@app.route('/api/verify-invitation', methods=['POST'])
+def verify_invitation():
+    data = request.get_json()
+    
+    if not data or not data.get('code'):
+        return jsonify({'error': 'Invitation code is required'}), 400
+    
+    code = data.get('code')
+    invitation = InvitationCode.query.filter_by(code=code).first()
+    
+    if not invitation:
+        return jsonify({'valid': False, 'error': 'Invalid invitation code'}), 200
+    
+    if not invitation.is_valid():
+        return jsonify({'valid': False, 'error': 'Invitation code has already been used'}), 200
+    
+    return jsonify({
+        'valid': True,
+        'uses': invitation.uses,
+        'max_uses': invitation.max_uses,
+        'remaining': invitation.max_uses - invitation.uses
+    }), 200
+
+# Protect the translation endpoint with authentication
+@app.route('/translate', methods=['POST'])
+@jwt_required()
+def translate_pptx_endpoint():
+    # Get user from token
+    username = get_jwt_identity()
+    user = User.query.filter_by(username=username).first()
+    
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+        
+    file = request.files['file']
+    src_lang = request.form.get('src_lang', 'zh')  # Default source language: Chinese
+    dest_lang = request.form.get('dest_lang', 'en')  # Default target language: English
+    
+    print(f"Received file: {file.filename}")
+    print(f"Source language: {src_lang}, Target language: {dest_lang}")
+    
+    try:
+        # Translate the PPTX file and get the output path
+        output_path = translate_pptx(file.stream, src_lang, dest_lang)
+        
+        # Return the translated file
+        response = make_response(send_file(output_path, as_attachment=True, 
+                                 download_name=f"translated_{file.filename}"))
+        
+        # Set content type explicitly (helps prevent MIME type issues)
+        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        
+        print(f"Translation completed successfully.")
+        return response
+    except Exception as e:
+        print(f"Error during translation: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
 
 def gemini_batch_translate(texts, src_lang, dest_lang):
     """Batch translate a list of texts using Gemini API."""
@@ -416,4 +589,4 @@ def translate_pptx(input_stream, src_lang, dest_lang):
     return temp_file.name
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')

@@ -3,12 +3,16 @@
 import { useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 
-export function DynamicHead() {
+interface DynamicHeadProps {
+  title?: string; // Optional custom title
+}
+
+export function DynamicHead({ title }: DynamicHeadProps) {
   const { t, locale } = useTranslation();
   
   useEffect(() => {
-    // Update document title based on current language
-    document.title = t('title');
+    // Update document title based on custom title or current language
+    document.title = title || t('title');
     
     // Update favicon link dynamically
     // First, remove any existing favicon links
@@ -38,7 +42,7 @@ export function DynamicHead() {
     
     // Set RTL direction for Arabic, Hebrew, Persian, etc. if needed in the future
     // document.documentElement.dir = ['ar', 'he', 'fa'].includes(locale) ? 'rtl' : 'ltr';
-  }, [t, locale]);
+  }, [t, locale, title]);
 
   return null; // This component doesn't render anything visually
 } 

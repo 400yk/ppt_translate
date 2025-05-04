@@ -14,6 +14,9 @@ import ru from '@/locale/ru.json';
 const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
 type LanguageCode = typeof languageCodes[number];
 
+// Helper to check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
+
 // Create a type for language translations
 type LanguageKey = `languages.${LanguageCode}`;
 
@@ -30,12 +33,48 @@ export type TranslationKey =
   | 'translating'
   | 'progress_label'
   | 'no_file_selected'
+  | 'common.loading'
   | 'errors.no_file'
   | 'errors.same_language'
   | 'errors.translation_failed'
   | 'errors.download_failed'
   | 'errors.invalid_file_type'
+  | 'errors.unknown_error'
+  | 'errors.required_fields'
+  | 'errors.fill_all_fields'
+  | 'errors.login_failed'
+  | 'errors.password_mismatch'
+  | 'errors.passwords_dont_match'
+  | 'errors.invalid_invitation'
+  | 'errors.enter_valid_code'
+  | 'errors.verification_error'
   | 'success.translation_complete'
+  | 'buttons.translate'
+  | 'buttons.download'
+  | 'buttons.translating'
+  | 'buttons.select_file'
+  | 'upload.title'
+  | 'upload.description'
+  | 'footer.description'
+  | 'auth.login'
+  | 'auth.register'
+  | 'auth.username'
+  | 'auth.username_placeholder'
+  | 'auth.email'
+  | 'auth.email_placeholder'
+  | 'auth.password'
+  | 'auth.password_placeholder'
+  | 'auth.login_success'
+  | 'auth.welcome_back'
+  | 'auth.logout'
+  | 'auth.no_account'
+  | 'auth.have_account'
+  | 'auth.confirm_password'
+  | 'auth.confirm_password_placeholder'
+  | 'auth.invitation_code'
+  | 'auth.invitation_code_placeholder'
+  | 'auth.valid_code'
+  | 'auth.invalid_code'
   | LanguageKey;
 
 // Define available locales map
@@ -58,19 +97,73 @@ const getNestedTranslation = (locale: any, key: string): string => {
   return keys.reduce((obj, k) => (obj && obj[k] !== undefined ? obj[k] : key), locale);
 };
 
+// The event name for locale changes
+export const LOCALE_CHANGE_EVENT = 'app:localeChange';
+
+// Track active listeners for the locale change event
+let localeChangeListeners: (() => void)[] = [];
+
 // Custom hook for translations
 export function useTranslation() {
-  const [locale, setLocale] = useState<LocaleCode>('en');
+  const [locale, setLocaleState] = useState<LocaleCode>(() => {
+    // Only run browser-specific code in the browser
+    if (isBrowser) {
+      // Initialize from localStorage or browser language
+      const savedLocale = localStorage.getItem('app_locale') as LocaleCode;
+      const browserLang = navigator.language.split('-')[0] as LocaleCode;
+      return savedLocale || (locales[browserLang] ? browserLang : 'en');
+    }
+    // Default for server-side rendering
+    return 'en';
+  });
 
   useEffect(() => {
-    // Get browser language
-    const browserLang = navigator.language.split('-')[0] as LocaleCode;
-    // Use browser language if it's available in our locales, otherwise default to English
-    setLocale(locales[browserLang] ? browserLang : 'en');
-  }, []);
+    // Skip effects on server-side rendering
+    if (!isBrowser) return;
+    
+    // Handle locale change events
+    const handleLocaleChange = () => {
+      const savedLocale = localStorage.getItem('app_locale') as LocaleCode;
+      if (savedLocale && savedLocale !== locale) {
+        setLocaleState(savedLocale);
+      }
+    };
+
+    // Add event listener for locale changes
+    window.addEventListener(LOCALE_CHANGE_EVENT, handleLocaleChange);
+    
+    // Add this listener to our tracking array
+    const listener = handleLocaleChange;
+    localeChangeListeners.push(listener);
+    
+    return () => {
+      // Clean up
+      window.removeEventListener(LOCALE_CHANGE_EVENT, handleLocaleChange);
+      localeChangeListeners = localeChangeListeners.filter(l => l !== listener);
+    };
+  }, [locale]);
 
   const t = (key: TranslationKey): string => {
     return getNestedTranslation(locales[locale], key);
+  };
+
+  // Updated locale setter to broadcast changes
+  const setLocale = (newLocale: LocaleCode) => {
+    // Only run browser-specific code in the browser
+    if (isBrowser) {
+      // Update localStorage
+      localStorage.setItem('app_locale', newLocale);
+      
+      // Update the HTML lang attribute
+      document.documentElement.lang = newLocale;
+      
+      // Broadcast the change to all other components
+      const event = new CustomEvent(LOCALE_CHANGE_EVENT);
+      window.dispatchEvent(event);
+    }
+    
+    // Update this component's state (this works in both environments)
+    setLocaleState(newLocale);
   };
 
   return { t, locale, setLocale };

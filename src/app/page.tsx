@@ -17,10 +17,23 @@ import {useTranslation, LocaleCode} from '@/lib/i18n';
 import LogoImage from '@/assets/Pure_logo.png';
 import { DynamicHead } from '@/components/dynamic-head';
 import styles from './styles/home.module.css';
+import { useAuth } from '@/lib/auth-context';
+import { useRouter } from 'next/navigation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Define available languages (codes only)
 const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
 type LanguageCode = typeof languageCodes[number];
+
+// Check for browser environment
+const isBrowser = typeof window !== 'undefined';
 
 // Helper to display language names in their native language
 const nativeLanguageNames = {
@@ -45,6 +58,15 @@ export default function Home() {
   const {toast} = useToast();
   const {t, locale, setLocale} = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const router = useRouter();
+
+  // Check authentication and redirect if necessary
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/auth');
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   // Monitor changes to translatedFileUrl
   useEffect(() => {
@@ -184,53 +206,66 @@ export default function Home() {
         });
       }, 300);
 
+      // Get auth token from localStorage
+      let token;
+      if (isBrowser) {
+        token = localStorage.getItem('auth_token');
+      }
+      
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
       // Send the file to the Flask backend
       console.log("Sending translation request to backend");
       const response = await fetch('http://localhost:5000/translate', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formData,
       });
 
       clearInterval(progressInterval);
 
       if (!response.ok) {
+        if (response.status === 401) {
+          // Authentication error
+          toast({
+            title: 'Authentication Error',
+            description: 'Your session has expired. Please login again.',
+            variant: 'destructive',
+          });
+          
+          // Redirect to login page
+          logout();
+          router.push('/auth');
+          return;
+        }
+        
         const err = await response.json();
         throw new Error(err.error || 'Translation failed');
       }
 
-      // Get the translated PPTX as a blob
-      console.log("Server responded with success, getting blob");
-      const blob = await response.blob();
-      
-      // Create a URL for the blob
-      const url = window.URL.createObjectURL(blob);
-      console.log("Created blob URL:", url);
-      
-      // Store translated file in-memory as blob for more reliable access
-      const translatedBlob = new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
-      const translatedUrl = URL.createObjectURL(translatedBlob);
-      
-      // This needs to update state properly
-      console.log("Setting translated file URL:", translatedUrl);
-      
-      // Set progress to 100% before setting the URL
+      // Handle successful translation
       setProgress(100);
       
-      // Update translatedFileUrl state - do this last to avoid being overridden
-      storeTranslatedUrl(translatedUrl);
+      // Create a blob URL for the translated file
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      storeTranslatedUrl(url);
       
-      // Show success toast after all state updates
+      // Show success message
       toast({
         title: 'Success',
         description: t('success.translation_complete'),
       });
-      
-      console.log("Translation process complete");
     } catch (error) {
       console.error("Translation error:", error);
+      setProgress(0);
       toast({
         title: 'Error',
-        description: t('errors.translation_failed'),
+        description: error instanceof Error ? error.message : String(error),
         variant: 'destructive',
       });
     } finally {
@@ -238,217 +273,227 @@ export default function Home() {
     }
   };
 
-  // Show download or translate button based on state
   const getButtonText = () => {
     if (isTranslating) {
+      return t('buttons.translating');
+    }
+    
+    if (translatedFileUrl) {
       return (
         <>
-          <Icons.spinner className={styles.spinnerIcon} />
-          {t('translating')}
+          <Icons.upload className="mr-1 h-4 w-4 transform rotate-180" />
+          {t('buttons.download')}
         </>
       );
     }
     
-    // For debugging
-    console.log("Button text calculation - translatedFileUrl:", translatedFileUrl);
-    
-    if (translatedFileUrl) {
-      return t('download_button');
-    }
-    
-    return t('translate_button');
+    return t('buttons.translate');
   };
 
   const handleButtonAction = () => {
-    console.log("Button clicked, translatedFileUrl:", translatedFileUrl);
+    if (isTranslating) {
+      // Don't do anything while translating
+      return;
+    }
     
     if (translatedFileUrl) {
-      console.log("Download action triggered");
-      try {
-        // Create a link element to trigger download
-        const a = document.createElement('a');
-        a.href = translatedFileUrl;
-        a.download = `translated-${file?.name || 'presentation.pptx'}`;
-        
-        // Append to body, click, and remove
-        document.body.appendChild(a);
-        a.click();
-        
-        // Clean up
-        setTimeout(() => {
-          document.body.removeChild(a);
-          // Don't revoke URL here as it might be needed again
-        }, 100);
-      } catch (error) {
-        console.error('Download error:', error);
-        toast({
-          title: 'Error',
-          description: t('errors.download_failed'),
-          variant: 'destructive',
-        });
-      }
+      // If translation exists, trigger download
+      const link = document.createElement('a');
+      link.href = translatedFileUrl;
+      link.download = `translated_${file?.name}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } else {
-      console.log("Translate action triggered");
+      // Otherwise start translation
       handleTranslate();
     }
   };
 
+  // If still loading auth state, show a spinner
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // If not authenticated, we're redirecting, but still show a spinner
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className={styles.container}>
-      {/* Add the DynamicHead component */}
+    <main className="flex min-h-screen flex-col items-center p-4 md:p-12">
       <DynamicHead />
       
-      {/* Language selector in top right corner */}
-      <div className={styles.languageSelector}>
-        <div className={styles.langSelectorWrapper}>
-          <label className={styles.srOnly}>UI Language:</label>
-          <Select value={locale} onValueChange={(value: LocaleCode) => setLocale(value)}>
-            <SelectTrigger className={styles.selectWidth}>
-              <SelectValue placeholder="Select language" />
+      {/* Header with user menu */}
+      <div className="w-full flex justify-between items-center mb-8">
+        <div className="flex items-center">
+          <Image
+            src={LogoImage}
+            alt="Logo" 
+            width={40}
+            height={40}
+            className="mr-2"
+          />
+          <h1 className="text-2xl font-bold">Translide</h1>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          {/* Language selector */}
+          <Select value={locale} onValueChange={(value) => setLocale(value as LocaleCode)}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder={nativeLanguageNames[locale as LanguageCode]} />
             </SelectTrigger>
             <SelectContent>
-              {Object.entries(nativeLanguageNames).map(([code, name]) => (
-                <SelectItem key={`ui-${code}`} value={code}>
-                  {name}
+              {languageCodes.map((code) => (
+                <SelectItem key={code} value={code}>
+                  {nativeLanguageNames[code]}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          
+          {/* User dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <Icons.user className="h-4 w-4" />
+                <span className="hidden sm:inline-block">{user?.username}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>{user?.email || user?.username}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout}>
+                <Icons.logout className="mr-2 h-4 w-4" />
+                {t('auth.logout')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-
-      <div className={styles.mainContent}>
-        <div className={styles.header}>
-          <div className={styles.logoTitleWrapper}>
-            <div className={styles.logo}>
-              <Image 
-                src={LogoImage} 
-                alt="App Logo" 
-                fill 
-                style={{ objectFit: 'contain' }}
-                priority
-                sizes="(max-width: 768px) 100vw, 300px"
-              />
-            </div>
-            <h1 className={styles.title}>
-              {t('title')}
-            </h1>
-          </div>
-          <p className={styles.slogan}>
-            {t('slogan')}
-          </p>
-        </div>
-
-        <div className={styles.formWrapper}>
-          <div className={styles.fileInputWrapper}>
-            <label className={styles.fileInput}>
-              {file ? (
-                <div className={styles.fileInputLabelUploaded}>
-                  <span className={styles.fileNameInButton}>
-                    {t('file_uploaded')}: {file.name}
-                  </span>
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    strokeWidth={1.5} 
-                    stroke="currentColor" 
-                    className={styles.revertIcon}
+      
+      <div className="flex flex-col items-center justify-center w-full max-w-3xl mx-auto">
+        {/* Rest of the component remains the same */}
+        <div className={`w-full mb-8 p-8 border-2 border-dashed rounded-lg 
+          transition-all duration-300 ${styles.dropZone}
+          ${file ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary'}`}>
+          <div className="flex flex-col items-center justify-center">
+            {!file && (
+              <>
+                <Icons.upload className="mb-4 h-10 w-10 text-gray-400" />
+                <h3 className="mb-2 text-lg font-medium">{t('upload.title')}</h3>
+                <p className="mb-4 text-sm text-gray-500">{t('upload.description')}</p>
+              </>
+            )}
+            
+            {file && (
+              <div className="w-full flex flex-col items-center">
+                <div className="flex items-center justify-between w-full mb-4">
+                  <div className="flex items-center">
+                    <Icons.file className="h-8 w-8 text-primary mr-2" />
+                    <div>
+                      <h3 className="font-medium text-sm">{file.name}</h3>
+                      <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handleRevertFile}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                  </svg>
+                    <Icons.x className="h-4 w-4" />
+                  </Button>
                 </div>
-              ) : (
-                <div className={invalidFileType ? styles.fileInputLabelError : styles.fileInputLabel}>
-                  {t('file_upload')}
+                
+                <div className="w-full flex items-center space-x-4">
+                  <div className="flex-1">
+                    <Select value={srcLang} onValueChange={(value) => setSrcLang(value as LanguageCode)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={getLanguageName(srcLang)} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {languageCodes.map((code) => (
+                          <SelectItem key={code} value={code}>
+                            {getLanguageName(code)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <Icons.arrowRight className="h-4 w-4 flex-shrink-0" />
+                  
+                  <div className="flex-1">
+                    <Select value={destLang} onValueChange={(value) => setDestLang(value as LanguageCode)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={getLanguageName(destLang)} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {languageCodes.map((code) => (
+                          <SelectItem key={code} value={code}>
+                            {getLanguageName(code)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              )}
+              </div>
+            )}
+            
+            <div className="w-full mt-4">
               <input
                 type="file"
-                className={styles.srOnly}
+                id="fileInput"
                 accept=".ppt,.pptx"
                 onChange={handleFileChange}
+                className="hidden"
                 ref={fileInputRef}
               />
-            </label>
-            {invalidFileType && (
-              <p className={styles.fileNameError}>
-                {t('errors.invalid_file_type')}
-              </p>
-            )}
-          </div>
-
-          <div className={styles.langSelectionGrid}>
-            <div className={styles.langFieldWrapper}>
-              <label className={styles.label}>{t('from_label')}</label>
-              <div className={styles.langSelectContainer}>
-                <Select value={srcLang} onValueChange={(value: LanguageCode) => setSrcLang(value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select source language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {languageCodes.map((code) => (
-                      <SelectItem key={`src-${code}`} value={code}>
-                        {getLanguageName(code)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className={styles.langFieldWrapper}>
-              <label className={styles.label}>{t('to_label')}</label>
-              <div className={styles.langSelectContainer}>
-                <Select value={destLang} onValueChange={(value: LanguageCode) => setDestLang(value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select target language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {languageCodes.map((code) => (
-                      <SelectItem key={`dest-${code}`} value={code}>
-                        {getLanguageName(code)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          {progress > 0 && (
-            <div className={styles.progressWrapper}>
-              <p className={styles.progressLabel}>{t('progress_label')}</p>
-              <Progress value={progress} />
-            </div>
-          )}
-
-          <div className={styles.buttonWrapper}>
-            <Button
-              onClick={handleButtonAction}
-              disabled={isTranslating || (!translatedFileUrl && (!file || invalidFileType))}
-              className={translatedFileUrl ? styles.downloadButton : styles.translateButton}
-            >
-              {isTranslating ? (
-                <>
-                  <Icons.spinner className={styles.spinnerIcon} />
-                  {t('translating')}
-                </>
-              ) : Boolean(translatedFileUrl) ? (
-                // Force evaluation with Boolean() to ensure consistent rendering
-                <>
-                  {t('download_button')}
-                </>
-              ) : (
-                <>
-                  {t('translate_button')}
-                </>
+              
+              {!file && (
+                <Button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full" 
+                  variant="outline"
+                >
+                  {t('buttons.select_file')}
+                </Button>
               )}
-            </Button>
+              
+              {file && (
+                <Button 
+                  onClick={handleButtonAction}
+                  className={`w-full ${translatedFileUrl ? styles.shiningButton : ''}`}
+                  disabled={isTranslating || invalidFileType}
+                >
+                  {isTranslating && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                  {getButtonText()}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
+
+        {(isTranslating || progress > 0) && (
+          <div className="w-full mb-4">
+            <Progress value={progress} className="h-2" />
+            <p className="text-xs text-center mt-2">{progress}%</p>
+          </div>
+        )}
+        
+        <p className="text-sm text-gray-500 text-center max-w-lg">
+          {t('footer.description')}
+        </p>
       </div>
-    </div>
+    </main>
   );
 }

@@ -10,15 +10,61 @@
   "translating": "Translating...",
   "progress_label": "Translation Progress:",
   "no_file_selected": "",
+  "common": {
+    "loading": "Loading..."
+  },
   "errors": {
     "no_file": "Please upload a file first.",
     "same_language": "Source and target languages cannot be the same.",
     "translation_failed": "An error occurred during translation.",
     "download_failed": "Failed to download the translated file.",
-    "invalid_file_type": "Please upload a PowerPoint file (.ppt or .pptx)."
+    "invalid_file_type": "Please upload a PowerPoint file (.ppt or .pptx).",
+    "unknown_error": "An unknown error occurred.",
+    "required_fields": "Required Fields",
+    "fill_all_fields": "Please fill out all required fields.",
+    "login_failed": "Login Failed",
+    "password_mismatch": "Password Mismatch",
+    "passwords_dont_match": "Passwords do not match.",
+    "invalid_invitation": "Invalid Invitation Code",
+    "enter_valid_code": "Please enter a valid invitation code.",
+    "verification_error": "Error verifying code."
   },
   "success": {
     "translation_complete": "File translated successfully!"
+  },
+  "buttons": {
+    "translate": "Translate",
+    "download": "Download",
+    "translating": "Translating...",
+    "select_file": "Select File"
+  },
+  "upload": {
+    "title": "Upload Your Presentation",
+    "description": "Select or drag and drop your PowerPoint file (.ppt or .pptx)"
+  },
+  "footer": {
+    "description": "Translate your PowerPoint slides while preserving all formatting and layout."
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "username": "Username",
+    "username_placeholder": "Enter your username",
+    "email": "Email",
+    "email_placeholder": "Enter your email",
+    "password": "Password",
+    "password_placeholder": "Enter your password",
+    "login_success": "Login Successful",
+    "welcome_back": "Welcome back!",
+    "logout": "Logout",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "confirm_password": "Confirm Password",
+    "confirm_password_placeholder": "Confirm your password",
+    "invitation_code": "Invitation Code",
+    "invitation_code_placeholder": "Enter your invitation code",
+    "valid_code": "Valid code. {0} uses remaining.",
+    "invalid_code": "Invalid invitation code."
   },
   "languages": {
     "zh": "Chinese",

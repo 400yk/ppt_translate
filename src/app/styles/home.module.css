@@ -278,4 +278,58 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Shining gold effect for download button */
+.shiningButton {
+  position: relative;
+  overflow: hidden;
+  background-color: #f59e0b; /* Amber-500 */
+  color: #000;
+  transition: all 0.3s ease;
+  /* Add box shadow for more emphasis */
+  box-shadow: 0 0 10px #fbbf24, 0 0 20px rgba(251, 191, 36, 0.5);
+}
+
+.shiningButton:hover {
+  background-color: #d97706; /* Amber-600 on hover */
+  box-shadow: 0 0 15px #f59e0b, 0 0 25px rgba(245, 158, 11, 0.6);
+}
+
+.shiningButton::before {
+  content: '';
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  width: 300%;
+  height: 300%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  animation: shiningEffect 2s infinite linear;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes shiningEffect {
+  0% {
+    transform: rotate(30deg) translateX(-100%);
+  }
+  100% {
+    transform: rotate(30deg) translateX(100%);
+  }
+}
+
+/* Keeping the definition but not using it anymore */
+@keyframes pulseButton {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
 } 

@@ -2,6 +2,19 @@
 Configuration values for PowerPoint translation.
 """
 
+import os
+from pathlib import Path
+
+# Database settings
+basedir = os.path.abspath(os.path.dirname(__file__))
+SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'app.db'))
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# Secret key for session management
+SECRET_KEY = os.getenv('SECRET_KEY', os.urandom(24).hex())
+JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', os.urandom(24).hex())
+JWT_ACCESS_TOKEN_EXPIRES = 86400  # 24 hours
+
 # Default font settings
 DEFAULT_FONT_NAME = "Arial"
 DEFAULT_FONT_SIZE = 18
