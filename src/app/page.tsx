@@ -46,6 +46,11 @@ export default function Home() {
   const {t, locale, setLocale} = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Monitor changes to translatedFileUrl
+  useEffect(() => {
+    console.log("translatedFileUrl changed:", translatedFileUrl);
+  }, [translatedFileUrl]);
+
   // Helper function to get translated language name
   const getLanguageName = (code: LanguageCode): string => {
     // Using type assertion to help TypeScript understand this is a valid key
@@ -73,9 +78,10 @@ export default function Home() {
       setDestLang('en');
     }
     
-    // Reset translation state when language changes
-    setTranslatedFileUrl(null);
-    setProgress(0);
+    // Don't reset translation state when language changes
+    // This was causing the translatedFileUrl to be reset unexpectedly
+    // setTranslatedFileUrl(null);
+    // setProgress(0);
   }, [locale, isTranslating]);
 
   // Validate file extension
@@ -106,7 +112,7 @@ export default function Home() {
       
       // Set the file and reset previous translation state
       setFile(selectedFile);
-      setTranslatedFileUrl(null);
+      setTranslatedFileUrl(null); // Reset translation URL when new file is selected
       setProgress(0);
     }
   };
@@ -126,6 +132,17 @@ export default function Home() {
   };
 
   const handleTranslate = async () => {
+    // Store reference to the translated file in localStorage to persist between renders
+    const storeTranslatedUrl = (url: string) => {
+      try {
+        // Just set it in state directly, avoid localStorage for blob URLs
+        console.log("Storing translated URL in state:", url);
+        setTranslatedFileUrl(url);
+      } catch (e) {
+        console.error("Error storing translated URL:", e);
+      }
+    };
+
     if (!file) {
       toast({
         title: 'Error',
@@ -146,6 +163,7 @@ export default function Home() {
 
     setIsTranslating(true);
     setProgress(0);
+    setTranslatedFileUrl(null); // Reset any previous translated file URL
 
     try {
       // Create a FormData object to send the file
@@ -167,6 +185,7 @@ export default function Home() {
       }, 300);
 
       // Send the file to the Flask backend
+      console.log("Sending translation request to backend");
       const response = await fetch('http://localhost:5000/translate', {
         method: 'POST',
         body: formData,
@@ -180,75 +199,96 @@ export default function Home() {
       }
 
       // Get the translated PPTX as a blob
+      console.log("Server responded with success, getting blob");
       const blob = await response.blob();
+      
+      // Create a URL for the blob
       const url = window.URL.createObjectURL(blob);
-      setTranslatedFileUrl(url);
+      console.log("Created blob URL:", url);
+      
+      // Store translated file in-memory as blob for more reliable access
+      const translatedBlob = new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
+      const translatedUrl = URL.createObjectURL(translatedBlob);
+      
+      // This needs to update state properly
+      console.log("Setting translated file URL:", translatedUrl);
+      
+      // Set progress to 100% before setting the URL
       setProgress(100);
+      
+      // Update translatedFileUrl state - do this last to avoid being overridden
+      storeTranslatedUrl(translatedUrl);
+      
+      // Show success toast after all state updates
       toast({
         title: 'Success',
         description: t('success.translation_complete'),
       });
+      
+      console.log("Translation process complete");
     } catch (error) {
+      console.error("Translation error:", error);
       toast({
         title: 'Error',
         description: t('errors.translation_failed'),
         variant: 'destructive',
       });
-      console.error('Translation error:', error);
     } finally {
       setIsTranslating(false);
     }
   };
 
-  const handleButtonAction = () => {
+  // Show download or translate button based on state
+  const getButtonText = () => {
+    if (isTranslating) {
+      return (
+        <>
+          <Icons.spinner className={styles.spinnerIcon} />
+          {t('translating')}
+        </>
+      );
+    }
+    
+    // For debugging
+    console.log("Button text calculation - translatedFileUrl:", translatedFileUrl);
+    
     if (translatedFileUrl) {
-      // If translation is complete, download the file
-      if (translatedFileUrl) {
-        try {
-          // Create a fetch request to get the file
-          fetch(translatedFileUrl)
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('Network response was not ok');
-              }
-              return response.blob();
-            })
-            .then(blob => {
-              // Create a URL for the blob
-              const url = window.URL.createObjectURL(blob);
-              
-              // Create a link element
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'translated-presentation.pptx';
-              
-              // Append to body, click, and remove
-              document.body.appendChild(a);
-              a.click();
-              
-              // Clean up
-              window.URL.revokeObjectURL(url);
-              document.body.removeChild(a);
-            })
-            .catch(error => {
-              console.error('Download error:', error);
-              toast({
-                title: 'Error',
-                description: t('errors.download_failed'),
-                variant: 'destructive',
-              });
-            });
-        } catch (error) {
-          console.error('Download error:', error);
-          toast({
-            title: 'Error',
-            description: t('errors.download_failed'),
-            variant: 'destructive',
-          });
-        }
+      return t('download_button');
+    }
+    
+    return t('translate_button');
+  };
+
+  const handleButtonAction = () => {
+    console.log("Button clicked, translatedFileUrl:", translatedFileUrl);
+    
+    if (translatedFileUrl) {
+      console.log("Download action triggered");
+      try {
+        // Create a link element to trigger download
+        const a = document.createElement('a');
+        a.href = translatedFileUrl;
+        a.download = `translated-${file?.name || 'presentation.pptx'}`;
+        
+        // Append to body, click, and remove
+        document.body.appendChild(a);
+        a.click();
+        
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(a);
+          // Don't revoke URL here as it might be needed again
+        }, 100);
+      } catch (error) {
+        console.error('Download error:', error);
+        toast({
+          title: 'Error',
+          description: t('errors.download_failed'),
+          variant: 'destructive',
+        });
       }
     } else {
-      // If translation is not complete, start the translation
+      console.log("Translate action triggered");
       handleTranslate();
     }
   };
@@ -286,6 +326,7 @@ export default function Home() {
               fill 
               style={{ objectFit: 'contain' }}
               priority
+              sizes="(max-width: 768px) 100vw, 300px"
             />
           </div>
           <h1 className={styles.title}>
@@ -389,10 +430,15 @@ export default function Home() {
                   <Icons.spinner className={styles.spinnerIcon} />
                   {t('translating')}
                 </>
-              ) : translatedFileUrl ? (
-                t('download_button')
+              ) : Boolean(translatedFileUrl) ? (
+                // Force evaluation with Boolean() to ensure consistent rendering
+                <>
+                  {t('download_button')}
+                </>
               ) : (
-                t('translate_button')
+                <>
+                  {t('translate_button')}
+                </>
               )}
             </Button>
           </div>
