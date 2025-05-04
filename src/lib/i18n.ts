@@ -20,6 +20,7 @@ type LanguageKey = `languages.${LanguageCode}`;
 // Define translations type
 export type TranslationKey = 
   | 'title'
+  | 'slogan'
   | 'file_upload'
   | 'file_uploaded'
   | 'from_label'

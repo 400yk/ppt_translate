@@ -319,19 +319,24 @@ export default function Home() {
 
       <div className={styles.mainContent}>
         <div className={styles.header}>
-          <div className={styles.logo}>
-            <Image 
-              src={LogoImage} 
-              alt="App Logo" 
-              fill 
-              style={{ objectFit: 'contain' }}
-              priority
-              sizes="(max-width: 768px) 100vw, 300px"
-            />
+          <div className={styles.logoTitleWrapper}>
+            <div className={styles.logo}>
+              <Image 
+                src={LogoImage} 
+                alt="App Logo" 
+                fill 
+                style={{ objectFit: 'contain' }}
+                priority
+                sizes="(max-width: 768px) 100vw, 300px"
+              />
+            </div>
+            <h1 className={styles.title}>
+              {t('title')}
+            </h1>
           </div>
-          <h1 className={styles.title}>
-            {t('title')}
-          </h1>
+          <p className={styles.slogan}>
+            {t('slogan')}
+          </p>
         </div>
 
         <div className={styles.formWrapper}>

@@ -37,8 +37,14 @@
 /* Header with logo and title */
 .header {
   display: flex;
+  flex-direction: column;
   align-items: center;
   margin-bottom: 2rem;
+}
+
+.logoTitleWrapper {
+  display: flex;
+  align-items: center;
 }
 
 .logo {
@@ -54,10 +60,22 @@
   font-weight: 700;
 }
 
+.slogan {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
 @media (min-width: 768px) {
   .title {
     font-size: 3rem;
     line-height: 1;
+  }
+  
+  .slogan {
+    font-size: 1.125rem;
   }
 }
 

@@ -1,5 +1,6 @@
 {
   "title": "幻翻",
+  "slogan": "一键用GPT翻译PPT，并保留原格式",
   "file_upload": "上传pptx文件",
   "file_uploaded": "已上传",
   "from_label": "从：",
