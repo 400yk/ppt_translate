@@ -1,4 +1,3 @@
-
 // This is a server-side file.
 'use server';
 /**
@@ -165,16 +164,58 @@ async function translatePresentationData(presentationData: any, targetLanguage: 
 }
 
 async function createPptx(translatedPresentationData: any): Promise<Buffer> {
-  // reconstruct the PPT/PPTX file with the translated text elements
-  // Use a library like `pptxgenjs` to create a new PPT/PPTX file.
-  let pptx = new pptxgen();
-  translatedPresentationData.slides.forEach(slideData => {
-    let slide = pptx.addSlide();
-    slide.addText(slideData.title, { x: 1, y: 0.5, w: 8, h: 1, fontSize: 24 });
-    slide.addText(slideData.body, { x: 1, y: 1.5, w: 8, h: 3, fontSize: 18 });
-  });
-
-  return await pptx.write('buffer') as Buffer;
+  // Reconstruct the PPT/PPTX file with the translated text elements
+  try {
+    // Create a new PowerPoint presentation
+    const pptx = new pptxgen();
+    
+    // Set presentation properties
+    pptx.author = 'LinguaSlides';
+    pptx.company = 'LinguaSlides';
+    pptx.revision = '1';
+    pptx.subject = 'Translated Presentation';
+    pptx.title = 'Translated Presentation';
+    
+    // Add translated slides
+    translatedPresentationData.slides.forEach((slideData: any) => {
+      // Create a new slide
+      const slide = pptx.addSlide();
+      
+      // Add title
+      if (slideData.title) {
+        slide.addText(slideData.title, { 
+          x: 0.5, 
+          y: 0.5, 
+          w: '90%', 
+          h: 1.0, 
+          fontSize: 24,
+          bold: true,
+          color: '363636'
+        });
+      }
+      
+      // Add body text
+      if (slideData.body) {
+        slide.addText(slideData.body, { 
+          x: 0.5, 
+          y: 1.8, 
+          w: '90%', 
+          h: 4.0, 
+          fontSize: 18,
+          color: '363636',
+          breakLine: true
+        });
+      }
+    });
+    
+    // Generate a Buffer using the standard method from pptxgenjs
+    // Not using outputType here since it's handled internally by the 'buffer' parameter
+    const buffer = await pptx.write('buffer') as any;
+    return Buffer.from(buffer);
+  } catch (error) {
+    console.error('Error creating PPTX file:', error);
+    throw new Error('Failed to create translated PowerPoint file');
+  }
 }
 
 async function uploadFile(fileBuffer: Buffer, fileName: string): Promise<string> {
@@ -183,3 +224,5 @@ async function uploadFile(fileBuffer: Buffer, fileName: string): Promise<string>
   // For simplicity, we will return a placeholder.
   return '/dummy-translated-presentation.pptx';
 }
+
+export { parsePptx, translatePresentationData, createPptx };

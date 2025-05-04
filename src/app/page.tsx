@@ -33,40 +33,104 @@ export default function Home() {
     setIsTranslating(true);
     setProgress(0);
 
-    // Simulate translation progress
-    const interval = setInterval(() => {
-      setProgress(prevProgress => {
-        const newProgress = prevProgress + 10;
-        if (newProgress >= 100) {
-          clearInterval(interval);
-          // Simulate a translated file URL
-          setTranslatedFileUrl('/dummy-translated-presentation.pptx');
-          setIsTranslating(false);
-          toast({
-            title: 'Success',
-            description: 'File translated successfully!',
-          });
-          return 100;
-        }
-        return newProgress;
+    try {
+      // Create a FormData object to send the file
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('targetLanguage', 'en'); // Default to English, but could be made dynamic
+
+      // Simulate translation progress
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          const newProgress = prev + 5;
+          if (newProgress >= 90) {
+            clearInterval(progressInterval);
+            return 90; // Hold at 90% until actual completion
+          }
+          return newProgress;
+        });
+      }, 300);
+
+      // In a real implementation, you would send the file to your API
+      // const response = await fetch('/api/translate', {
+      //   method: 'POST',
+      //   body: formData,
+      // });
+      
+      // Simulate API request delay
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Simulate successful response
+      // const data = await response.json();
+      const data = { translatedFileUrl: '/dummy-translated-presentation.pptx' };
+      
+      clearInterval(progressInterval);
+      setProgress(100);
+      setTranslatedFileUrl(data.translatedFileUrl);
+      
+      toast({
+        title: 'Success',
+        description: 'File translated successfully!',
       });
-    }, 300);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'An error occurred during translation.',
+        variant: 'destructive',
+      });
+      console.error('Translation error:', error);
+    } finally {
+      setIsTranslating(false);
+    }
   };
 
   const handleDownload = () => {
     if (translatedFileUrl) {
-      // Create a temporary link element
-      const link = document.createElement('a');
-      link.href = translatedFileUrl;
-      link.download = 'translated-presentation.pptx'; // Set the desired file name
-      document.body.appendChild(link);
-
-      // Programmatically trigger the download
-      link.click();
-
-      // Remove the temporary link
-      document.body.removeChild(link);
-
+      try {
+        // For testing purposes, create a sample PPTX Blob
+        // In a real implementation, you'd fetch the actual file from the translatedFileUrl
+        
+        // Create a fetch request to get the file
+        fetch(translatedFileUrl)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.blob();
+          })
+          .then(blob => {
+            // Create a URL for the blob
+            const url = window.URL.createObjectURL(blob);
+            
+            // Create a link element
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'translated-presentation.pptx';
+            
+            // Append to body, click, and remove
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          })
+          .catch(error => {
+            console.error('Download error:', error);
+            toast({
+              title: 'Error',
+              description: 'Failed to download the translated file.',
+              variant: 'destructive',
+            });
+          });
+      } catch (error) {
+        console.error('Download error:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to download the translated file.',
+          variant: 'destructive',
+        });
+      }
     } else {
       toast({
         title: 'Error',
