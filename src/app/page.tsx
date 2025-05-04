@@ -41,6 +41,7 @@ export default function Home() {
   const [isTranslating, setIsTranslating] = useState(false);
   const [srcLang, setSrcLang] = useState<LanguageCode>("zh"); // Default source language: Chinese
   const [destLang, setDestLang] = useState<LanguageCode>("en"); // Default target language: English
+  const [invalidFileType, setInvalidFileType] = useState(false);
   const {toast} = useToast();
   const {t, locale, setLocale} = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -77,10 +78,35 @@ export default function Home() {
     setProgress(0);
   }, [locale, isTranslating]);
 
+  // Validate file extension
+  const validateFileExtension = (fileName: string): boolean => {
+    const validExtensions = ['.pptx', '.ppt'];
+    const fileExtension = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
+    return validExtensions.includes(fileExtension);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setTranslatedFileUrl(null); // Reset any previous translations
+      const selectedFile = e.target.files[0];
+      
+      // Check if file has a valid extension
+      if (!validateFileExtension(selectedFile.name)) {
+        // Show invalid file type warning
+        setInvalidFileType(true);
+        toast({
+          title: 'Warning',
+          description: t('errors.invalid_file_type'),
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      // Reset invalid file type flag
+      setInvalidFileType(false);
+      
+      // Set the file and reset previous translation state
+      setFile(selectedFile);
+      setTranslatedFileUrl(null);
       setProgress(0);
     }
   };
@@ -91,6 +117,7 @@ export default function Home() {
     setFile(null);
     setTranslatedFileUrl(null);
     setProgress(0);
+    setInvalidFileType(false);
     
     // Reset the file input
     if (fileInputRef.current) {
@@ -287,7 +314,7 @@ export default function Home() {
                   </svg>
                 </div>
               ) : (
-                <div className={styles.fileInputLabel}>
+                <div className={invalidFileType ? styles.fileInputLabelError : styles.fileInputLabel}>
                   {t('file_upload')}
                 </div>
               )}
@@ -299,9 +326,9 @@ export default function Home() {
                 ref={fileInputRef}
               />
             </label>
-            {!file && (
-              <p className={styles.fileName}>
-                {t('no_file_selected')}
+            {invalidFileType && (
+              <p className={styles.fileNameError}>
+                {t('errors.invalid_file_type')}
               </p>
             )}
           </div>
@@ -309,34 +336,38 @@ export default function Home() {
           <div className={styles.langSelectionGrid}>
             <div className={styles.langFieldWrapper}>
               <label className={styles.label}>{t('from_label')}</label>
-              <Select value={srcLang} onValueChange={(value: LanguageCode) => setSrcLang(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select source language" />
-                </SelectTrigger>
-                <SelectContent>
-                  {languageCodes.map((code) => (
-                    <SelectItem key={`src-${code}`} value={code}>
-                      {getLanguageName(code)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className={styles.langSelectContainer}>
+                <Select value={srcLang} onValueChange={(value: LanguageCode) => setSrcLang(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select source language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languageCodes.map((code) => (
+                      <SelectItem key={`src-${code}`} value={code}>
+                        {getLanguageName(code)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className={styles.langFieldWrapper}>
               <label className={styles.label}>{t('to_label')}</label>
-              <Select value={destLang} onValueChange={(value: LanguageCode) => setDestLang(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select target language" />
-                </SelectTrigger>
-                <SelectContent>
-                  {languageCodes.map((code) => (
-                    <SelectItem key={`dest-${code}`} value={code}>
-                      {getLanguageName(code)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className={styles.langSelectContainer}>
+                <Select value={destLang} onValueChange={(value: LanguageCode) => setDestLang(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select target language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languageCodes.map((code) => (
+                      <SelectItem key={`dest-${code}`} value={code}>
+                        {getLanguageName(code)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
@@ -350,7 +381,7 @@ export default function Home() {
           <div className={styles.buttonWrapper}>
             <Button
               onClick={handleButtonAction}
-              disabled={isTranslating || (!translatedFileUrl && !file)}
+              disabled={isTranslating || (!translatedFileUrl && (!file || invalidFileType))}
               className={translatedFileUrl ? styles.downloadButton : styles.translateButton}
             >
               {isTranslating ? (

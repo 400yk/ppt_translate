@@ -13,7 +13,8 @@
     "no_file": "Please upload a file first.",
     "same_language": "Source and target languages cannot be the same.",
     "translation_failed": "An error occurred during translation.",
-    "download_failed": "Failed to download the translated file."
+    "download_failed": "Failed to download the translated file.",
+    "invalid_file_type": "Please upload a PowerPoint file (.ppt or .pptx)."
   },
   "success": {
     "translation_complete": "File translated successfully!"

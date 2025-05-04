@@ -1,6 +1,7 @@
 {
   "title": "번역슬라이드",
   "file_upload": "pptx 파일 업로드",
+  "file_uploaded": "업로드됨",
   "from_label": "원본:",
   "to_label": "대상:",
   "translate_button": "번역",
@@ -12,7 +13,8 @@
     "no_file": "먼저 파일을 업로드해 주세요.",
     "same_language": "원본 언어와 대상 언어는 같을 수 없습니다.",
     "translation_failed": "번역 중 오류가 발생했습니다.",
-    "download_failed": "번역된 파일 다운로드에 실패했습니다."
+    "download_failed": "번역된 파일 다운로드에 실패했습니다.",
+    "invalid_file_type": "PowerPoint 파일(.ppt 또는 .pptx)을 업로드하세요."
   },
   "success": {
     "translation_complete": "파일이 성공적으로 번역되었습니다!"

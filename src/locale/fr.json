@@ -13,7 +13,8 @@
     "no_file": "Veuillez d'abord télécharger un fichier.",
     "same_language": "Les langues source et cible ne peuvent pas être identiques.",
     "translation_failed": "Une erreur s'est produite lors de la traduction.",
-    "download_failed": "Échec du téléchargement du fichier traduit."
+    "download_failed": "Échec du téléchargement du fichier traduit.",
+    "invalid_file_type": "Veuillez télécharger un fichier PowerPoint (.ppt ou .pptx)."
   },
   "success": {
     "translation_complete": "Fichier traduit avec succès !"

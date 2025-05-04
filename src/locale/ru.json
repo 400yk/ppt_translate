@@ -1,8 +1,9 @@
 {
-  "title": "СлайдПеревод",
-  "file_upload": "Загрузить pptx файл",
-  "from_label": "С:",
-  "to_label": "На:",
+  "title": "СлайдПереводчик",
+  "file_upload": "Загрузить файл pptx",
+  "file_uploaded": "Загружено",
+  "from_label": "С языка:",
+  "to_label": "На язык:",
   "translate_button": "Перевести",
   "download_button": "Скачать переведенный файл",
   "translating": "Перевод...",
@@ -12,7 +13,8 @@
     "no_file": "Пожалуйста, сначала загрузите файл.",
     "same_language": "Исходный и целевой языки не могут быть одинаковыми.",
     "translation_failed": "Произошла ошибка при переводе.",
-    "download_failed": "Не удалось загрузить переведенный файл."
+    "download_failed": "Не удалось скачать переведенный файл.",
+    "invalid_file_type": "Пожалуйста, загрузите файл PowerPoint (.ppt или .pptx)."
   },
   "success": {
     "translation_complete": "Файл успешно переведен!"

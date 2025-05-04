@@ -13,7 +13,8 @@
     "no_file": "请先上传文件。",
     "same_language": "源语言和目标语言不能相同。",
     "translation_failed": "翻译过程中发生错误。",
-    "download_failed": "下载已翻译文件失败。"
+    "download_failed": "下载已翻译文件失败。",
+    "invalid_file_type": "请上传PowerPoint文件（.ppt或.pptx）。"
   },
   "success": {
     "translation_complete": "文件已成功翻译！"

@@ -12,7 +12,8 @@
     "no_file": "最初にファイルをアップロードしてください。",
     "same_language": "ソース言語とターゲット言語は同じにできません。",
     "translation_failed": "翻訳中にエラーが発生しました。",
-    "download_failed": "翻訳済みファイルのダウンロードに失敗しました。"
+    "download_failed": "翻訳済みファイルのダウンロードに失敗しました。",
+    "invalid_file_type": "PowerPointファイル（.pptまたは.pptx）をアップロードしてください。"
   },
   "success": {
     "translation_complete": "ファイルが正常に翻訳されました！"

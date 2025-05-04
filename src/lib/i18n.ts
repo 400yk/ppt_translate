@@ -33,6 +33,7 @@ export type TranslationKey =
   | 'errors.same_language'
   | 'errors.translation_failed'
   | 'errors.download_failed'
+  | 'errors.invalid_file_type'
   | 'success.translation_complete'
   | LanguageKey;
 
