@@ -130,6 +130,17 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                 original_run = text_frame.paragraphs[0].runs[0]
                 font_name = original_run.font.name or DEFAULT_FONT_NAME
                 
+                # Style scale factor for text formatting (bold/italic/underline)
+                style_scale_factor = 1.0
+                
+                # Check if text has formatting that might need more space
+                if original_run.font.bold:
+                    style_scale_factor *= 0.9  # Bold text needs ~10% more space
+                if original_run.font.italic:
+                    style_scale_factor *= 0.95  # Italic text needs ~5% more space
+                if original_run.font.underline:
+                    style_scale_factor *= 0.95  # Underlined text needs ~5% more space
+                
                 # Check if this is a title placeholder
                 is_title = False
                 if shape.is_placeholder:
@@ -168,6 +179,7 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                         font_color = None
             else:
                 font_name = DEFAULT_FONT_NAME
+                style_scale_factor = 1.0  # Default for no formatting
                 
                 # Check if this is a title placeholder
                 is_title = False
@@ -189,15 +201,73 @@ def translate_pptx(input_stream, src_lang, dest_lang):
             else:
                 # For regular content, constrain both dimensions
                 best_font_size = fit_font_size_to_bbox(orig_w, orig_h, translated, font_name, original_font_size)
+            
+            # Apply the style scaling factor to the font size
+            best_font_size = int(best_font_size * style_scale_factor)
+                
+            # Store original formatting information before clearing
+            original_paragraphs = []
+            for para in text_frame.paragraphs:
+                para_info = {
+                    'level': para.level,
+                    'alignment': para.alignment,
+                    'runs': []
+                }
+                
+                # Store runs and their formatting
+                for run in para.runs:
+                    run_info = {
+                        'text_length': len(run.text),
+                        'bold': run.font.bold,
+                        'italic': run.font.italic, 
+                        'underline': run.font.underline,
+                        'font_name': run.font.name or font_name,
+                        'color': run.font.color.rgb if hasattr(run.font.color, 'rgb') else None
+                    }
+                    para_info['runs'].append(run_info)
+                
+                original_paragraphs.append(para_info)
                 
             text_frame.clear()
-            p = text_frame.paragraphs[0]
-            run = p.add_run()
-            run.text = translated
-            run.font.name = font_name
-            run.font.size = Pt(best_font_size)
-            if font_color:
-                run.font.color.rgb = font_color
+            
+            # Simple approach for short texts - use a single formatted run
+            if len(original_paragraphs) == 1 and len(original_paragraphs[0]['runs']) == 1:
+                p = text_frame.paragraphs[0]
+                run = p.add_run()
+                run.text = translated
+                run.font.name = font_name
+                run.font.size = Pt(best_font_size)
+                
+                # Apply original formatting
+                original_run_info = original_paragraphs[0]['runs'][0]
+                if original_run_info['bold'] is not None:
+                    run.font.bold = original_run_info['bold']
+                if original_run_info['italic'] is not None:
+                    run.font.italic = original_run_info['italic']
+                if original_run_info['underline'] is not None:
+                    run.font.underline = original_run_info['underline']
+                if font_color:
+                    run.font.color.rgb = font_color
+            else:
+                # For more complex text, preserve the structure using paragraph count
+                # This is a simplification as we can't perfectly map formatting from source to translated text
+                p = text_frame.paragraphs[0]
+                run = p.add_run()
+                run.text = translated
+                run.font.name = font_name
+                run.font.size = Pt(best_font_size)
+                
+                # Apply formatting from dominant formatting in original text
+                has_bold = any(run_info['bold'] for para in original_paragraphs for run_info in para['runs'] if run_info['bold'] is not None)
+                has_italic = any(run_info['italic'] for para in original_paragraphs for run_info in para['runs'] if run_info['italic'] is not None)
+                has_underline = any(run_info['underline'] for para in original_paragraphs for run_info in para['runs'] if run_info['underline'] is not None)
+                
+                run.font.bold = has_bold
+                run.font.italic = has_italic
+                run.font.underline = has_underline
+                
+                if font_color:
+                    run.font.color.rgb = font_color
         else:
             shape.text = translated
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx')
