@@ -25,7 +25,7 @@ The website features a clean and intuitive user interface, with a primary light 
 Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/ppt_translate.git
+git clone https://github.com/400yk/ppt_translate.git
 cd ppt_translate
 ```
 
