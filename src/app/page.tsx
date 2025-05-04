@@ -37,37 +37,39 @@ export default function Home() {
       // Create a FormData object to send the file
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('targetLanguage', 'en'); // Default to English, but could be made dynamic
+      formData.append('src_lang', 'zh'); // Default source language, make dynamic if needed
+      formData.append('dest_lang', 'en'); // Default target language, make dynamic if needed
 
-      // Simulate translation progress
+      // Simulate progress bar up to 90%
       const progressInterval = setInterval(() => {
         setProgress(prev => {
           const newProgress = prev + 5;
           if (newProgress >= 90) {
             clearInterval(progressInterval);
-            return 90; // Hold at 90% until actual completion
+            return 90;
           }
           return newProgress;
         });
       }, 300);
 
-      // In a real implementation, you would send the file to your API
-      // const response = await fetch('/api/translate', {
-      //   method: 'POST',
-      //   body: formData,
-      // });
-      
-      // Simulate API request delay
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Simulate successful response
-      // const data = await response.json();
-      const data = { translatedFileUrl: '/dummy-translated-presentation.pptx' };
-      
+      // Send the file to the Flask backend
+      const response = await fetch('http://localhost:5000/translate', {
+        method: 'POST',
+        body: formData,
+      });
+
       clearInterval(progressInterval);
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Translation failed');
+      }
+
+      // Get the translated PPTX as a blob
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      setTranslatedFileUrl(url);
       setProgress(100);
-      setTranslatedFileUrl(data.translatedFileUrl);
-      
       toast({
         title: 'Success',
         description: 'File translated successfully!',

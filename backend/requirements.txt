@@ -1,0 +1,4 @@
+Flask
+python-pptx
+requests
+python-dotenv
