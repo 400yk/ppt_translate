@@ -1,0 +1,31 @@
+{
+  "title": "Diapositraduce",
+  "file_upload": "Subir archivo pptx",
+  "file_uploaded": "Subido",
+  "from_label": "De:",
+  "to_label": "A:",
+  "translate_button": "Traducir",
+  "download_button": "Descargar Archivo Traducido",
+  "translating": "Traduciendo...",
+  "progress_label": "Progreso de traducción:",
+  "no_file_selected": "",
+  "errors": {
+    "no_file": "Por favor, sube un archivo primero.",
+    "same_language": "Los idiomas de origen y destino no pueden ser iguales.",
+    "translation_failed": "Ocurrió un error durante la traducción.",
+    "download_failed": "Error al descargar el archivo traducido."
+  },
+  "success": {
+    "translation_complete": "¡Archivo traducido con éxito!"
+  },
+  "languages": {
+    "zh": "Chino",
+    "en": "Inglés",
+    "es": "Español",
+    "fr": "Francés",
+    "de": "Alemán",
+    "ja": "Japonés",
+    "ko": "Coreano",
+    "ru": "Ruso"
+  }
+} 

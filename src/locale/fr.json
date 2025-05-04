@@ -1,0 +1,31 @@
+{
+  "title": "TradiaSlide",
+  "file_upload": "Télécharger un fichier pptx",
+  "file_uploaded": "Téléchargé",
+  "from_label": "De :",
+  "to_label": "À :",
+  "translate_button": "Traduire",
+  "download_button": "Télécharger le fichier traduit",
+  "translating": "Traduction en cours...",
+  "progress_label": "Progression de la traduction :",
+  "no_file_selected": "",
+  "errors": {
+    "no_file": "Veuillez d'abord télécharger un fichier.",
+    "same_language": "Les langues source et cible ne peuvent pas être identiques.",
+    "translation_failed": "Une erreur s'est produite lors de la traduction.",
+    "download_failed": "Échec du téléchargement du fichier traduit."
+  },
+  "success": {
+    "translation_complete": "Fichier traduit avec succès !"
+  },
+  "languages": {
+    "zh": "Chinois",
+    "en": "Anglais",
+    "es": "Espagnol",
+    "fr": "Français",
+    "de": "Allemand",
+    "ja": "Japonais",
+    "ko": "Coréen",
+    "ru": "Russe"
+  }
+} 

@@ -1,0 +1,31 @@
+{
+  "title": "FolieTrans",
+  "file_upload": "pptx-Datei hochladen",
+  "file_uploaded": "Hochgeladen",
+  "from_label": "Von:",
+  "to_label": "Nach:",
+  "translate_button": "Übersetzen",
+  "download_button": "Übersetzte Datei herunterladen",
+  "translating": "Übersetzung läuft...",
+  "progress_label": "Übersetzungsfortschritt:",
+  "no_file_selected": "",
+  "errors": {
+    "no_file": "Bitte laden Sie zuerst eine Datei hoch.",
+    "same_language": "Quell- und Zielsprache dürfen nicht identisch sein.",
+    "translation_failed": "Bei der Übersetzung ist ein Fehler aufgetreten.",
+    "download_failed": "Fehler beim Herunterladen der übersetzten Datei."
+  },
+  "success": {
+    "translation_complete": "Datei erfolgreich übersetzt!"
+  },
+  "languages": {
+    "zh": "Chinesisch",
+    "en": "Englisch",
+    "es": "Spanisch",
+    "fr": "Französisch",
+    "de": "Deutsch",
+    "ja": "Japanisch",
+    "ko": "Koreanisch",
+    "ru": "Russisch"
+  }
+} 

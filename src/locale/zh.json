@@ -1,0 +1,31 @@
+{
+  "title": "幻翻",
+  "file_upload": "上传pptx文件",
+  "file_uploaded": "已上传",
+  "from_label": "从：",
+  "to_label": "到：",
+  "translate_button": "翻译",
+  "download_button": "下载已翻译文件",
+  "translating": "翻译中...",
+  "progress_label": "翻译进度：",
+  "no_file_selected": "",
+  "errors": {
+    "no_file": "请先上传文件。",
+    "same_language": "源语言和目标语言不能相同。",
+    "translation_failed": "翻译过程中发生错误。",
+    "download_failed": "下载已翻译文件失败。"
+  },
+  "success": {
+    "translation_complete": "文件已成功翻译！"
+  },
+  "languages": {
+    "zh": "中文",
+    "en": "英文",
+    "es": "西班牙文",
+    "fr": "法文",
+    "de": "德文",
+    "ja": "日文",
+    "ko": "韩文",
+    "ru": "俄文"
+  }
+} 

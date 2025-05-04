@@ -1,0 +1,30 @@
+{
+  "title": "번역슬라이드",
+  "file_upload": "pptx 파일 업로드",
+  "from_label": "원본:",
+  "to_label": "대상:",
+  "translate_button": "번역",
+  "download_button": "번역된 파일 다운로드",
+  "translating": "번역 중...",
+  "progress_label": "번역 진행 상황:",
+  "no_file_selected": "",
+  "errors": {
+    "no_file": "먼저 파일을 업로드해 주세요.",
+    "same_language": "원본 언어와 대상 언어는 같을 수 없습니다.",
+    "translation_failed": "번역 중 오류가 발생했습니다.",
+    "download_failed": "번역된 파일 다운로드에 실패했습니다."
+  },
+  "success": {
+    "translation_complete": "파일이 성공적으로 번역되었습니다!"
+  },
+  "languages": {
+    "zh": "중국어",
+    "en": "영어",
+    "es": "스페인어",
+    "fr": "프랑스어",
+    "de": "독일어",
+    "ja": "일본어",
+    "ko": "한국어",
+    "ru": "러시아어"
+  }
+} 

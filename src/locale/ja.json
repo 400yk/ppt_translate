@@ -1,0 +1,30 @@
+{
+  "title": "翻スライド (ほんスライド)",
+  "file_upload": "pptxファイルをアップロード",
+  "from_label": "から：",
+  "to_label": "へ：",
+  "translate_button": "翻訳",
+  "download_button": "翻訳済みファイルをダウンロード",
+  "translating": "翻訳中...",
+  "progress_label": "翻訳の進捗状況：",
+  "no_file_selected": "",
+  "errors": {
+    "no_file": "最初にファイルをアップロードしてください。",
+    "same_language": "ソース言語とターゲット言語は同じにできません。",
+    "translation_failed": "翻訳中にエラーが発生しました。",
+    "download_failed": "翻訳済みファイルのダウンロードに失敗しました。"
+  },
+  "success": {
+    "translation_complete": "ファイルが正常に翻訳されました！"
+  },
+  "languages": {
+    "zh": "中国語",
+    "en": "英語",
+    "es": "スペイン語",
+    "fr": "フランス語",
+    "de": "ドイツ語",
+    "ja": "日本語",
+    "ko": "韓国語",
+    "ru": "ロシア語"
+  }
+} 

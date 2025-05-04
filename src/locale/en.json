@@ -1,0 +1,31 @@
+{
+  "title": "Translide",
+  "file_upload": "Upload pptx file",
+  "file_uploaded": "Uploaded",
+  "from_label": "From:",
+  "to_label": "To:",
+  "translate_button": "Translate",
+  "download_button": "Download Translated File",
+  "translating": "Translating...",
+  "progress_label": "Translation Progress:",
+  "no_file_selected": "",
+  "errors": {
+    "no_file": "Please upload a file first.",
+    "same_language": "Source and target languages cannot be the same.",
+    "translation_failed": "An error occurred during translation.",
+    "download_failed": "Failed to download the translated file."
+  },
+  "success": {
+    "translation_complete": "File translated successfully!"
+  },
+  "languages": {
+    "zh": "Chinese",
+    "en": "English",
+    "es": "Spanish",
+    "fr": "French",
+    "de": "German",
+    "ja": "Japanese",
+    "ko": "Korean",
+    "ru": "Russian"
+  }
+} 
