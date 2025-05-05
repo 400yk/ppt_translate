@@ -189,9 +189,9 @@ export default function LandingPage() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>{user?.email || user?.username}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => router.push('/pricing')}>
-                      <Icons.pricing className="mr-2 h-4 w-4" />
-                      {t('pricing.title')}
+                    <DropdownMenuItem onClick={() => router.push('/profile')}>
+                      <Icons.user className="mr-2 h-4 w-4" />
+                      {t('profile.title')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleLogout}>
                       <Icons.logout className="mr-2 h-4 w-4" />

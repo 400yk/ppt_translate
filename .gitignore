@@ -40,7 +40,12 @@ next-env.d.ts
 .genkit/*
 .venv
 tmp
+test
 
 backend/.env
 backend/__pycache__/
 backend/app.db
+
+.env
+.env.dev
+.env.prod

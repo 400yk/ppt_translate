@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,26 +25,8 @@ export default function RegisterForm() {
   const { t, locale } = useTranslation();
   const router = useRouter();
 
-  // Force component re-render on locale change
-  useEffect(() => {
-    const handleLocaleChange = () => {
-      // Increment to force a re-render
-      setForceRender(prev => prev + 1);
-      
-      // Re-check invitation code to update message language
-      if (codeValid === true && invitationCode) {
-        checkInvitationCode(invitationCode);
-      }
-    };
-    
-    window.addEventListener(LOCALE_CHANGE_EVENT, handleLocaleChange);
-    return () => {
-      window.removeEventListener(LOCALE_CHANGE_EVENT, handleLocaleChange);
-    };
-  }, [codeValid, invitationCode]);
-
-  // Function to check invitation code
-  const checkInvitationCode = async (code: string) => {
+  // Memoize the checkInvitationCode function to prevent recreation on each render
+  const checkInvitationCode = useCallback(async (code: string) => {
     if (!code || code.length < 6) {
       setCodeValid(null);
       setCodeMessage('');
@@ -68,18 +50,43 @@ export default function RegisterForm() {
     } finally {
       setIsCheckingCode(false);
     }
-  };
+  }, [verifyInvitationCode, t]);
+
+  // Force component re-render on locale change
+  useEffect(() => {
+    const handleLocaleChange = () => {
+      // Increment to force a re-render
+      setForceRender(prev => prev + 1);
+      
+      // Re-check invitation code to update message language only if we have a valid code
+      if (codeValid === true && invitationCode && invitationCode.length >= 6) {
+        checkInvitationCode(invitationCode);
+      }
+    };
+    
+    window.addEventListener(LOCALE_CHANGE_EVENT, handleLocaleChange);
+    return () => {
+      window.removeEventListener(LOCALE_CHANGE_EVENT, handleLocaleChange);
+    };
+  }, [codeValid, invitationCode, checkInvitationCode]);
 
   // Verify invitation code when it changes
   useEffect(() => {
-    if (invitationCode) {
-      const timeoutId = setTimeout(() => checkInvitationCode(invitationCode), 500);
-      return () => clearTimeout(timeoutId);
+    let timeoutId: NodeJS.Timeout;
+    
+    if (invitationCode && invitationCode.length >= 6) {
+      timeoutId = setTimeout(() => {
+        checkInvitationCode(invitationCode);
+      }, 500);
     } else {
       setCodeValid(null);
       setCodeMessage('');
     }
-  }, [invitationCode, forceRender]);
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [invitationCode, checkInvitationCode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

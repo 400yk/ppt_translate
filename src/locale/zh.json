@@ -40,7 +40,8 @@
     "translate": "翻译",
     "download": "下载",
     "translating": "翻译中...",
-    "select_file": "选择文件"
+    "select_file": "选择文件",
+    "upgrade": "立即升级"
   },
   "upload": {
     "title": "上传您的演示文稿",
@@ -54,6 +55,7 @@
     "login": "登录",
     "login_subtitle": "登录您的账户以继续",
     "register": "注册",
+    "register_login": "注册/登录",
     "username": "用户名",
     "username_placeholder": "输入您的用户名",
     "email": "电子邮箱",
@@ -101,16 +103,21 @@
     "yearly": "按年付费（优惠15%）",
     "current_plan": "当前方案",
     "upgrade": "立即升级",
+    "free_user": "免费用户",
+    "paid_user": "您已是付费用户",
     "features": {
       "upload_limit": "文件上传限制",
       "char_per_file": "每个文件字符限制",
       "monthly_limit": "每月字符限制",
       "file_size": "最大文件大小",
       "support": "客户支持"
-    }
+    },
+    "weekly_limit_title": "已达到每周翻译次数限制",
+    "weekly_limit_message": "免费用户每周只能翻译1次。升级到付费会员可以获得无限翻译次数。"
   },
   "nav": {
-    "translate_now": "立即翻译"
+    "translate_now": "立即翻译",
+    "home": "返回首页"
   },
   "landing": {
     "translate": "翻译",
@@ -131,9 +138,49 @@
   "guest": {
     "free_trial": "免费试用",
     "free_trial_desc": "您正在使用免费试用版，可以使用一次翻译服务。",
-    "register_prompt": "请注册以获得额外的免费翻译机会",
+    "register_prompt": "请注册账号，每周可获得一次免费翻译机会",
     "register_title": "注册账号",
-    "register_subtitle": "注册一个免费账户，获得一次额外的免费翻译机会",
-    "trial_used": "免费试用已用完"
+    "register_subtitle": "注册一个免费账户，每周可获得一次免费翻译机会",
+    "trial_used": "免费试用已用完",
+    "guest_user": "游客用户",
+    "one_time_note": "注意：这是一次性的免费翻译。您需要注册账号才能翻译更多文档。"
+  },
+  "profile": {
+    "title": "个人资料",
+    "free_user": "免费用户",
+    "paid_member": "付费会员",
+    "invitation_member": "邀请码用户",
+    "membership_details": "会员详情",
+    "membership_start": "会员开始日期",
+    "membership_end": "会员结束日期",
+    "days_remaining": "剩余天数",
+    "translations": "翻译",
+    "invitation_code": "邀请码",
+    "translations_limit": "翻译次数限制",
+    "translations_used": "已使用翻译次数",
+    "translations_remaining": "剩余翻译次数",
+    "reset_info": "重置信息",
+    "reset_daily": "翻译次数于每天开始时重置",
+    "reset_weekly": "翻译次数于每周开始时重置",
+    "reset_monthly": "翻译次数于每月开始时重置",
+    "free_user_description": "您目前是免费用户。升级会员可获得无限翻译次数。",
+    "upgrade_membership": "升级会员",
+    "extend_membership": "延长会员"
+  },
+  "payment": {
+    "title": "选择订阅方案",
+    "subtitle": "请选择您偏好的付费方案",
+    "billed_monthly": "按月计费",
+    "billed_yearly": "按年计费",
+    "pay_monthly": "月付 ¥{price}",
+    "pay_yearly": "年付 ¥{price}",
+    "processing": "支付处理中...",
+    "success": "支付成功",
+    "monthly_success": "您已成功订阅月付方案",
+    "yearly_success": "您已成功订阅年付方案",
+    "error": "支付失败",
+    "error_description": "处理您的支付时出现错误，请重试。",
+    "secure_info": "所有支付都是安全加密的",
+    "benefits": "您将获得"
   }
 } 

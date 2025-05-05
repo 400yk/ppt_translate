@@ -40,7 +40,8 @@
     "translate": "Translate",
     "download": "Download",
     "translating": "Translating...",
-    "select_file": "Select File"
+    "select_file": "Select File",
+    "upgrade": "Upgrade Now"
   },
   "upload": {
     "title": "Upload Your Presentation",
@@ -54,6 +55,7 @@
     "login": "Login",
     "login_subtitle": "Sign in to your account to continue",
     "register": "Register",
+    "register_login": "Register / Login",
     "username": "Username",
     "username_placeholder": "Enter your username",
     "email": "Email",
@@ -101,16 +103,21 @@
     "yearly": "Yearly (15% off)",
     "current_plan": "Current Plan",
     "upgrade": "Upgrade Now",
+    "free_user": "Free User",
+    "paid_user": "You are already a paid user",
     "features": {
       "upload_limit": "File Upload Limit",
       "char_per_file": "Max Characters per File",
       "monthly_limit": "Monthly Character Limit",
       "file_size": "Max File Size",
       "support": "Support"
-    }
+    },
+    "weekly_limit_title": "Weekly Translation Limit Reached",
+    "weekly_limit_message": "Free users can only perform 1 translation(s) per week. Consider upgrading to a paid membership for unlimited translations."
   },
   "nav": {
-    "translate_now": "Translate Now"
+    "translate_now": "Translate Now",
+    "home": "Back to Home"
   },
   "landing": {
     "translate": "Translate",
@@ -131,9 +138,49 @@
   "guest": {
     "free_trial": "Free Trial",
     "free_trial_desc": "You are using the free trial version with one translation credit.",
-    "register_prompt": "Please register to get an additional free translation credit",
+    "register_prompt": "Please register to get one free translation per week",
     "register_title": "Register Account",
-    "register_subtitle": "Register a free account to get an additional free translation credit",
-    "trial_used": "Free trial has been used"
+    "register_subtitle": "Register a free account to get one free translation per week",
+    "trial_used": "Free trial has been used",
+    "guest_user": "Guest User",
+    "one_time_note": "Note: This is a one-time free translation. You will need to register for an account to translate more documents."
+  },
+  "profile": {
+    "title": "My Profile",
+    "free_user": "Free User",
+    "paid_member": "Paid Member",
+    "invitation_member": "Invitation User",
+    "membership_details": "Membership Details",
+    "membership_start": "Membership Start",
+    "membership_end": "Membership End",
+    "days_remaining": "Days Remaining",
+    "translations": "Translations",
+    "invitation_code": "Invitation Code",
+    "translations_limit": "Translation Limit",
+    "translations_used": "Translations Used",
+    "translations_remaining": "Translations Remaining",
+    "reset_info": "Reset Information",
+    "reset_daily": "Translations reset at the start of each day",
+    "reset_weekly": "Translations reset at the start of each week",
+    "reset_monthly": "Translations reset at the start of each month",
+    "free_user_description": "You are currently on the free plan. Upgrade to get unlimited translations.",
+    "upgrade_membership": "Upgrade Membership",
+    "extend_membership": "Extend Membership"
+  },
+  "payment": {
+    "title": "Choose a Subscription Plan",
+    "subtitle": "Select your preferred payment plan",
+    "billed_monthly": "Billed monthly",
+    "billed_yearly": "Billed annually",
+    "pay_monthly": "Pay ¥{price} monthly",
+    "pay_yearly": "Pay ¥{price} yearly",
+    "processing": "Processing payment...",
+    "success": "Payment Successful",
+    "monthly_success": "You have successfully subscribed to the monthly plan",
+    "yearly_success": "You have successfully subscribed to the yearly plan",
+    "error": "Payment Failed",
+    "error_description": "There was an error processing your payment. Please try again.",
+    "secure_info": "All payments are secure and encrypted",
+    "benefits": "You will receive"
   }
 } 

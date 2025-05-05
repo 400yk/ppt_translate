@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useRouter as useNavigationRouter } from 'next/navigation';
+import { clearGuestSession } from './guest-session';
 
 // Check for browser environment
 const isBrowser = typeof window !== 'undefined';
@@ -103,6 +104,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('auth_token', data.access_token);
         localStorage.setItem('auth_user', JSON.stringify({ username, email: '' }));
       }
+      
+      // Don't clear guest session - this prevents abuse where users could
+      // log in, use quota, log out, and use guest translation again
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -136,6 +140,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('auth_token', data.access_token);
         localStorage.setItem('auth_user', JSON.stringify({ username, email }));
       }
+      
+      // For new registrations, we do want to reset guest usage to give them a fresh start
+      // This is handled by the resetGuestUsageAfterRegistration function in auth-tabs.tsx
+      // but we don't clear the entire guest session
     } catch (error) {
       console.error('Registration error:', error);
       throw error;

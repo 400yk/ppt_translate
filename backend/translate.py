@@ -8,8 +8,13 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import User, db, TranslationRecord
 from api_client import gemini_batch_translate
 from pptx_utils import measure_text_bbox, fit_font_size_to_bbox, fit_font_size_for_title
-from config import DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, DEFAULT_TITLE_FONT_SIZE
+from config import (
+    DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, DEFAULT_TITLE_FONT_SIZE,
+    GUEST_TRANSLATION_LIMIT, FREE_USER_TRANSLATION_LIMIT, FREE_USER_TRANSLATION_PERIOD
+)
+from guest_tracker import guest_tracker
 import datetime
+import user_manager
 
 def register_routes(app):
     @app.route('/translate', methods=['POST'])
@@ -33,41 +38,21 @@ def register_routes(app):
         print(f"Source language: {src_lang}, Target language: {dest_lang}")
         
         try:
+            # Check user's permission to translate - MOVED BEFORE translation
+            result = user_manager.check_user_permission(user)
+            # Handle the case where three values are returned (allowed, response_obj, status_code)
+            if isinstance(result, tuple):
+                if len(result) == 3:
+                    allowed, response_obj, status_code = result
+                    if not allowed:
+                        return response_obj, status_code
+                elif len(result) == 2:
+                    allowed, response_obj = result
+                    if not allowed:
+                        return response_obj
+            
             # Translate the PPTX file and get the output path
             output_path = translate_pptx(file.stream, src_lang, dest_lang)
-            
-            # Check user's permission to translate
-            if user.invitation_code:
-                # Users with invitation codes use their code's quota
-                if user.invitation_code.is_valid():
-                    user.invitation_code.increment_usage()
-                    print(f"Updated usage count for invitation code: {user.invitation_code.code}")
-                    print(f"Current usage: {user.invitation_code.uses}/{user.invitation_code.max_uses}")
-                else:
-                    return jsonify({'error': 'Your invitation code has reached its usage limit or has been deactivated'}), 403
-            else:
-                # Users without invitation codes can translate once per week
-                print("User does not have an associated invitation code, checking weekly quota")
-                
-                # Get the start of the current week (Monday 00:00:00)
-                today = datetime.datetime.now()
-                start_of_week = today - datetime.timedelta(days=today.weekday())
-                start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
-                
-                # Count translations in the current week
-                weekly_count = TranslationRecord.query.filter(
-                    TranslationRecord.user_id == user.id,
-                    TranslationRecord.created_at >= start_of_week
-                ).count()
-                
-                if weekly_count >= 1:
-                    # User has already used their weekly quota
-                    return jsonify({
-                        'error': 'Weekly translation limit reached',
-                        'message': 'Without an invitation code, you can only perform one translation per week'
-                    }), 403
-                
-                print(f"User has used {weekly_count}/1 translations this week")
             
             # Record the translation in the database
             user.record_translation(file.filename, src_lang, dest_lang)
@@ -91,7 +76,7 @@ def register_routes(app):
     def guest_translate_pptx_endpoint():
         """
         Endpoint for guest users to translate a PowerPoint file without authentication.
-        Only for trial use - limited to one use per IP address.
+        Limited to GUEST_TRANSLATION_LIMIT per IP address.
         """
         if 'file' not in request.files:
             return jsonify({'error': 'No file uploaded'}), 400
@@ -103,7 +88,23 @@ def register_routes(app):
         print(f"Received guest file: {file.filename}")
         print(f"Source language: {src_lang}, Target language: {dest_lang}")
         
+        # Get client IP
+        client_ip = request.remote_addr
+        
         try:
+            # Check guest permission before translating
+            result = user_manager.check_guest_permission(client_ip, file.filename, src_lang, dest_lang)
+            # Handle the case where three values are returned (allowed, response_obj, status_code)
+            if isinstance(result, tuple):
+                if len(result) == 3:
+                    allowed, response_obj, status_code = result
+                    if not allowed:
+                        return response_obj, status_code
+                elif len(result) == 2:
+                    allowed, response_obj = result
+                    if not allowed:
+                        return response_obj
+            
             # Translate the PPTX file and get the output path
             output_path = translate_pptx(file.stream, src_lang, dest_lang)
             
@@ -148,6 +149,29 @@ def register_routes(app):
             'count': len(history),
             'translations': history
         }), 200
+    
+    @app.route('/api/membership/status', methods=['GET'])
+    @jwt_required()
+    def get_membership_status():
+        """Get the current user's membership status."""
+        username = get_jwt_identity()
+        user = User.query.filter_by(username=username).first()
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Get membership status
+        status = user_manager.get_membership_status(user)
+        return jsonify(status), 200
+        
+    @app.route('/api/guest/status', methods=['GET'])
+    def get_guest_status():
+        """Get the guest translation status for the current IP."""
+        client_ip = request.remote_addr
+        
+        # Get guest status
+        status = user_manager.get_guest_status(client_ip)
+        return jsonify(status), 200
 
 def translate_pptx(input_stream, src_lang, dest_lang):
     prs = Presentation(input_stream)

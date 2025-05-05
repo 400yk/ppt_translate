@@ -5,7 +5,8 @@ import AuthTabs from '@/components/auth-tabs';
 import LogoImage from '@/assets/Pure_logo.png';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/lib/auth-context';
 
 import {
   Dialog,
@@ -23,9 +24,30 @@ interface RegistrationDialogProps {
 export function RegistrationDialog({ isOpen, onClose }: RegistrationDialogProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const { isAuthenticated } = useAuth();
+  
+  // Reset tab state when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab('login');
+    }
+  }, [isOpen]);
+
+  // Close dialog automatically when authentication state changes to true
+  useEffect(() => {
+    if (isAuthenticated && isOpen) {
+      onClose();
+    }
+  }, [isAuthenticated, isOpen, onClose]);
+  
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      onClose();
+    }
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogTitle className="sr-only">
           {activeTab === 'register' ? t('guest.register_title') : t('auth.login')}

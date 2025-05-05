@@ -6,6 +6,8 @@ from models import db
 from dotenv import load_dotenv
 import auth
 import translate
+from pricing import pricing_bp
+import membership_api
 
 # Load Gemini API key from .env - try multiple locations
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -52,6 +54,8 @@ def create_app():
     # Register routes from modules
     auth.register_routes(app)
     translate.register_routes(app)
+    app.register_blueprint(pricing_bp)
+    app.register_blueprint(membership_api.membership_bp)
 
     return app
 

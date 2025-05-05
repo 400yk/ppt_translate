@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslation } from '@/lib/i18n';
 import LoginForm from '@/components/auth/LoginForm';
@@ -9,7 +9,6 @@ import { resetGuestUsageAfterRegistration } from '@/lib/guest-session';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { useEffect } from 'react';
 
 interface AuthTabsProps {
   defaultTab?: 'login' | 'register';
@@ -23,30 +22,39 @@ export default function AuthTabs({ defaultTab = 'login', onAuthSuccess, onTabCha
   const { toast } = useToast();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  
+  // Use a ref to track if auth success was already handled
+  const authSuccessHandled = useRef(false);
 
   // Monitor authentication state to detect successful login/registration
   useEffect(() => {
-    // If the user becomes authenticated, it means login/registration was successful
-    if (isAuthenticated) {
-      // Reset guest usage if it was a registration
-      if (activeTab === 'register') {
-        resetGuestUsageAfterRegistration();
-        
-        // Show registration success message
-        toast({
-          title: t('auth.register'),
-          description: t('success.registration_complete'),
-        });
-      }
-      
-      // Call the onAuthSuccess callback if provided
-      if (onAuthSuccess) {
-        onAuthSuccess();
-      }
-      
-      // Redirect to translate page
-      router.push('/translate');
+    // Skip on initial render and only handle once
+    if (!isAuthenticated || authSuccessHandled.current) {
+      return;
     }
+    
+    // Mark as handled to prevent repeated execution
+    authSuccessHandled.current = true;
+    
+    // Reset guest usage only if it was a registration (not login)
+    // This gives new users a fresh start but prevents login/logout abuse
+    if (activeTab === 'register') {
+      resetGuestUsageAfterRegistration();
+      
+      // Show registration success message
+      toast({
+        title: t('auth.register'),
+        description: t('success.registration_complete'),
+      });
+    }
+    
+    // Call the onAuthSuccess callback if provided
+    if (onAuthSuccess) {
+      onAuthSuccess();
+    }
+    
+    // Redirect to translate page
+    router.push('/translate');
   }, [isAuthenticated, router, toast, t, onAuthSuccess, activeTab]);
 
   // Call onTabChange when activeTab changes
@@ -56,11 +64,16 @@ export default function AuthTabs({ defaultTab = 'login', onAuthSuccess, onTabCha
     }
   }, [activeTab, onTabChange]);
 
+  // Handle tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as 'login' | 'register');
+  };
+
   return (
     <Tabs 
       defaultValue={defaultTab} 
       value={activeTab}
-      onValueChange={(value) => setActiveTab(value as 'login' | 'register')}
+      onValueChange={handleTabChange}
       className="w-full"
     >
       <TabsList className="grid w-full grid-cols-2 mb-6">

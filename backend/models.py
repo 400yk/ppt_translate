@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 import datetime
 import secrets
 import string
+from config import PAID_MEMBERSHIP_MONTHLY, PAID_MEMBERSHIP_YEARLY, INVITATION_MEMBERSHIP_MONTHS
 
 db = SQLAlchemy()
 
@@ -75,6 +76,10 @@ class User(db.Model):
     invitation_code_id = db.Column(db.Integer, db.ForeignKey('invitation_code.id'))
     invitation_code = db.relationship('InvitationCode', backref=db.backref('users', lazy='dynamic'))
     translations = db.relationship('TranslationRecord', backref='user', lazy='dynamic')
+    # Membership tracking fields
+    membership_start = db.Column(db.DateTime)
+    membership_end = db.Column(db.DateTime)
+    is_paid_user = db.Column(db.Boolean, default=False)
     
     def set_password(self, password):
         """Hash the password and store it."""
@@ -101,6 +106,69 @@ class User(db.Model):
         db.session.add(translation)
         db.session.commit()
         return translation
+        
+    def activate_paid_membership(self, months=None, is_invitation=False, is_yearly=False):
+        """
+        Activate paid membership for the specified number of months.
+        If months is None, use the default from config based on membership type.
+        
+        Args:
+            months: Number of months for membership duration
+            is_invitation: Whether this is an invitation-based membership
+            is_yearly: Whether this is a yearly subscription (vs monthly)
+        """
+        if months is None:
+            if is_invitation:
+                months = INVITATION_MEMBERSHIP_MONTHS
+            else:
+                months = PAID_MEMBERSHIP_YEARLY if is_yearly else PAID_MEMBERSHIP_MONTHLY
+            
+        now = datetime.datetime.utcnow()
+        # If already a member, extend from current end date
+        if self.is_paid_user and self.membership_end and self.membership_end > now:
+            self.membership_end = self.membership_end + datetime.timedelta(days=30*months)
+        else:
+            # New membership or expired membership
+            self.membership_start = now
+            self.membership_end = now + datetime.timedelta(days=30*months)
+            self.is_paid_user = True
+            
+        db.session.commit()
+        return True
+        
+    def cancel_membership(self):
+        """Cancel the user's paid membership."""
+        self.is_paid_user = False
+        db.session.commit()
+        return True
+        
+    def is_membership_active(self):
+        """Check if the user has an active paid membership."""
+        if not self.is_paid_user:
+            return False
+            
+        now = datetime.datetime.utcnow()
+        if self.membership_end and self.membership_end > now:
+            return True
+            
+        # Membership has expired
+        if self.membership_end and self.membership_end <= now:
+            self.is_paid_user = False
+            db.session.commit()
+            
+        return False
+        
+    def get_membership_days_remaining(self):
+        """Get the number of days remaining in the membership."""
+        if not self.is_paid_user or not self.membership_end:
+            return 0
+            
+        now = datetime.datetime.utcnow()
+        if self.membership_end <= now:
+            return 0
+            
+        delta = self.membership_end - now
+        return delta.days
 
 class TranslationRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)

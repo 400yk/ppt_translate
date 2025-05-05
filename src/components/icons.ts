@@ -53,6 +53,7 @@ const Icons = {
   mail: Mail,
   menu: Menu,
   messageSquare: MessageSquare,
+  payment: CreditCard,
   plus: Plus,
   plusCircle: PlusCircle,
   pricing: CreditCard,

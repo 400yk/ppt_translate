@@ -15,13 +15,13 @@ import Link from 'next/link';
 import { LanguageSelector } from '@/components/language-selector';
 import { DynamicHead } from '@/components/dynamic-head';
 import { RegistrationDialog } from '@/components/registration-dialog';
+import { PaymentModal } from '@/components/payment-modal';
+import { usePricing } from '@/lib/pricing-service';
 
-// Pricing data with locale support
-const pricingData = {
+// Static content that doesn't depend on pricing
+const featureData = {
   en: {
     freePlan: {
-      price: "$0",
-      period: "Forever free",
       features: {
         uploads: "1 PPT/week",
         charPerFile: "25,000 characters",
@@ -31,9 +31,6 @@ const pricingData = {
       }
     },
     paidPlan: {
-      price: "$7.99",
-      period: "/month",
-      yearlyInfo: "$6.79/month billed yearly (15% off)",
       features: {
         uploads: "Unlimited uploads",
         charPerFile: "Unlimited characters per file",
@@ -63,8 +60,6 @@ const pricingData = {
   },
   zh: {
     freePlan: {
-      price: "￥0",
-      period: "永久免费",
       features: {
         uploads: "每周1个PPT",
         charPerFile: "25,000个字符",
@@ -74,9 +69,6 @@ const pricingData = {
       }
     },
     paidPlan: {
-      price: "￥54.99",
-      period: "/月",
-      yearlyInfo: "￥46.99/月（按年付费可节省15%）",
       features: {
         uploads: "无限上传",
         charPerFile: "每个文件无字符限制",
@@ -110,17 +102,47 @@ export default function PricingPage() {
   const { t, locale } = useTranslation();
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const { pricing, isLoading: isPricingLoading } = usePricing();
   const [isClient, setIsClient] = useState(false);
   const [forceRender, setForceRender] = useState(0);
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isPaidUser, setIsPaidUser] = useState(false);
 
-  // Get the appropriate pricing data based on locale
-  const pricing = locale === 'zh' ? pricingData.zh : pricingData.en;
+  // Get the appropriate feature data based on locale
+  const features = locale === 'zh' ? featureData.zh : featureData.en;
 
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
     setIsClient(true);
   }, []);
+  
+  // Check if user is a paid member
+  useEffect(() => {
+    const checkMembershipStatus = async () => {
+      if (!isAuthenticated || !isClient) return;
+      
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) return;
+        
+        const response = await fetch('http://localhost:5000/api/membership/status', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setIsPaidUser(data.user_type === 'paid');
+        }
+      } catch (error) {
+        console.error('Error checking membership status:', error);
+      }
+    };
+    
+    checkMembershipStatus();
+  }, [isAuthenticated, isClient]);
   
   // Force component re-render on locale change
   useEffect(() => {
@@ -144,9 +166,13 @@ export default function PricingPage() {
     if (!isAuthenticated) {
       setShowRegistrationDialog(true); // Show registration dialog instead of redirect
     } else {
-      // Handle upgrade process for logged-in users
-      // This is where you would add actual upgrade functionality
+      // Show payment modal for logged-in users
+      setShowPaymentModal(true);
     }
+  };
+
+  const closePaymentModal = () => {
+    setShowPaymentModal(false);
   };
 
   return (
@@ -157,6 +183,12 @@ export default function PricingPage() {
       <RegistrationDialog 
         isOpen={showRegistrationDialog} 
         onClose={() => setShowRegistrationDialog(false)} 
+      />
+      
+      {/* Payment Modal */}
+      <PaymentModal 
+        isOpen={showPaymentModal} 
+        onClose={closePaymentModal}
       />
       
       {/* Navbar */}
@@ -224,8 +256,8 @@ export default function PricingPage() {
             </div>
             
             <div className="space-y-2 mb-6">
-              <p className="text-3xl font-bold">{pricing.freePlan.price}</p>
-              <p className="text-muted-foreground">{pricing.freePlan.period}</p>
+              <p className="text-3xl font-bold">{isPricingLoading ? '...' : pricing.symbol}0</p>
+              <p className="text-muted-foreground">{locale === 'zh' ? '永久免费' : 'Forever free'}</p>
             </div>
 
             <Separator className="my-4" />
@@ -234,35 +266,35 @@ export default function PricingPage() {
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{pricing.freePlan.features.uploads}</p>
+                  <p className="font-medium">{features.freePlan.features.uploads}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.upload_limit')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{pricing.freePlan.features.charPerFile}</p>
+                  <p className="font-medium">{features.freePlan.features.charPerFile}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.char_per_file')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{pricing.freePlan.features.monthlyLimit}</p>
+                  <p className="font-medium">{features.freePlan.features.monthlyLimit}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.monthly_limit')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{pricing.freePlan.features.fileSize}</p>
+                  <p className="font-medium">{features.freePlan.features.fileSize}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.file_size')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{pricing.freePlan.features.support}</p>
+                  <p className="font-medium">{features.freePlan.features.support}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.support')}</p>
                 </div>
               </div>
@@ -273,14 +305,16 @@ export default function PricingPage() {
               variant="outline"
               onClick={() => isAuthenticated ? null : setShowRegistrationDialog(true)}
             >
-              {isAuthenticated ? t('pricing.current_plan') : t('auth.login')}
+              {isAuthenticated 
+                ? (isPaidUser ? t('pricing.paid_user') : t('pricing.free_user'))
+                : t('auth.login')}
             </Button>
           </Card>
 
           {/* Paid Plan */}
           <Card className="p-6 flex flex-col relative border-primary/50 bg-primary/5">
             <div className="absolute -top-4 right-4 bg-primary text-primary-foreground text-sm px-3 py-1 rounded-full">
-              {pricing.recommended}
+              {features.recommended}
             </div>
             
             <div className="space-y-2 mb-6">
@@ -289,8 +323,22 @@ export default function PricingPage() {
             </div>
             
             <div className="space-y-2 mb-6">
-              <p className="text-3xl font-bold">{pricing.paidPlan.price}<span className="text-lg font-normal">{pricing.paidPlan.period}</span></p>
-              <p className="text-sm text-muted-foreground">{pricing.paidPlan.yearlyInfo}</p>
+              {isPricingLoading ? (
+                <div className="space-y-2">
+                  <div className="h-8 w-24 bg-muted animate-pulse rounded"></div>
+                  <div className="h-4 w-40 bg-muted animate-pulse rounded"></div>
+                </div>
+              ) : (
+                <>
+                  <p className="text-3xl font-bold">
+                    {pricing.monthly.display}
+                    <span className="text-lg font-normal">/{locale === 'zh' ? '月' : 'mo'}</span>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {pricing.yearly.display_per_month}/{locale === 'zh' ? '月' : 'mo'} {t('pricing.yearly')}
+                  </p>
+                </>
+              )}
             </div>
 
             <Separator className="my-4" />
@@ -299,57 +347,67 @@ export default function PricingPage() {
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{pricing.paidPlan.features.uploads}</p>
+                  <p className="font-medium">{features.paidPlan.features.uploads}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.upload_limit')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{pricing.paidPlan.features.charPerFile}</p>
+                  <p className="font-medium">{features.paidPlan.features.charPerFile}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.char_per_file')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{pricing.paidPlan.features.monthlyLimit}</p>
+                  <p className="font-medium">{features.paidPlan.features.monthlyLimit}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.monthly_limit')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{pricing.paidPlan.features.fileSize}</p>
+                  <p className="font-medium">{features.paidPlan.features.fileSize}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.file_size')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{pricing.paidPlan.features.support}</p>
+                  <p className="font-medium">{features.paidPlan.features.support}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.support')}</p>
                 </div>
               </div>
             </div>
 
-            <Button className="mt-8 w-full" variant="default" onClick={handleUpgradeClick}>
-              {t('pricing.upgrade')}
+            <Button 
+              onClick={handleUpgradeClick} 
+              size="lg" 
+              className="mt-6"
+              disabled={isPricingLoading || isPaidUser}
+            >
+              {isPricingLoading ? (
+                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              {isAuthenticated 
+                ? (isPaidUser ? t('pricing.paid_user') : t('pricing.upgrade')) 
+                : t('auth.login')}
             </Button>
           </Card>
         </div>
 
-        <div className="mt-16 max-w-3xl mx-auto p-6 bg-muted rounded-lg">
-          <h3 className="text-xl font-bold mb-4 text-center">{pricing.faq.title}</h3>
+        {/* <div className="mt-16 max-w-3xl mx-auto p-6 bg-muted rounded-lg">
+          <h3 className="text-xl font-bold mb-4 text-center">{features.faq.title}</h3>
           <div className="space-y-4">
-            {pricing.faq.items.map((item, index) => (
+            {features.faq.items.map((item, index) => (
               <div key={index}>
                 <h4 className="font-medium">{item.question}</h4>
                 <p className="text-muted-foreground">{item.answer}</p>
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
       
       {/* Footer */}

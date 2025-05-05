@@ -29,9 +29,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from 'next/link';
-import { canGuestUseTranslation, consumeGuestUsage } from '@/lib/guest-session';
+import { canGuestUseTranslation, consumeGuestUsage, fetchGuestUsage } from '@/lib/guest-session';
 import { RegistrationDialog } from '@/components/registration-dialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { PaymentModal } from "@/components/payment-modal";
 
 // Define available languages (codes only)
 const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
@@ -72,6 +73,10 @@ export default function TranslationPage() {
   const [forceRender, setForceRender] = useState(0);
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
   const [isGuestUser, setIsGuestUser] = useState(false);
+  const [weeklyLimitReached, setWeeklyLimitReached] = useState(false);
+  const [limitMessage, setLimitMessage] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
   
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
@@ -101,10 +106,8 @@ export default function TranslationPage() {
   // Custom logout function to redirect to landing page
   const handleLogout = () => {
     logout(() => {
-      // Force a direct navigation to the home page
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
-      }
+      // Use router for navigation to avoid redirecting with window.location
+      router.push('/');
     });
   };
 
@@ -112,14 +115,35 @@ export default function TranslationPage() {
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated) {
-        // If not authenticated, check if guest can use translation
-        if (canGuestUseTranslation()) {
-          // Allow guest to use the page, but mark them as guest
-          setIsGuestUser(true);
-        } else {
-          // If guest has used their free trial, show registration dialog
-          setShowRegistrationDialog(true);
-        }
+        // If not authenticated, check if guest can use translation by fetching from backend
+        const checkGuestStatus = async () => {
+          try {
+            const guestUsage = await fetchGuestUsage();
+            if (guestUsage.remainingUses > 0) {
+              // Allow guest to use the page, but mark them as guest
+              setIsGuestUser(true);
+            } else {
+              // If guest has used their free trial, show registration dialog
+              setShowRegistrationDialog(true);
+            }
+          } catch (error) {
+            console.error("Error checking guest status:", error);
+            // Fallback to local check if API fails
+            if (canGuestUseTranslation()) {
+              setIsGuestUser(true);
+            } else {
+              setShowRegistrationDialog(true);
+            }
+          }
+        };
+        
+        checkGuestStatus();
+      } else {
+        // When authenticated, hide guest UI but don't reset underlying guest data
+        // This prevents users from bypassing usage limits by logging in/out
+        setIsGuestUser(false);
+        // Clear any weekly limit flags that might be set for the current session
+        setWeeklyLimitReached(false);
       }
     }
   }, [isLoading, isAuthenticated]);
@@ -128,6 +152,24 @@ export default function TranslationPage() {
   useEffect(() => {
     console.log("translatedFileUrl changed:", translatedFileUrl);
   }, [translatedFileUrl]);
+  
+  // Refresh guest usage status whenever component is mounted
+  useEffect(() => {
+    if (isClient && !isAuthenticated) {
+      // Fetch fresh guest usage status from backend
+      fetchGuestUsage().then(usage => {
+        console.log("Refreshed guest usage status:", usage);
+        // If we have no uses left but were previously shown as a guest user,
+        // update the UI to show registration dialog
+        if (usage.remainingUses <= 0 && isGuestUser) {
+          setIsGuestUser(false);
+          setShowRegistrationDialog(true);
+        }
+      }).catch(err => {
+        console.error("Failed to refresh guest usage status:", err);
+      });
+    }
+  }, [isClient, isAuthenticated, isGuestUser]);
 
   // Helper function to get translated language name
   const getLanguageName = (code: LanguageCode): string => {
@@ -188,6 +230,9 @@ export default function TranslationPage() {
       // Reset invalid file type flag
       setInvalidFileType(false);
       
+      // Reset weekly limit reached flag
+      setWeeklyLimitReached(false);
+      
       // Set the file and reset previous translation state
       setFile(selectedFile);
       setTranslatedFileUrl(null); // Reset translation URL when new file is selected
@@ -202,6 +247,7 @@ export default function TranslationPage() {
     setTranslatedFileUrl(null);
     setProgress(0);
     setInvalidFileType(false);
+    setWeeklyLimitReached(false);
     
     // Reset the file input
     if (fileInputRef.current) {
@@ -313,6 +359,15 @@ export default function TranslationPage() {
           
           // Redirect to home page on logout
           handleLogout();
+          return;
+        }
+        
+        if (response.status === 403) {
+          // Weekly/usage limit reached
+          const err = await response.json();
+          setWeeklyLimitReached(true);
+          setLimitMessage(err.message || 'Weekly translation limit reached. Please upgrade to a paid membership for unlimited translations.');
+          setProgress(0);
           return;
         }
         
@@ -439,6 +494,21 @@ export default function TranslationPage() {
     }
   };
 
+  // Add a useEffect to force rerender on locale changes
+  useEffect(() => {
+    // Ensure translations are updated when locale changes
+    const forceUpdate = () => {
+      setForceRender(prev => prev + 1);
+    };
+    
+    if (isBrowser) {
+      window.addEventListener(LOCALE_CHANGE_EVENT, forceUpdate);
+      return () => {
+        window.removeEventListener(LOCALE_CHANGE_EVENT, forceUpdate);
+      };
+    }
+  }, []);
+
   // If still loading auth state, show a spinner
   if (isLoading) {
     return (
@@ -457,6 +527,11 @@ export default function TranslationPage() {
     );
   }
 
+  // Get translated texts for the dropdown menu
+  const guestUserText = locale === 'zh' ? '游客用户' : 'Guest User';
+  const registerLoginText = locale === 'zh' ? '注册/登录' : 'Register / Login';
+  const backToHomeText = locale === 'zh' ? '返回首页' : 'Back to Home';
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <DynamicHead />
@@ -464,21 +539,27 @@ export default function TranslationPage() {
       {/* Registration dialog */}
       <RegistrationDialog 
         isOpen={showRegistrationDialog} 
-        onClose={() => setShowRegistrationDialog(false)} 
+        onClose={() => {
+          setShowRegistrationDialog(false);
+          // We don't force a page reload here anymore
+          // The guest UI will be hidden via the useEffect hook that checks auth state
+        }} 
+      />
+      
+      {/* Payment modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={() => {
+          setWeeklyLimitReached(false);
+          toast({
+            title: t('payment.success'),
+            description: t(selectedPlan === 'monthly' ? 'payment.monthly_success' : 'payment.yearly_success'),
+          });
+        }}
       />
       
       <div className="container mx-auto px-4 py-4 max-w-6xl flex flex-col h-full flex-1">
-        {/* Guest user banner */}
-        {isClient && isGuestUser && (
-          <Alert className="border-teal-500 bg-teal-50 mb-6">
-            <Icons.info className="h-4 w-4 text-teal-500" />
-            <AlertTitle className="text-teal-700">{t('guest.free_trial')}</AlertTitle>
-            <AlertDescription className="text-teal-600">
-              {t('guest.free_trial_desc')}
-            </AlertDescription>
-          </Alert>
-        )}
-        
         {/* Header with user menu */}
         <div className="w-full flex justify-between items-center py-2">
           <div className="flex items-center">
@@ -506,20 +587,37 @@ export default function TranslationPage() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="flex items-center gap-2">
                     <Icons.user className="h-4 w-4" />
-                    <span className="hidden sm:inline-block">{user?.username}</span>
+                    <span className="hidden sm:inline-block">{user?.username || guestUserText}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>{user?.email || user?.username}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push('/pricing')}>
-                    <Icons.pricing className="mr-2 h-4 w-4" />
-                    {t('pricing.title')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <Icons.logout className="mr-2 h-4 w-4" />
-                    {t('auth.logout')}
-                  </DropdownMenuItem>
+                  {isGuestUser ? (
+                    <>
+                      <DropdownMenuLabel>{guestUserText}</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setShowRegistrationDialog(true)}>
+                        <Icons.user className="mr-2 h-4 w-4" />
+                        {registerLoginText}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => router.push('/')}>
+                        <Icons.home className="mr-2 h-4 w-4" />
+                        {backToHomeText}
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuLabel>{user?.email || user?.username}</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => router.push('/profile')}>
+                        <Icons.user className="mr-2 h-4 w-4" />
+                        {t('profile.title')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout}>
+                        <Icons.logout className="mr-2 h-4 w-4" />
+                        {t('auth.logout')}
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -528,6 +626,38 @@ export default function TranslationPage() {
         
         {/* Main content area - flex-1 to take remaining height */}
         <div className="flex flex-col items-center justify-center w-full max-w-3xl mx-auto flex-1">
+          {/* Guest user banner - right above the drop zone */}
+          {isClient && isGuestUser && (
+            <Alert className="border-teal-500 bg-teal-50 w-full mb-8">
+              <Icons.info className="h-4 w-4 text-teal-500" />
+              <AlertTitle className="text-teal-700">{t('guest.free_trial')}</AlertTitle>
+              <AlertDescription className="text-teal-600">
+                {t('guest.free_trial_desc')}
+                <span className="block mt-1 font-medium">
+                  {t('guest.one_time_note')}
+                </span>
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {/* Weekly limit reached banner - moved right above the drop zone */}
+          {isClient && weeklyLimitReached && (
+            <Alert className="border-amber-500 bg-amber-50 w-full mb-8">
+              <Icons.info className="h-4 w-4 text-amber-500" />
+              <AlertTitle className="text-amber-700">{isGuestUser ? t('guest.trial_used') : t('pricing.weekly_limit_title')}</AlertTitle>
+              <AlertDescription className="text-amber-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <span>{isGuestUser ? t('guest.register_prompt') : t('pricing.weekly_limit_message')}</span>
+                <Button 
+                  variant="outline" 
+                  className="border-amber-500 text-amber-700 hover:bg-amber-200 hover:text-amber-900 shrink-0"
+                  onClick={() => isGuestUser ? setShowRegistrationDialog(true) : setShowPaymentModal(true)}
+                >
+                  {isGuestUser ? t('auth.register_login') : t('buttons.upgrade')}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {/* Update the drop zone div to handle drag and drop events */}
           <div 
             ref={dropZoneRef}
