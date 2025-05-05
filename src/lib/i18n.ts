@@ -20,6 +20,21 @@ const isBrowser = typeof window !== 'undefined';
 // Create a type for language translations
 type LanguageKey = `languages.${LanguageCode}`;
 
+// Helper to get the best matching locale from available options
+const getBestMatchingLocale = (browserLanguages: readonly string[]): LocaleCode => {
+  // First try to match full locale codes (e.g., "en-US", "zh-CN")
+  for (const lang of browserLanguages) {
+    // Try exact match first (e.g., "en-US")
+    const baseCode = lang.split('-')[0].toLowerCase();
+    if (baseCode in locales) {
+      return baseCode as LocaleCode;
+    }
+  }
+  
+  // Default to English if no match found
+  return 'en';
+};
+
 // Define translations type
 export type TranslationKey = 
   | 'title'
@@ -123,8 +138,15 @@ export function useTranslation() {
     if (isBrowser) {
       // Initialize from localStorage or browser language
       const savedLocale = localStorage.getItem('app_locale') as LocaleCode;
-      const browserLang = navigator.language.split('-')[0] as LocaleCode;
-      return savedLocale || (locales[browserLang] ? browserLang : 'en');
+      
+      // If there's a saved locale preference, use it
+      if (savedLocale && savedLocale in locales) {
+        return savedLocale;
+      }
+      
+      // Otherwise, use browser language preferences
+      const browserLanguages = navigator.languages || [navigator.language];
+      return getBestMatchingLocale(browserLanguages);
     }
     // Default for server-side rendering
     return 'en';
@@ -164,6 +186,12 @@ export function useTranslation() {
   const setLocale = (newLocale: LocaleCode) => {
     // Only run browser-specific code in the browser
     if (isBrowser) {
+      // Validate the locale
+      if (!(newLocale in locales)) {
+        console.warn(`Invalid locale: ${newLocale}, falling back to English`);
+        newLocale = 'en';
+      }
+      
       // Update localStorage
       localStorage.setItem('app_locale', newLocale);
       

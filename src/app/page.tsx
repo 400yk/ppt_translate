@@ -64,6 +64,13 @@ export default function Home() {
   const router = useRouter();
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
+  // Set HTML lang attribute on initial render
+  useEffect(() => {
+    if (isBrowser) {
+      document.documentElement.lang = locale;
+    }
+  }, []); // Empty dependency array ensures it only runs once on mount
+
   // Check authentication and redirect if necessary
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -408,7 +415,7 @@ export default function Home() {
           {/* Language selector */}
           <Select value={locale} onValueChange={(value) => setLocale(value as LocaleCode)}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder={nativeLanguageNames[locale as LanguageCode]} />
+              <SelectValue placeholder={t(`languages.${locale}`)} />
             </SelectTrigger>
             <SelectContent>
               {languageCodes.map((code) => (

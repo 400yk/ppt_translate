@@ -40,6 +40,13 @@ export default function AuthPage() {
   const router = useRouter();
   const { t, locale, setLocale } = useTranslation();
 
+  // Set HTML lang attribute on initial render
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      document.documentElement.lang = locale;
+    }
+  }, []); // Empty dependency array ensures it only runs once on mount
+
   // Force component re-render on locale change
   useEffect(() => {
     const handleLocaleChange = () => {
@@ -85,10 +92,10 @@ export default function AuthPage() {
         <div className="absolute top-4 right-4">
           <Select value={locale} onValueChange={handleLanguageChange}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder={nativeLanguageNames[locale as keyof typeof nativeLanguageNames]} />
+              <SelectValue placeholder={t(`languages.${locale}`)} />
             </SelectTrigger>
             <SelectContent>
-              {(Object.keys(nativeLanguageNames) as Array<keyof typeof nativeLanguageNames>).map((code) => (
+              {languageCodes.map((code) => (
                 <SelectItem key={code} value={code}>
                   {nativeLanguageNames[code]}
                 </SelectItem>
