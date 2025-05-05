@@ -66,6 +66,8 @@ export type TranslationKey =
   | 'errors.translation_failed'
   | 'errors.download_failed'
   | 'errors.invalid_file_type'
+  | 'errors.file_size_limit'
+  | 'errors.file_size_exceeded'
   | 'errors.unknown_error'
   | 'errors.required_fields'
   | 'errors.fill_all_fields'
@@ -76,6 +78,11 @@ export type TranslationKey =
   | 'errors.enter_valid_code'
   | 'errors.verification_error'
   | 'errors.free_trial_used'
+  | 'errors.invitation_required'
+  | 'errors.registration_failed'
+  | 'errors.authentication_error'
+  | 'errors.session_expired'
+  | 'success.title'
   | 'success.translation_complete'
   | 'success.registration_complete'
   | 'buttons.translate'
@@ -156,8 +163,6 @@ export type TranslationKey =
   | 'guest.guest_user'
   | 'guest.one_time_note'
   | LanguageKey
-  | 'errors.invitation_required'
-  | 'errors.registration_failed'
   | 'auth.register_success'
   | 'auth.welcome'
   | 'auth.use_without_code'
@@ -275,33 +280,35 @@ export function useTranslation() {
     };
   }, [locale]);
 
-  const t = (key: TranslationKey): string => {
-    return getNestedTranslation(locales[locale], key);
-  };
-
-  // Updated locale setter to broadcast changes
-  const setLocale = (newLocale: LocaleCode) => {
-    // Only run browser-specific code in the browser
-    if (isBrowser) {
-      // Validate the locale
-      if (!(newLocale in locales)) {
-        console.warn(`Invalid locale: ${newLocale}, falling back to English`);
-        newLocale = 'en';
-      }
-      
-      // Update localStorage
-      localStorage.setItem('app_locale', newLocale);
-      
-      // Update the HTML lang attribute
-      document.documentElement.lang = newLocale;
-      
-      // Broadcast the change to all other components
-      const event = new CustomEvent(LOCALE_CHANGE_EVENT);
-      window.dispatchEvent(event);
+  // Enhanced translation function to handle parameters
+  const t = (key: TranslationKey, params?: Record<string, any>): string => {
+    let translation = getNestedTranslation(locales[locale], key);
+    
+    // Replace parameters if provided
+    if (params) {
+      Object.entries(params).forEach(([paramKey, paramValue]) => {
+        translation = translation.replace(new RegExp(`{${paramKey}}`, 'g'), String(paramValue));
+      });
     }
     
-    // Update this component's state (this works in both environments)
-    setLocaleState(newLocale);
+    return translation;
+  };
+
+  // Function to set locale and notify listeners
+  const setLocale = (newLocale: LocaleCode) => {
+    if (isBrowser) {
+      // Store in localStorage
+      localStorage.setItem('app_locale', newLocale);
+      
+      // Update state
+      setLocaleState(newLocale);
+      
+      // Set HTML lang attribute
+      document.documentElement.lang = newLocale;
+      
+      // Dispatch custom event for other components to react to locale change
+      window.dispatchEvent(new Event(LOCALE_CHANGE_EVENT));
+    }
   };
 
   return { t, locale, setLocale };

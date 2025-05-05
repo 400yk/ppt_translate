@@ -14,11 +14,13 @@
     "loading": "読み込み中..."
   },
   "errors": {
-    "no_file": "ファイルをアップロードしてください。",
-    "same_language": "元の言語と翻訳先の言語が同じです。",
+    "no_file": "まずファイルをアップロードしてください。",
+    "same_language": "ソース言語とターゲット言語は同じにすることはできません。",
     "translation_failed": "翻訳中にエラーが発生しました。",
-    "download_failed": "翻訳ファイルのダウンロードに失敗しました。",
-    "invalid_file_type": "PowerPointファイルをアップロードしてください（.pptx形式のみ対応）。",
+    "download_failed": "翻訳されたファイルのダウンロードに失敗しました。",
+    "invalid_file_type": "PowerPointファイルをアップロードしてください（.pptx形式のみサポートされています）。",
+    "file_size_limit": "ファイルサイズ制限",
+    "file_size_exceeded": "ファイルサイズが無料ユーザーの制限である{size}MBを超えています。より大きなファイルをアップロードするにはアップグレードしてください。",
     "unknown_error": "不明なエラーが発生しました。",
     "required_fields": "必須項目",
     "fill_all_fields": "すべての必須項目を入力してください。",
@@ -29,12 +31,15 @@
     "enter_valid_code": "有効な招待コードを入力してください。",
     "verification_error": "コードの検証中にエラーが発生しました。",
     "free_trial_used": "無料トライアルを使用済みです。続けるには登録してください。",
-    "invitation_required": "招待コードを入力するか、招待コードなしで登録を選択してください。",
-    "registration_failed": "登録に失敗しました"
+    "invitation_required": "招待コードを入力するか、コードなしで登録を選択してください。",
+    "registration_failed": "登録に失敗しました",
+    "authentication_error": "認証エラー",
+    "session_expired": "セッションが期限切れになりました。もう一度ログインしてください。"
   },
   "success": {
-    "translation_complete": "ファイルの翻訳が完了しました！",
-    "registration_complete": "登録完了！無料翻訳クレジットを受け取りました。"
+    "title": "成功",
+    "translation_complete": "ファイルが正常に翻訳されました！",
+    "registration_complete": "登録が完了しました！無料の翻訳クレジットを受け取りました。"
   },
   "buttons": {
     "translate": "翻訳",

@@ -18,7 +18,9 @@
     "same_language": "Los idiomas de origen y destino no pueden ser los mismos.",
     "translation_failed": "Se produjo un error durante la traducción.",
     "download_failed": "Error al descargar el archivo traducido.",
-    "invalid_file_type": "Por favor, sube un archivo PowerPoint (solo se admite el formato .pptx).",
+    "invalid_file_type": "Por favor, suba un archivo PowerPoint (solo se admite el formato .pptx).",
+    "file_size_limit": "Límite de tamaño de archivo",
+    "file_size_exceeded": "El tamaño del archivo excede el límite de {size}MB para usuarios gratuitos. Actualice para cargar archivos más grandes.",
     "unknown_error": "Se produjo un error desconocido.",
     "required_fields": "Campos obligatorios",
     "fill_all_fields": "Por favor, complete todos los campos obligatorios.",
@@ -29,12 +31,15 @@
     "enter_valid_code": "Por favor, ingrese un código de invitación válido.",
     "verification_error": "Error al verificar el código.",
     "free_trial_used": "Ha utilizado su prueba gratuita. Regístrese para continuar.",
-    "invitation_required": "Por favor, ingrese un código de invitación o elija registrarse sin uno.",
-    "registration_failed": "Error en el registro"
+    "invitation_required": "Por favor, introduzca un código de invitación o elija registrarse sin uno.",
+    "registration_failed": "Registro fallido",
+    "authentication_error": "Error de autenticación",
+    "session_expired": "Su sesión ha caducado. Por favor, inicie sesión de nuevo."
   },
   "success": {
+    "title": "Éxito",
     "translation_complete": "¡Archivo traducido con éxito!",
-    "registration_complete": "¡Registro exitoso! Ha recibido un crédito de traducción gratuito."
+    "registration_complete": "¡Registro exitoso! Has recibido un crédito de traducción gratuito."
   },
   "buttons": {
     "translate": "Traducir",

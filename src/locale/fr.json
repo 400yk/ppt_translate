@@ -19,6 +19,8 @@
     "translation_failed": "Une erreur s'est produite lors de la traduction.",
     "download_failed": "Échec du téléchargement du fichier traduit.",
     "invalid_file_type": "Veuillez télécharger un fichier PowerPoint (seul le format .pptx est pris en charge).",
+    "file_size_limit": "Limite de taille de fichier",
+    "file_size_exceeded": "La taille du fichier dépasse la limite de {size}MB pour les utilisateurs gratuits. Veuillez mettre à niveau pour télécharger des fichiers plus volumineux.",
     "unknown_error": "Une erreur inconnue s'est produite.",
     "required_fields": "Champs obligatoires",
     "fill_all_fields": "Veuillez remplir tous les champs obligatoires.",
@@ -30,9 +32,12 @@
     "verification_error": "Erreur lors de la vérification du code.",
     "free_trial_used": "Vous avez utilisé votre essai gratuit. Veuillez vous inscrire pour continuer.",
     "invitation_required": "Veuillez entrer un code d'invitation ou choisir de vous inscrire sans code.",
-    "registration_failed": "Échec de l'inscription"
+    "registration_failed": "Échec de l'inscription",
+    "authentication_error": "Erreur d'authentification",
+    "session_expired": "Votre session a expiré. Veuillez vous reconnecter."
   },
   "success": {
+    "title": "Succès",
     "translation_complete": "Fichier traduit avec succès !",
     "registration_complete": "Inscription réussie ! Vous avez reçu un crédit de traduction gratuit."
   },

@@ -82,6 +82,8 @@ export default function TranslationPage() {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
   const [fileSizeExceeded, setFileSizeExceeded] = useState(false);
   const [maxFileSizeMB, setMaxFileSizeMB] = useState(50); // Default to 50MB, will be updated from backend
+  const [membershipStatus, setMembershipStatus] = useState<any>(null);
+  const [isLoadingMembership, setIsLoadingMembership] = useState(false);
   
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
@@ -200,6 +202,36 @@ export default function TranslationPage() {
     }
   }, [isClient, isAuthenticated, isGuestUser]);
 
+  // Fetch membership status after authentication
+  useEffect(() => {
+    const fetchMembershipStatus = async () => {
+      if (!isAuthenticated) return;
+      setIsLoadingMembership(true);
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) return;
+        const response = await fetch('http://localhost:5000/api/membership/status', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setMembershipStatus(data);
+        } else {
+          setMembershipStatus(null);
+        }
+      } catch (e) {
+        setMembershipStatus(null);
+      } finally {
+        setIsLoadingMembership(false);
+      }
+    };
+    if (isAuthenticated) {
+      fetchMembershipStatus();
+    }
+  }, [isAuthenticated]);
+
   // Helper function to get translated language name
   const getLanguageName = (code: LanguageCode): string => {
     // Using type assertion to help TypeScript understand this is a valid key
@@ -244,15 +276,13 @@ export default function TranslationPage() {
   const validateFileSize = (fileSize: number): boolean => {
     // Use max file size from backend config
     const MAX_SIZE_BYTES = maxFileSizeMB * 1024 * 1024;
-    
-    // Only apply size limit for non-paid users
-    // For now, assume all authenticated users who aren't guests are paid users
-    const isPaidUser = isAuthenticated && !isGuestUser;
-    
+    // A user is considered paid only if membershipStatus.user_type === 'paid'
+    const isPaidUser = membershipStatus?.user_type === 'paid';
     if (!isPaidUser && fileSize > MAX_SIZE_BYTES) {
+      setFileSizeExceeded(true);
       return false;
     }
-    
+    setFileSizeExceeded(false);
     return true;
   };
 
@@ -274,10 +304,10 @@ export default function TranslationPage() {
       
       // Check file size limit for non-paid users
       if (!validateFileSize(selectedFile.size)) {
-        setFileSizeExceeded(true);
+        // validateFileSize now handles setting fileSizeExceeded
         toast({
-          title: 'Warning',
-          description: `File size exceeds ${maxFileSizeMB}MB limit for free users. Please upgrade to upload larger files.`,
+          title: t('errors.file_size_limit'),
+          description: t('errors.file_size_exceeded', { size: maxFileSizeMB }),
           variant: 'destructive',
         });
         return;
@@ -410,8 +440,8 @@ export default function TranslationPage() {
         if (response.status === 401) {
           // Authentication error
           toast({
-            title: 'Authentication Error',
-            description: 'Your session has expired. Please login again.',
+            title: t('errors.authentication_error'),
+            description: t('errors.session_expired'),
             variant: 'destructive',
           });
           
@@ -443,7 +473,7 @@ export default function TranslationPage() {
       
       // Show success message
       toast({
-        title: 'Success',
+        title: t('success.title'),
         description: t('success.translation_complete'),
       });
     } catch (error) {
@@ -548,17 +578,16 @@ export default function TranslationPage() {
       
       // Check file size limit for non-paid users
       if (!validateFileSize(droppedFile.size)) {
-        setFileSizeExceeded(true);
+        // validateFileSize now handles setting fileSizeExceeded
         toast({
-          title: 'Warning',
-          description: `File size exceeds ${maxFileSizeMB}MB limit for free users. Please upgrade to upload larger files.`,
+          title: t('errors.file_size_limit'),
+          description: t('errors.file_size_exceeded', { size: maxFileSizeMB }),
           variant: 'destructive',
         });
         return;
       }
       
       setInvalidFileType(false);
-      setFileSizeExceeded(false);
       setFile(droppedFile);
       setTranslatedFileUrl(null);
       setProgress(0);
@@ -733,15 +762,15 @@ export default function TranslationPage() {
           {isClient && fileSizeExceeded && (
             <Alert className="border-amber-500 bg-amber-50 w-full mb-8">
               <Icons.info className="h-4 w-4 text-amber-500" />
-              <AlertTitle className="text-amber-700">File Size Limit</AlertTitle>
+              <AlertTitle className="text-amber-700">{t('errors.file_size_limit')}</AlertTitle>
               <AlertDescription className="text-amber-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <span>File size exceeds {maxFileSizeMB}MB limit for free users. Please upgrade to upload larger files.</span>
+                <span>{t('errors.file_size_exceeded', { size: maxFileSizeMB })}</span>
                 <Button 
                   variant="outline" 
                   className="border-amber-500 text-amber-700 hover:bg-amber-200 hover:text-amber-900 shrink-0"
                   onClick={() => setShowPaymentModal(true)}
                 >
-                  {t('buttons.upgrade') || 'Upgrade'}
+                  {t('buttons.upgrade')}
                 </Button>
               </AlertDescription>
             </Alert>

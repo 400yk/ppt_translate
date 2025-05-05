@@ -19,6 +19,8 @@
     "translation_failed": "翻译过程中发生错误。",
     "download_failed": "下载已翻译文件失败。",
     "invalid_file_type": "请上传PowerPoint文件（仅支持pptx）。",
+    "file_size_limit": "文件大小限制",
+    "file_size_exceeded": "文件大小超过免费用户限制的{size}MB。请升级以上传更大的文件。",
     "unknown_error": "发生未知错误。",
     "required_fields": "必填字段",
     "fill_all_fields": "请填写所有必填字段。",
@@ -30,9 +32,12 @@
     "verification_error": "验证邀请码时出错。",
     "free_trial_used": "您已使用过免费试用，请注册账号继续使用。",
     "invitation_required": "请输入邀请码或选择不使用邀请码注册。",
-    "registration_failed": "注册失败"
+    "registration_failed": "注册失败",
+    "authentication_error": "认证错误",
+    "session_expired": "您的会话已过期，请重新登录。"
   },
   "success": {
+    "title": "成功",
     "translation_complete": "文件已成功翻译！",
     "registration_complete": "注册成功！您已获得一次免费翻译机会。"
   },

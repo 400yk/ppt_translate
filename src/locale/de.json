@@ -17,8 +17,10 @@
     "no_file": "Bitte laden Sie zuerst eine Datei hoch.",
     "same_language": "Quell- und Zielsprache können nicht identisch sein.",
     "translation_failed": "Bei der Übersetzung ist ein Fehler aufgetreten.",
-    "download_failed": "Fehler beim Herunterladen der übersetzten Datei.",
+    "download_failed": "Das Herunterladen der übersetzten Datei ist fehlgeschlagen.",
     "invalid_file_type": "Bitte laden Sie eine PowerPoint-Datei hoch (nur .pptx-Format wird unterstützt).",
+    "file_size_limit": "Dateigrößenbeschränkung",
+    "file_size_exceeded": "Die Dateigröße überschreitet das Limit von {size}MB für kostenlose Benutzer. Bitte upgraden Sie, um größere Dateien hochzuladen.",
     "unknown_error": "Ein unbekannter Fehler ist aufgetreten.",
     "required_fields": "Erforderliche Felder",
     "fill_all_fields": "Bitte füllen Sie alle erforderlichen Felder aus.",
@@ -30,9 +32,12 @@
     "verification_error": "Fehler bei der Überprüfung des Codes.",
     "free_trial_used": "Sie haben Ihre kostenlose Testversion verwendet. Bitte registrieren Sie sich, um fortzufahren.",
     "invitation_required": "Bitte geben Sie einen Einladungscode ein oder wählen Sie die Registrierung ohne Code.",
-    "registration_failed": "Registrierung fehlgeschlagen"
+    "registration_failed": "Registrierung fehlgeschlagen",
+    "authentication_error": "Authentifizierungsfehler",
+    "session_expired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
   },
   "success": {
+    "title": "Erfolg",
     "translation_complete": "Datei erfolgreich übersetzt!",
     "registration_complete": "Registrierung erfolgreich! Sie haben ein kostenloses Übersetzungsguthaben erhalten."
   },

@@ -19,6 +19,8 @@
     "translation_failed": "An error occurred during translation.",
     "download_failed": "Failed to download the translated file.",
     "invalid_file_type": "Please upload a PowerPoint file (only .pptx format is supported).",
+    "file_size_limit": "File Size Limit",
+    "file_size_exceeded": "File size exceeds {size}MB limit for free users. Please upgrade to upload larger files.",
     "unknown_error": "An unknown error occurred.",
     "required_fields": "Required Fields",
     "fill_all_fields": "Please fill out all required fields.",
@@ -30,9 +32,12 @@
     "verification_error": "Error verifying code.",
     "free_trial_used": "You have used your free trial. Please register to continue.",
     "invitation_required": "Please enter an invitation code or choose to register without one.",
-    "registration_failed": "Registration Failed"
+    "registration_failed": "Registration Failed",
+    "authentication_error": "Authentication Error",
+    "session_expired": "Your session has expired. Please login again."
   },
   "success": {
+    "title": "Success",
     "translation_complete": "File translated successfully!",
     "registration_complete": "Registration successful! You have received a free translation credit."
   },
