@@ -5,7 +5,8 @@ API endpoints for handling payment processing with Stripe.
 import os
 import json
 import stripe
-from flask import Blueprint, jsonify, request, redirect, url_for
+import logging
+from flask import Blueprint, jsonify, request, redirect, url_for, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import User, db
 from user_manager import get_membership_status
@@ -13,8 +14,14 @@ from config import PRICING, CURRENCY_RATES, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SE
 
 payment_bp = Blueprint('payment', __name__)
 
+# Set up logging
+logger = logging.getLogger(__name__)
+
+# Check if Stripe API key is available
+if not STRIPE_SECRET_KEY:
+    logger.error("STRIPE_SECRET_KEY is not set. Payment features will not work correctly.")
+
 # Initialize Stripe with your secret key
-# Replace with your actual secret key, preferably loaded from environment variable
 stripe.api_key = STRIPE_SECRET_KEY
 
 # Webhook signing secret for verifying webhook events

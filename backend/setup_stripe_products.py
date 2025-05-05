@@ -13,6 +13,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Import the config with currency rates and Stripe settings
 from backend.config import PRICING, CURRENCY_RATES, STRIPE_SECRET_KEY
 
+# Make sure we have the Stripe API key before initializing
+if not STRIPE_SECRET_KEY:
+    print("ERROR: STRIPE_SECRET_KEY is not set in environment variables.")
+    print("Please set this in your .env or .env.local file or as an environment variable.")
+    sys.exit(1)
+
 # Initialize Stripe with secret key from config
 stripe.api_key = STRIPE_SECRET_KEY
 
@@ -134,7 +140,4 @@ def setup_products():
     print("Stripe products and prices setup complete!")
 
 if __name__ == "__main__":
-    if not STRIPE_SECRET_KEY:
-        print("Error: STRIPE_SECRET_KEY is not set in environment variables or is empty.")
-        sys.exit(1)
     setup_products() 

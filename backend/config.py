@@ -53,8 +53,8 @@ GUEST_FREE_USER_MAX_FILE_SIZE = 50  # 50MB
 
 # Stripe payment settings
 FLASK_API_URL = os.getenv('FLASK_API_URL', 'http://localhost:9002')
-***REMOVED***
-***REMOVED***
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')  # No default value to avoid committed secrets
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')  # No default value
 STRIPE_SUCCESS_URL = os.getenv('STRIPE_SUCCESS_URL', f'{FLASK_API_URL}/payment/success')
 STRIPE_CANCEL_URL = os.getenv('STRIPE_CANCEL_URL', f'{FLASK_API_URL}/payment/cancel')
 
