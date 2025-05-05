@@ -5,7 +5,7 @@ from pptx import Presentation
 from pptx.util import Pt
 from pptx.enum.shapes import PP_PLACEHOLDER
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User
+from models import User, db
 from api_client import gemini_batch_translate
 from pptx_utils import measure_text_bbox, fit_font_size_to_bbox, fit_font_size_for_title
 from config import DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, DEFAULT_TITLE_FONT_SIZE
@@ -35,6 +35,21 @@ def register_routes(app):
             # Translate the PPTX file and get the output path
             output_path = translate_pptx(file.stream, src_lang, dest_lang)
             
+            # Update usage count for the user's invitation code
+            if user.invitation_code:
+                if user.invitation_code.is_valid():
+                    user.invitation_code.increment_usage()
+                    print(f"Updated usage count for invitation code: {user.invitation_code.code}")
+                    print(f"Current usage: {user.invitation_code.uses}/{user.invitation_code.max_uses}")
+                else:
+                    return jsonify({'error': 'Your invitation code has reached its usage limit or has been deactivated'}), 403
+            else:
+                print("User does not have an associated invitation code")
+                return jsonify({'error': 'No valid invitation code associated with this account'}), 403
+            
+            # Record the translation in the database
+            user.record_translation(file.filename, src_lang, dest_lang)
+            
             # Return the translated file
             response = make_response(send_file(output_path, as_attachment=True, 
                                  download_name=f"translated_{file.filename}"))
@@ -49,6 +64,33 @@ def register_routes(app):
             import traceback
             traceback.print_exc()
             return jsonify({'error': str(e)}), 500
+            
+    @app.route('/api/translations/history', methods=['GET'])
+    @jwt_required()
+    def get_translation_history():
+        username = get_jwt_identity()
+        user = User.query.filter_by(username=username).first()
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        # Get the user's translation history
+        translations = user.translations.order_by(db.desc('created_at')).all()
+        
+        history = []
+        for translation in translations:
+            history.append({
+                'id': translation.id,
+                'filename': translation.filename,
+                'date': translation.created_at.isoformat(),
+                'source_language': translation.source_language,
+                'target_language': translation.target_language
+            })
+            
+        return jsonify({
+            'count': len(history),
+            'translations': history
+        }), 200
 
 def translate_pptx(input_stream, src_lang, dest_lang):
     prs = Presentation(input_stream)
