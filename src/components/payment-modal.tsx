@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, TranslationKey } from '@/lib/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
@@ -19,6 +19,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 // Replace with your actual publishable key
 const stripePromise = loadStripe('pk_test_51RLN2ZQeLScrDDE3hH1BvAl9v7OIKFjInCkFsNxiqVcdcYTKTzweyQXusxQOs3jSXuJtzyIg1iLqoBpHW0QiZ8f4004PWvZRj8');
 
+// Helper function to safely cast keys
+const asTranslationKey = (key: string): TranslationKey => key as TranslationKey;
+
 // API endpoint
 const API_URL = 'http://localhost:5000';
 
@@ -29,7 +32,7 @@ const pricingBenefitsKeys = [
   "pricing.features.monthly_limit", 
   "pricing.features.file_size",
   "pricing.features.support"
-];
+] as const;
 
 // Currency options with symbols
 const currencyOptions = {
@@ -355,12 +358,12 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
   // Get benefits using translation system
   const benefits = pricingBenefitsKeys.map(key => {
     // Use the paid plan features from translations
-    if (key === "pricing.features.uploads") return t('pricing.paid_plan') + ": " + t(key);
-    if (key === "pricing.features.char_per_file") return t('pricing.paid_plan') + ": " + t(key);
-    if (key === "pricing.features.monthly_limit") return "5,000,000 " + t(key);
-    if (key === "pricing.features.file_size") return t('pricing.paid_plan') + ": " + t(key);
-    if (key === "pricing.features.support") return t('pricing.paid_plan') + ": " + t(key);
-    return t(key);
+    if (key === "pricing.features.uploads") return t('pricing.paid_plan') + ": " + t(asTranslationKey(key));
+    if (key === "pricing.features.char_per_file") return t('pricing.paid_plan') + ": " + t(asTranslationKey(key));
+    if (key === "pricing.features.monthly_limit") return "5,000,000 " + t(asTranslationKey(key));
+    if (key === "pricing.features.file_size") return t('pricing.paid_plan') + ": " + t(asTranslationKey(key));
+    if (key === "pricing.features.support") return t('pricing.paid_plan') + ": " + t(asTranslationKey(key));
+    return t(asTranslationKey(key));
   });
 
   // Initialize selected currency based on locale

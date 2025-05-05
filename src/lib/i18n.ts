@@ -205,7 +205,12 @@ export type TranslationKey =
   | 'payment.benefits'
   | 'payment.cancel_description'
   | 'payment.success_description'
-  | 'payment.currency';
+  | 'payment.currency'
+  | 'pricing.features.uploads'
+  | 'pricing.features.char_per_file'
+  | 'pricing.features.monthly_limit'
+  | 'pricing.features.file_size'
+  | 'pricing.features.support';
 
 // Define available locales map
 export const locales = {
