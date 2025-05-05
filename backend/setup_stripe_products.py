@@ -6,35 +6,15 @@ Run this script to create the necessary Stripe products and prices for multiple 
 import os
 import sys
 import stripe
-from dotenv import load_dotenv
 
 # Add the parent directory to the path so we can import the models
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import the config with currency rates
-from backend.config import PRICING, CURRENCY_RATES
+# Import the config with currency rates and Stripe settings
+from backend.config import PRICING, CURRENCY_RATES, STRIPE_SECRET_KEY
 
-# Load environment variables
-current_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = os.path.dirname(current_dir)
-
-# Try loading .env from different possible locations
-env_paths = [
-    os.path.join(root_dir, '.env'),  # root project directory
-    os.path.join(current_dir, '.env'),  # backend directory
-    '.env'  # current working directory
-]
-
-for env_path in env_paths:
-    if os.path.exists(env_path):
-        print(f"Loading environment from: {env_path}")
-        load_dotenv(env_path)
-        break
-else:
-    print("Warning: Could not find .env file in any of the expected locations")
-
-# Initialize Stripe with your secret key
-***REMOVED***
+# Initialize Stripe with secret key from config
+stripe.api_key = STRIPE_SECRET_KEY
 
 # Function to calculate price in different currencies
 def calculate_price(base_price_usd, currency):
@@ -154,4 +134,7 @@ def setup_products():
     print("Stripe products and prices setup complete!")
 
 if __name__ == "__main__":
+    if not STRIPE_SECRET_KEY:
+        print("Error: STRIPE_SECRET_KEY is not set in environment variables or is empty.")
+        sys.exit(1)
     setup_products() 
