@@ -2,7 +2,7 @@ import os
 import requests
 import json
 import ast  # For safe eval fallback
-from config import GEMINI_API_URL
+from config import GEMINI_API_URL, GEMINI_API_BATCH_SIZE
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
@@ -73,3 +73,36 @@ def gemini_batch_translate(texts, src_lang, dest_lang):
     except Exception as e:
         print(f"Gemini translation error: {e}")
         return texts  # fallback to original 
+
+def gemini_batch_translate_with_size(texts, src_lang, dest_lang, batch_size=GEMINI_API_BATCH_SIZE):
+    """
+    Translate texts in smaller batches to handle very long files.
+    
+    Args:
+        texts: List of texts to translate
+        src_lang: Source language
+        dest_lang: Target language
+        batch_size: Maximum number of texts to process in each batch, defaults to GEMINI_API_BATCH_SIZE
+        
+    Returns:
+        List of translated texts in the same order as input
+    """
+    all_translated = []
+    
+    # Process texts in batches
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i:i + batch_size]
+        translated_batch = gemini_batch_translate(batch, src_lang, dest_lang)
+        
+        # If translation failed, use original texts
+        if translated_batch == batch:
+            print(f"Warning: Batch {i//batch_size + 1} translation failed, using original texts")
+        
+        all_translated.extend(translated_batch)
+        
+        # Add a small delay between batches to avoid rate limiting
+        if i + batch_size < len(texts):
+            import time
+            time.sleep(1)
+    
+    return all_translated 

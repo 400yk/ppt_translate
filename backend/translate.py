@@ -6,7 +6,7 @@ from pptx.util import Pt
 from pptx.enum.shapes import PP_PLACEHOLDER
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import User, db, TranslationRecord
-from api_client import gemini_batch_translate
+from api_client import gemini_batch_translate_with_size
 from pptx_utils import measure_text_bbox, fit_font_size_to_bbox, fit_font_size_for_title
 from config import (
     DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, DEFAULT_TITLE_FONT_SIZE,
@@ -219,9 +219,10 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                             table_cells.append(cell)
                             table_texts.append(cell.text)
 
-    # Batch translate all text content together
+    # Batch translate all text content together using the new batched approach
     all_texts = texts + table_texts
-    all_translated_texts = gemini_batch_translate(all_texts, src_lang, dest_lang)
+    print(f"Total texts to translate: {len(all_texts)}")
+    all_translated_texts = gemini_batch_translate_with_size(all_texts, src_lang, dest_lang, batch_size=200)
     
     # Split the translated texts back into shape texts and table texts
     translated_texts = all_translated_texts[:len(texts)]

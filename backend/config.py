@@ -22,6 +22,7 @@ DEFAULT_TITLE_FONT_SIZE = 24
 
 # API settings
 GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+GEMINI_API_BATCH_SIZE = 200
 
 # Font settings for text measurement
 MIN_FONT_SIZE = 8 

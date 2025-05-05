@@ -6,3 +6,4 @@
 6. For text color, problem still exists where translated text doesn't match original text's color
 7. PPT files are not supported yet.
 8. For very long pptx file, the return Gemini JSON string maybe too long, cause parsing to fail
+9. Count of total characters used is not implemented yet.
