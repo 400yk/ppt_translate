@@ -9,29 +9,9 @@ import { useAuth } from '@/lib/auth-context';
 import { DynamicHead } from '@/components/dynamic-head';
 import LogoImage from '@/assets/Pure_logo.png';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useTranslation, LocaleCode, LOCALE_CHANGE_EVENT } from '@/lib/i18n';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-// Define available languages (codes only)
-const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
-
-// Helper to display language names in their native language
-const nativeLanguageNames = {
-  zh: "中文",
-  en: "English",
-  es: "Español",
-  fr: "Français",
-  de: "Deutsch",
-  ja: "日本語",
-  ko: "한국어",
-  ru: "Русский"
-};
+import { LanguageSelector } from '@/components/language-selector';
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState('login');
@@ -60,6 +40,13 @@ export default function AuthPage() {
     };
   }, []);
 
+  // Set HTML lang attribute when locale changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      document.documentElement.lang = locale;
+    }
+  }, [locale]); // Update when locale changes
+
   // Handle language change
   const handleLanguageChange = (value: string) => {
     setLocale(value as LocaleCode);
@@ -67,10 +54,10 @@ export default function AuthPage() {
     setForceRender(prev => prev + 1);
   };
 
-  // Redirect to home if already authenticated
+  // Redirect to translate page if already authenticated
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      router.push('/');
+      router.push('/translate');
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -90,28 +77,20 @@ export default function AuthPage() {
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-50 dark:bg-gray-900">
         {/* Language selector - positioned in the top right corner */}
         <div className="absolute top-4 right-4">
-          <Select value={locale} onValueChange={handleLanguageChange}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder={t(`languages.${locale}`)} />
-            </SelectTrigger>
-            <SelectContent>
-              {languageCodes.map((code) => (
-                <SelectItem key={code} value={code}>
-                  {nativeLanguageNames[code]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <LanguageSelector width="w-[100px]" onValueChange={handleLanguageChange} />
         </div>
         
         <div className="mb-8">
-          <Image
-            src={LogoImage}
-            alt="Logo"
-            width={120}
-            height={120}
-            className="mx-auto"
-          />
+          <Link href="/" className="flex flex-col items-center hover:opacity-80 transition-opacity">
+            <Image
+              src={LogoImage}
+              alt={t('title')}
+              width={120}
+              height={120}
+              className="mx-auto"
+            />
+            <span className="mt-2 text-sm text-gray-500">{t('auth.back_to_home')}</span>
+          </Link>
         </div>
         
         <Tabs

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation, LOCALE_CHANGE_EVENT } from '@/lib/i18n';
+import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
   const [username, setUsername] = useState('');
@@ -15,6 +16,7 @@ export default function LoginForm() {
   const { login } = useAuth();
   const { toast } = useToast();
   const { t, locale } = useTranslation();
+  const router = useRouter();
   
   // Force component re-render on locale change
   const [forceRender, setForceRender] = useState(0);
@@ -51,6 +53,8 @@ export default function LoginForm() {
         title: t('auth.login_success'),
         description: t('auth.welcome_back'),
       });
+      // Redirect to translate page after successful login
+      router.push('/translate');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : t('errors.unknown_error');
       toast({

@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { useRouter as useNavigationRouter } from 'next/navigation';
 
 // Check for browser environment
 const isBrowser = typeof window !== 'undefined';
@@ -18,7 +19,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string, invitationCode: string) => Promise<void>;
-  logout: () => void;
+  logout: (navigateCallback?: () => void) => void;
   verifyInvitationCode: (code: string) => Promise<{
     valid: boolean;
     remaining?: number;
@@ -45,6 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // We can't use the router hook directly here (only in client components)
+  // So we'll update the logout function to take an optional callback
 
   // Initialize auth state from localStorage on mount
   useEffect(() => {
@@ -139,7 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Logout function
-  const logout = () => {
+  const logout = (navigateCallback?: () => void) => {
     setUser(null);
     setToken(null);
     
@@ -147,6 +151,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isBrowser) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
+      
+      // If a navigation callback is provided, use it
+      if (navigateCallback) {
+        navigateCallback();
+      } 
+      // Otherwise, do a default redirect to home page
+      else if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     }
   };
 

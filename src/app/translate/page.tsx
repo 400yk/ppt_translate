@@ -13,12 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {useTranslation, LocaleCode} from '@/lib/i18n';
+import {useTranslation, LocaleCode, LOCALE_CHANGE_EVENT} from '@/lib/i18n';
 import LogoImage from '@/assets/Pure_logo.png';
 import { DynamicHead } from '@/components/dynamic-head';
 import styles from '../styles/home.module.css';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
+import { LanguageSelector } from '@/components/language-selector';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,6 +66,7 @@ export default function TranslationPage() {
   const router = useRouter();
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const [isClient, setIsClient] = useState(false);
+  const [forceRender, setForceRender] = useState(0);
   
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
@@ -76,7 +78,30 @@ export default function TranslationPage() {
     if (isBrowser) {
       document.documentElement.lang = locale;
     }
-  }, []); // Empty dependency array ensures it only runs once on mount
+  }, [locale]); // Update when locale changes
+  
+  // Force component re-render on locale change
+  useEffect(() => {
+    const handleLocaleChange = () => {
+      // Increment to force a re-render
+      setForceRender(prev => prev + 1);
+    };
+    
+    window.addEventListener(LOCALE_CHANGE_EVENT, handleLocaleChange);
+    return () => {
+      window.removeEventListener(LOCALE_CHANGE_EVENT, handleLocaleChange);
+    };
+  }, []);
+
+  // Custom logout function to redirect to landing page
+  const handleLogout = () => {
+    logout(() => {
+      // Force a direct navigation to the home page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
+    });
+  };
 
   // Check authentication and redirect if necessary
   useEffect(() => {
@@ -254,9 +279,8 @@ export default function TranslationPage() {
             variant: 'destructive',
           });
           
-          // Redirect to login page
-          logout();
-          router.push('/auth');
+          // Redirect to home page on logout
+          handleLogout();
           return;
         }
         
@@ -412,12 +436,12 @@ export default function TranslationPage() {
             <div className="flex items-center">
               <Image
                 src={LogoImage}
-                alt="Logo" 
+                alt={t('title')} 
                 width={40}
                 height={40}
                 className="mr-2"
               />
-              <h1 className="text-2xl font-bold">Translide</h1>
+              <h1 className="text-2xl font-bold">{t('title')}</h1>
             </div>
           </Link>
         </div>
@@ -425,18 +449,7 @@ export default function TranslationPage() {
         {isClient && (
           <div className="flex items-center gap-4">
             {/* Language selector */}
-            <Select value={locale} onValueChange={(value) => setLocale(value as LocaleCode)}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder={t(`languages.${locale}`)} />
-              </SelectTrigger>
-              <SelectContent>
-                {languageCodes.map((code) => (
-                  <SelectItem key={code} value={code}>
-                    {nativeLanguageNames[code]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <LanguageSelector width="w-[100px]" />
             
             {/* User dropdown */}
             <DropdownMenu>
@@ -453,7 +466,7 @@ export default function TranslationPage() {
                   <Icons.pricing className="mr-2 h-4 w-4" />
                   {t('pricing.title')}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={logout}>
+                <DropdownMenuItem onClick={handleLogout}>
                   <Icons.logout className="mr-2 h-4 w-4" />
                   {t('auth.logout')}
                 </DropdownMenuItem>

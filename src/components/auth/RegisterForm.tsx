@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation, LOCALE_CHANGE_EVENT } from '@/lib/i18n';
 import { Icons } from '@/components/icons';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterForm() {
   const [email, setEmail] = useState('');
@@ -22,6 +23,7 @@ export default function RegisterForm() {
   const { register, verifyInvitationCode } = useAuth();
   const { toast } = useToast();
   const { t, locale } = useTranslation();
+  const router = useRouter();
 
   // Force component re-render on locale change
   useEffect(() => {
@@ -105,6 +107,8 @@ export default function RegisterForm() {
         title: t('auth.login_success'),
         description: t('auth.welcome_back'),
       });
+      // Redirect to translate page after successful registration
+      router.push('/translate');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : t('errors.unknown_error');
       toast({

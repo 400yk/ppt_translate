@@ -65,7 +65,8 @@
     "invitation_code": "Invitation Code",
     "invitation_code_placeholder": "Enter your invitation code",
     "valid_code": "Valid code. {0} uses remaining.",
-    "invalid_code": "Invalid invitation code."
+    "invalid_code": "Invalid invitation code.",
+    "back_to_home": "Back to Home"
   },
   "languages": {
     "zh": "Chinese",
@@ -95,5 +96,24 @@
       "file_size": "Max File Size",
       "support": "Support"
     }
+  },
+  "nav": {
+    "translate_now": "Translate Now"
+  },
+  "landing": {
+    "translate": "Translate",
+    "powerpoint": "PowerPoint",
+    "with_translide": "with Translide AI",
+    "subtitle": "One-click translation for your PowerPoint in any language.",
+    "get_started": "Get Started For Free",
+    "simplest_way": "The simplest way to translate your PowerPoint",
+    "texts": "Texts",
+    "texts_desc": "Converts text into multiple languages while preserving textbox layout.",
+    "tables": "Tables",
+    "tables_desc": "Extract and translate text from tables while maintaining table layout.",
+    "styles": "Styles",
+    "styles_desc": "Keep the style of your PowerPoint slides same as original.",
+    "view_pricing": "View Pricing Plans",
+    "copyright": "Translide. All rights reserved."
   }
 } 
