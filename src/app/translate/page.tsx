@@ -752,7 +752,7 @@ export default function TranslationPage() {
                 {!file && (
                   <Button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full" 
+                    className="w-full bg-[#0C8599] text-white hover:bg-[#0A6D80] transition-colors" 
                     variant="outline"
                   >
                     {t('buttons.select_file')}

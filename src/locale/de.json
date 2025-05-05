@@ -10,15 +10,77 @@
   "translating": "Übersetzung läuft...",
   "progress_label": "Übersetzungsfortschritt:",
   "no_file_selected": "",
+  "common": {
+    "loading": "Wird geladen..."
+  },
   "errors": {
     "no_file": "Bitte laden Sie zuerst eine Datei hoch.",
     "same_language": "Quell- und Zielsprache dürfen nicht identisch sein.",
     "translation_failed": "Bei der Übersetzung ist ein Fehler aufgetreten.",
     "download_failed": "Fehler beim Herunterladen der übersetzten Datei.",
-    "invalid_file_type": "Bitte laden Sie eine PowerPoint-Datei (.ppt oder .pptx) hoch."
+    "invalid_file_type": "Bitte laden Sie eine PowerPoint-Datei (.ppt oder .pptx) hoch.",
+    "unknown_error": "Ein unbekannter Fehler ist aufgetreten.",
+    "required_fields": "Erforderliche Felder",
+    "fill_all_fields": "Bitte füllen Sie alle erforderlichen Felder aus.",
+    "login_failed": "Anmeldung fehlgeschlagen",
+    "password_mismatch": "Passwort stimmt nicht überein",
+    "passwords_dont_match": "Passwörter stimmen nicht überein.",
+    "invalid_invitation": "Ungültiger Einladungscode",
+    "enter_valid_code": "Bitte geben Sie einen gültigen Einladungscode ein.",
+    "verification_error": "Fehler bei der Überprüfung des Codes.",
+    "free_trial_used": "Sie haben Ihre kostenlose Testversion verwendet. Bitte registrieren Sie sich, um fortzufahren.",
+    "invitation_required": "Bitte geben Sie einen Einladungscode ein oder wählen Sie die Registrierung ohne Code.",
+    "registration_failed": "Registrierung fehlgeschlagen"
   },
   "success": {
-    "translation_complete": "Datei erfolgreich übersetzt!"
+    "translation_complete": "Datei erfolgreich übersetzt!",
+    "registration_complete": "Registrierung erfolgreich! Sie haben ein kostenloses Übersetzungsguthaben erhalten."
+  },
+  "buttons": {
+    "translate": "Übersetzen",
+    "download": "Herunterladen",
+    "translating": "Übersetzung läuft...",
+    "select_file": "Datei auswählen",
+    "upgrade": "Jetzt upgraden"
+  },
+  "upload": {
+    "title": "Ihre Präsentation hochladen",
+    "description": "Wählen Sie Ihre PowerPoint-Datei aus oder ziehen Sie sie per Drag & Drop (.ppt oder .pptx)",
+    "release": "Loslassen zum Hochladen"
+  },
+  "footer": {
+    "description": "Übersetzen Sie Ihre PowerPoint-Folien unter Beibehaltung aller Formatierungen und Layouts."
+  },
+  "auth": {
+    "login": "Anmelden",
+    "login_subtitle": "Melden Sie sich an, um fortzufahren",
+    "register": "Registrieren",
+    "register_login": "Registrieren / Anmelden",
+    "username": "Benutzername",
+    "username_placeholder": "Geben Sie Ihren Benutzernamen ein",
+    "email": "E-Mail",
+    "email_placeholder": "Geben Sie Ihre E-Mail-Adresse ein",
+    "password": "Passwort",
+    "password_placeholder": "Geben Sie Ihr Passwort ein",
+    "login_success": "Anmeldung erfolgreich",
+    "welcome_back": "Willkommen zurück!",
+    "logout": "Abmelden",
+    "no_account": "Noch kein Konto?",
+    "have_account": "Bereits ein Konto?",
+    "confirm_password": "Passwort bestätigen",
+    "confirm_password_placeholder": "Bestätigen Sie Ihr Passwort",
+    "invitation_code": "Einladungscode",
+    "invitation_code_optional": "Einladungscode (Optional)",
+    "invitation_code_placeholder": "Geben Sie Ihren Einladungscode ein",
+    "valid_code": "Gültiger Code. Noch {0} Verwendungen übrig.",
+    "invalid_code": "Ungültiger Einladungscode.",
+    "back_to_home": "Zurück zur Startseite",
+    "cancel": "Abbrechen",
+    "processing": "Verarbeitung...",
+    "use_without_code": "Ohne Einladungscode registrieren",
+    "register_success": "Registrierung erfolgreich",
+    "welcome": "Willkommen bei FolieTrans!",
+    "no_code_warning": "Ohne Einladungscode sind Sie auf eine Übersetzung pro Woche beschränkt."
   },
   "languages": {
     "zh": "Chinesisch",
@@ -29,5 +91,101 @@
     "ja": "Japanisch",
     "ko": "Koreanisch",
     "ru": "Russisch"
+  },
+  "pricing": {
+    "title": "Preise",
+    "subtitle": "Wählen Sie den Plan, der zu Ihren Übersetzungsbedürfnissen passt",
+    "free_plan": "Kostenloser Plan",
+    "paid_plan": "Bezahlter Plan",
+    "free_desc": "Für gelegentliche Übersetzungsbedürfnisse",
+    "paid_desc": "Für regelmäßige Übersetzungsbedürfnisse",
+    "monthly": "Monatlich",
+    "yearly": "Jährlich (15% Rabatt)",
+    "current_plan": "Aktueller Plan",
+    "upgrade": "Jetzt upgraden",
+    "free_user": "Kostenloser Benutzer",
+    "paid_user": "Sie sind bereits ein zahlender Benutzer",
+    "features": {
+      "upload_limit": "Datei-Upload-Limit",
+      "char_per_file": "Max. Zeichen pro Datei",
+      "monthly_limit": "Monatliches Zeichenlimit",
+      "file_size": "Max. Dateigröße",
+      "support": "Support"
+    },
+    "weekly_limit_title": "Wöchentliches Übersetzungslimit erreicht",
+    "weekly_limit_message": "Kostenlose Benutzer können nur 1 Übersetzung(en) pro Woche durchführen. Erwägen Sie ein Upgrade auf eine kostenpflichtige Mitgliedschaft für unbegrenzte Übersetzungen."
+  },
+  "nav": {
+    "translate_now": "Jetzt übersetzen",
+    "home": "Zurück zur Startseite"
+  },
+  "landing": {
+    "translate": "Übersetzen",
+    "powerpoint": "PowerPoint",
+    "with_translide": "mit FolieTrans AI",
+    "subtitle": "Ein-Klick-Übersetzung für Ihre PowerPoint in jeder Sprache.",
+    "get_started": "Kostenlos starten",
+    "simplest_way": "Der einfachste Weg, Ihre PowerPoint zu übersetzen",
+    "texts": "Texte",
+    "texts_desc": "Konvertiert Text in mehrere Sprachen unter Beibehaltung des Textbox-Layouts.",
+    "tables": "Tabellen",
+    "tables_desc": "Extrahiert und übersetzt Text aus Tabellen unter Beibehaltung des Tabellenlayouts.",
+    "styles": "Stile",
+    "styles_desc": "Behalten Sie den Stil Ihrer PowerPoint-Folien wie im Original bei.",
+    "view_pricing": "Preispläne anzeigen",
+    "copyright": "FolieTrans. Alle Rechte vorbehalten."
+  },
+  "guest": {
+    "free_trial": "Kostenlose Testversion",
+    "free_trial_desc": "Sie nutzen die kostenlose Testversion mit einem Übersetzungsguthaben.",
+    "register_prompt": "Bitte registrieren Sie sich, um eine kostenlose Übersetzung pro Woche zu erhalten",
+    "register_title": "Konto registrieren",
+    "register_subtitle": "Registrieren Sie ein kostenloses Konto, um eine kostenlose Übersetzung pro Woche zu erhalten",
+    "trial_used": "Kostenlose Testversion wurde verwendet",
+    "guest_user": "Gastbenutzer",
+    "one_time_note": "Hinweis: Dies ist eine einmalige kostenlose Übersetzung. Sie müssen sich für ein Konto registrieren, um weitere Dokumente zu übersetzen."
+  },
+  "profile": {
+    "title": "Mein Profil",
+    "free_user": "Kostenloser Benutzer",
+    "paid_member": "Zahlender Benutzer",
+    "invitation_member": "Eingeladener Benutzer",
+    "membership_details": "Mitgliedschaftsdetails",
+    "membership_start": "Beginn der Mitgliedschaft",
+    "membership_end": "Ende der Mitgliedschaft",
+    "days_remaining": "Verbleibende Tage",
+    "translations": "Übersetzungen",
+    "invitation_code": "Einladungscode",
+    "translations_limit": "Übersetzungslimit",
+    "translations_used": "Verwendete Übersetzungen",
+    "translations_remaining": "Verbleibende Übersetzungen",
+    "reset_info": "Reset-Informationen",
+    "reset_daily": "Übersetzungen werden zu Beginn jedes Tages zurückgesetzt",
+    "reset_weekly": "Übersetzungen werden zu Beginn jeder Woche zurückgesetzt",
+    "reset_monthly": "Übersetzungen werden zu Beginn jedes Monats zurückgesetzt",
+    "free_user_description": "Sie nutzen derzeit den kostenlosen Plan. Upgrade für unbegrenzte Übersetzungen.",
+    "upgrade_membership": "Mitgliedschaft upgraden",
+    "extend_membership": "Mitgliedschaft verlängern",
+    "manage_billing": "Abrechnung verwalten"
+  },
+  "payment": {
+    "title": "Wählen Sie einen Abonnementplan",
+    "subtitle": "Wählen Sie Ihren bevorzugten Zahlungsplan",
+    "billed_monthly": "Monatliche Abrechnung",
+    "billed_yearly": "Jährliche Abrechnung",
+    "pay_monthly": "¥{price} monatlich zahlen",
+    "pay_yearly": "¥{price} jährlich zahlen",
+    "pay": "Bezahlen",
+    "processing": "Zahlung wird verarbeitet...",
+    "success": "Zahlung erfolgreich",
+    "monthly_success": "Sie haben das monatliche Abonnement erfolgreich abgeschlossen",
+    "yearly_success": "Sie haben das jährliche Abonnement erfolgreich abgeschlossen",
+    "error": "Zahlung fehlgeschlagen",
+    "error_description": "Bei der Verarbeitung Ihrer Zahlung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+    "secure_info": "Alle Zahlungen sind sicher und verschlüsselt",
+    "benefits": "Sie erhalten",
+    "cancel_description": "Die Zahlung wurde abgebrochen. Sie können es erneut versuchen, wenn Sie bereit sind.",
+    "success_description": "Ihre Zahlung war erfolgreich. Sie haben jetzt vollen Zugriff auf alle Funktionen.",
+    "currency": "Währung auswählen"
   }
 } 

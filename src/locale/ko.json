@@ -1,6 +1,6 @@
 {
-  "title": "번역슬라이드",
-  "slogan": "GPT로 한 번에 PPT 번역, 원본 형식 유지",
+  "title": "슬라이드번역",
+  "slogan": "GPT로 PPT를 원본 형식을 유지하며 원클릭으로 번역",
   "file_upload": "pptx 파일 업로드",
   "file_uploaded": "업로드됨",
   "from_label": "원본:",
@@ -10,15 +10,77 @@
   "translating": "번역 중...",
   "progress_label": "번역 진행 상황:",
   "no_file_selected": "",
+  "common": {
+    "loading": "로딩 중..."
+  },
   "errors": {
     "no_file": "먼저 파일을 업로드해 주세요.",
-    "same_language": "원본 언어와 대상 언어는 같을 수 없습니다.",
+    "same_language": "원본 언어와 대상 언어가 동일할 수 없습니다.",
     "translation_failed": "번역 중 오류가 발생했습니다.",
     "download_failed": "번역된 파일 다운로드에 실패했습니다.",
-    "invalid_file_type": "PowerPoint 파일(.ppt 또는 .pptx)을 업로드하세요."
+    "invalid_file_type": "PowerPoint 파일(.ppt 또는 .pptx)을 업로드해 주세요.",
+    "unknown_error": "알 수 없는 오류가 발생했습니다.",
+    "required_fields": "필수 항목",
+    "fill_all_fields": "모든 필수 항목을 작성해 주세요.",
+    "login_failed": "로그인 실패",
+    "password_mismatch": "비밀번호 불일치",
+    "passwords_dont_match": "비밀번호가 일치하지 않습니다.",
+    "invalid_invitation": "유효하지 않은 초대 코드",
+    "enter_valid_code": "유효한 초대 코드를 입력해 주세요.",
+    "verification_error": "코드 확인 중 오류가 발생했습니다.",
+    "free_trial_used": "무료 체험을 사용하셨습니다. 계속하려면 등록해 주세요.",
+    "invitation_required": "초대 코드를 입력하거나 초대 코드 없이 등록을 선택해 주세요.",
+    "registration_failed": "등록 실패"
   },
   "success": {
-    "translation_complete": "파일이 성공적으로 번역되었습니다!"
+    "translation_complete": "파일 번역 완료!",
+    "registration_complete": "등록 성공! 무료 번역 크레딧을 받았습니다."
+  },
+  "buttons": {
+    "translate": "번역",
+    "download": "다운로드",
+    "translating": "번역 중...",
+    "select_file": "파일 선택",
+    "upgrade": "지금 업그레이드"
+  },
+  "upload": {
+    "title": "프레젠테이션 업로드",
+    "description": "PowerPoint 파일(.ppt 또는 .pptx)을 선택하거나 드래그 앤 드롭하세요",
+    "release": "놓아서 업로드"
+  },
+  "footer": {
+    "description": "모든 형식과 레이아웃을 유지하면서 PowerPoint 슬라이드를 번역합니다."
+  },
+  "auth": {
+    "login": "로그인",
+    "login_subtitle": "계속하려면 계정에 로그인하세요",
+    "register": "등록",
+    "register_login": "등록 / 로그인",
+    "username": "사용자 이름",
+    "username_placeholder": "사용자 이름 입력",
+    "email": "이메일",
+    "email_placeholder": "이메일 입력",
+    "password": "비밀번호",
+    "password_placeholder": "비밀번호 입력",
+    "login_success": "로그인 성공",
+    "welcome_back": "환영합니다!",
+    "logout": "로그아웃",
+    "no_account": "계정이 없으신가요?",
+    "have_account": "이미 계정이 있으신가요?",
+    "confirm_password": "비밀번호 확인",
+    "confirm_password_placeholder": "비밀번호 확인",
+    "invitation_code": "초대 코드",
+    "invitation_code_optional": "초대 코드 (선택사항)",
+    "invitation_code_placeholder": "초대 코드 입력",
+    "valid_code": "유효한 코드입니다. {0}회 사용 가능합니다.",
+    "invalid_code": "유효하지 않은 초대 코드입니다.",
+    "back_to_home": "홈으로 돌아가기",
+    "cancel": "취소",
+    "processing": "처리 중...",
+    "use_without_code": "초대 코드 없이 등록",
+    "register_success": "등록 성공",
+    "welcome": "슬라이드번역에 오신 것을 환영합니다!",
+    "no_code_warning": "초대 코드 없이는 주 1회 번역으로 제한됩니다."
   },
   "languages": {
     "zh": "중국어",
@@ -29,5 +91,101 @@
     "ja": "일본어",
     "ko": "한국어",
     "ru": "러시아어"
+  },
+  "pricing": {
+    "title": "가격",
+    "subtitle": "번역 요구 사항에 맞는 플랜을 선택하세요",
+    "free_plan": "무료 플랜",
+    "paid_plan": "유료 플랜",
+    "free_desc": "가끔 번역이 필요한 경우",
+    "paid_desc": "정기적으로 번역이 필요한 경우",
+    "monthly": "월간",
+    "yearly": "연간 (15% 할인)",
+    "current_plan": "현재 플랜",
+    "upgrade": "지금 업그레이드",
+    "free_user": "무료 사용자",
+    "paid_user": "이미 유료 사용자입니다",
+    "features": {
+      "upload_limit": "파일 업로드 제한",
+      "char_per_file": "파일당 최대 문자 수",
+      "monthly_limit": "월간 문자 제한",
+      "file_size": "최대 파일 크기",
+      "support": "지원"
+    },
+    "weekly_limit_title": "주간 번역 한도에 도달했습니다",
+    "weekly_limit_message": "무료 사용자는 주당 1회만 번역할 수 있습니다. 무제한 번역을 위해 유료 멤버십으로 업그레이드를 고려해 보세요."
+  },
+  "nav": {
+    "translate_now": "지금 번역하기",
+    "home": "홈으로 돌아가기"
+  },
+  "landing": {
+    "translate": "번역",
+    "powerpoint": "PowerPoint",
+    "with_translide": "슬라이드번역 AI로",
+    "subtitle": "어떤 언어로든 PowerPoint를 원클릭으로 번역합니다.",
+    "get_started": "무료로 시작하기",
+    "simplest_way": "PowerPoint를 번역하는 가장 간단한 방법",
+    "texts": "텍스트",
+    "texts_desc": "텍스트 상자 레이아웃을 유지하면서 텍스트를 여러 언어로 변환합니다.",
+    "tables": "표",
+    "tables_desc": "표 레이아웃을 유지하면서 표에서 텍스트를 추출하고 번역합니다.",
+    "styles": "스타일",
+    "styles_desc": "PowerPoint 슬라이드의 스타일을 원본과 동일하게 유지합니다.",
+    "view_pricing": "가격 플랜 보기",
+    "copyright": "슬라이드번역. 모든 권리 보유."
+  },
+  "guest": {
+    "free_trial": "무료 체험",
+    "free_trial_desc": "번역 크레딧이 1회 포함된 무료 체험 버전을 사용 중입니다.",
+    "register_prompt": "주 1회 무료 번역을 받으려면 등록해 주세요",
+    "register_title": "계정 등록",
+    "register_subtitle": "주 1회 무료 번역을 받으려면 무료 계정을 등록하세요",
+    "trial_used": "무료 체험을 사용하셨습니다",
+    "guest_user": "게스트 사용자",
+    "one_time_note": "참고: 이것은 일회성 무료 번역입니다. 더 많은 문서를 번역하려면 계정에 등록해야 합니다."
+  },
+  "profile": {
+    "title": "내 프로필",
+    "free_user": "무료 사용자",
+    "paid_member": "유료 멤버",
+    "invitation_member": "초대 사용자",
+    "membership_details": "멤버십 세부 정보",
+    "membership_start": "멤버십 시작일",
+    "membership_end": "멤버십 종료일",
+    "days_remaining": "남은 일수",
+    "translations": "번역",
+    "invitation_code": "초대 코드",
+    "translations_limit": "번역 제한",
+    "translations_used": "사용한 번역 횟수",
+    "translations_remaining": "남은 번역 횟수",
+    "reset_info": "재설정 정보",
+    "reset_daily": "번역 횟수는 매일 시작 시 재설정됩니다",
+    "reset_weekly": "번역 횟수는 매주 시작 시 재설정됩니다",
+    "reset_monthly": "번역 횟수는 매월 시작 시 재설정됩니다",
+    "free_user_description": "현재 무료 플랜을 사용 중입니다. 무제한 번역을 위해 업그레이드하세요.",
+    "upgrade_membership": "멤버십 업그레이드",
+    "extend_membership": "멤버십 연장",
+    "manage_billing": "결제 관리"
+  },
+  "payment": {
+    "title": "구독 플랜 선택",
+    "subtitle": "원하는 결제 플랜을 선택하세요",
+    "billed_monthly": "월간 결제",
+    "billed_yearly": "연간 결제",
+    "pay_monthly": "월 ¥{price} 결제",
+    "pay_yearly": "연 ¥{price} 결제",
+    "pay": "결제",
+    "processing": "결제 처리 중...",
+    "success": "결제 성공",
+    "monthly_success": "월간 플랜에 성공적으로 가입했습니다",
+    "yearly_success": "연간 플랜에 성공적으로 가입했습니다",
+    "error": "결제 실패",
+    "error_description": "결제 처리 중 오류가 발생했습니다. 다시 시도해 주세요.",
+    "secure_info": "모든 결제는 안전하게 암호화됩니다",
+    "benefits": "받게 될 혜택",
+    "cancel_description": "결제가 취소되었습니다. 준비가 되면 다시 시도하세요.",
+    "success_description": "결제가 성공적으로 완료되었습니다. 이제 모든 기능에 완전히 접근할 수 있습니다.",
+    "currency": "통화 선택"
   }
 } 

@@ -1,6 +1,6 @@
 {
-  "title": "TradiaSlide",
-  "slogan": "Traduisez PPT avec GPT en un clic, en préservant le format d'origine",
+  "title": "DiaporamaTraduction",
+  "slogan": "Traduisez PPT avec GPT en un clic, en conservant le format d'origine",
   "file_upload": "Télécharger un fichier pptx",
   "file_uploaded": "Téléchargé",
   "from_label": "De :",
@@ -10,15 +10,77 @@
   "translating": "Traduction en cours...",
   "progress_label": "Progression de la traduction :",
   "no_file_selected": "",
+  "common": {
+    "loading": "Chargement..."
+  },
   "errors": {
     "no_file": "Veuillez d'abord télécharger un fichier.",
     "same_language": "Les langues source et cible ne peuvent pas être identiques.",
-    "translation_failed": "Une erreur s'est produite lors de la traduction.",
+    "translation_failed": "Une erreur s'est produite pendant la traduction.",
     "download_failed": "Échec du téléchargement du fichier traduit.",
-    "invalid_file_type": "Veuillez télécharger un fichier PowerPoint (.ppt ou .pptx)."
+    "invalid_file_type": "Veuillez télécharger un fichier PowerPoint (.ppt ou .pptx).",
+    "unknown_error": "Une erreur inconnue s'est produite.",
+    "required_fields": "Champs obligatoires",
+    "fill_all_fields": "Veuillez remplir tous les champs obligatoires.",
+    "login_failed": "Échec de la connexion",
+    "password_mismatch": "Les mots de passe ne correspondent pas",
+    "passwords_dont_match": "Les mots de passe ne correspondent pas.",
+    "invalid_invitation": "Code d'invitation invalide",
+    "enter_valid_code": "Veuillez entrer un code d'invitation valide.",
+    "verification_error": "Erreur lors de la vérification du code.",
+    "free_trial_used": "Vous avez utilisé votre essai gratuit. Veuillez vous inscrire pour continuer.",
+    "invitation_required": "Veuillez entrer un code d'invitation ou choisir de vous inscrire sans code.",
+    "registration_failed": "Échec de l'inscription"
   },
   "success": {
-    "translation_complete": "Fichier traduit avec succès !"
+    "translation_complete": "Fichier traduit avec succès !",
+    "registration_complete": "Inscription réussie ! Vous avez reçu un crédit de traduction gratuit."
+  },
+  "buttons": {
+    "translate": "Traduire",
+    "download": "Télécharger",
+    "translating": "Traduction en cours...",
+    "select_file": "Sélectionner un fichier",
+    "upgrade": "Mettre à niveau maintenant"
+  },
+  "upload": {
+    "title": "Téléchargez votre présentation",
+    "description": "Sélectionnez ou glissez-déposez votre fichier PowerPoint (.ppt ou .pptx)",
+    "release": "Relâchez pour télécharger"
+  },
+  "footer": {
+    "description": "Traduisez vos diapositives PowerPoint tout en préservant la mise en forme et la mise en page."
+  },
+  "auth": {
+    "login": "Connexion",
+    "login_subtitle": "Connectez-vous à votre compte pour continuer",
+    "register": "S'inscrire",
+    "register_login": "S'inscrire / Se connecter",
+    "username": "Nom d'utilisateur",
+    "username_placeholder": "Entrez votre nom d'utilisateur",
+    "email": "Email",
+    "email_placeholder": "Entrez votre email",
+    "password": "Mot de passe",
+    "password_placeholder": "Entrez votre mot de passe",
+    "login_success": "Connexion réussie",
+    "welcome_back": "Bienvenue !",
+    "logout": "Se déconnecter",
+    "no_account": "Vous n'avez pas de compte ?",
+    "have_account": "Vous avez déjà un compte ?",
+    "confirm_password": "Confirmer le mot de passe",
+    "confirm_password_placeholder": "Confirmez votre mot de passe",
+    "invitation_code": "Code d'invitation",
+    "invitation_code_optional": "Code d'invitation (Optionnel)",
+    "invitation_code_placeholder": "Entrez votre code d'invitation",
+    "valid_code": "Code valide. {0} utilisations restantes.",
+    "invalid_code": "Code d'invitation invalide.",
+    "back_to_home": "Retour à l'accueil",
+    "cancel": "Annuler",
+    "processing": "Traitement en cours...",
+    "use_without_code": "S'inscrire sans code d'invitation",
+    "register_success": "Inscription réussie",
+    "welcome": "Bienvenue sur DiaporamaTraduction !",
+    "no_code_warning": "Sans code d'invitation, vous serez limité à une traduction par semaine."
   },
   "languages": {
     "zh": "Chinois",
@@ -29,5 +91,101 @@
     "ja": "Japonais",
     "ko": "Coréen",
     "ru": "Russe"
+  },
+  "pricing": {
+    "title": "Tarification",
+    "subtitle": "Choisissez le forfait qui correspond à vos besoins de traduction",
+    "free_plan": "Forfait gratuit",
+    "paid_plan": "Forfait payant",
+    "free_desc": "Pour des besoins de traduction occasionnels",
+    "paid_desc": "Pour des besoins de traduction réguliers",
+    "monthly": "Mensuel",
+    "yearly": "Annuel (15% de réduction)",
+    "current_plan": "Forfait actuel",
+    "upgrade": "Mettre à niveau maintenant",
+    "free_user": "Utilisateur gratuit",
+    "paid_user": "Vous êtes déjà un utilisateur payant",
+    "features": {
+      "upload_limit": "Limite de téléchargement de fichiers",
+      "char_per_file": "Caractères maximum par fichier",
+      "monthly_limit": "Limite mensuelle de caractères",
+      "file_size": "Taille maximale de fichier",
+      "support": "Support"
+    },
+    "weekly_limit_title": "Limite hebdomadaire de traduction atteinte",
+    "weekly_limit_message": "Les utilisateurs gratuits ne peuvent effectuer que 1 traduction(s) par semaine. Envisagez de passer à un abonnement payant pour des traductions illimitées."
+  },
+  "nav": {
+    "translate_now": "Traduire maintenant",
+    "home": "Retour à l'accueil"
+  },
+  "landing": {
+    "translate": "Traduisez",
+    "powerpoint": "PowerPoint",
+    "with_translide": "avec DiaporamaTraduction IA",
+    "subtitle": "Traduction en un clic pour votre PowerPoint dans n'importe quelle langue.",
+    "get_started": "Commencer gratuitement",
+    "simplest_way": "La façon la plus simple de traduire votre PowerPoint",
+    "texts": "Textes",
+    "texts_desc": "Convertit le texte en plusieurs langues tout en préservant la mise en page des zones de texte.",
+    "tables": "Tableaux",
+    "tables_desc": "Extrait et traduit le texte des tableaux tout en conservant leur mise en page.",
+    "styles": "Styles",
+    "styles_desc": "Conservez le style de vos diapositives PowerPoint identique à l'original.",
+    "view_pricing": "Voir les forfaits",
+    "copyright": "DiaporamaTraduction. Tous droits réservés."
+  },
+  "guest": {
+    "free_trial": "Essai gratuit",
+    "free_trial_desc": "Vous utilisez la version d'essai gratuite avec un crédit de traduction.",
+    "register_prompt": "Veuillez vous inscrire pour obtenir une traduction gratuite par semaine",
+    "register_title": "Créer un compte",
+    "register_subtitle": "Inscrivez-vous pour obtenir une traduction gratuite par semaine",
+    "trial_used": "L'essai gratuit a été utilisé",
+    "guest_user": "Utilisateur invité",
+    "one_time_note": "Remarque : Il s'agit d'une traduction gratuite unique. Vous devrez vous inscrire pour traduire plus de documents."
+  },
+  "profile": {
+    "title": "Mon profil",
+    "free_user": "Utilisateur gratuit",
+    "paid_member": "Membre payant",
+    "invitation_member": "Utilisateur par invitation",
+    "membership_details": "Détails de l'abonnement",
+    "membership_start": "Début de l'abonnement",
+    "membership_end": "Fin de l'abonnement",
+    "days_remaining": "Jours restants",
+    "translations": "Traductions",
+    "invitation_code": "Code d'invitation",
+    "translations_limit": "Limite de traductions",
+    "translations_used": "Traductions utilisées",
+    "translations_remaining": "Traductions restantes",
+    "reset_info": "Informations de réinitialisation",
+    "reset_daily": "Les traductions sont réinitialisées au début de chaque jour",
+    "reset_weekly": "Les traductions sont réinitialisées au début de chaque semaine",
+    "reset_monthly": "Les traductions sont réinitialisées au début de chaque mois",
+    "free_user_description": "Vous utilisez actuellement le forfait gratuit. Passez à l'abonnement pour obtenir des traductions illimitées.",
+    "upgrade_membership": "Mettre à niveau l'abonnement",
+    "extend_membership": "Prolonger l'abonnement",
+    "manage_billing": "Gérer la facturation"
+  },
+  "payment": {
+    "title": "Choisissez un forfait d'abonnement",
+    "subtitle": "Sélectionnez votre forfait de paiement préféré",
+    "billed_monthly": "Facturation mensuelle",
+    "billed_yearly": "Facturation annuelle",
+    "pay_monthly": "Payer ¥{price} par mois",
+    "pay_yearly": "Payer ¥{price} par an",
+    "pay": "Payer",
+    "processing": "Traitement du paiement...",
+    "success": "Paiement réussi",
+    "monthly_success": "Vous avez souscrit avec succès au forfait mensuel",
+    "yearly_success": "Vous avez souscrit avec succès au forfait annuel",
+    "error": "Échec du paiement",
+    "error_description": "Une erreur s'est produite lors du traitement de votre paiement. Veuillez réessayer.",
+    "secure_info": "Tous les paiements sont sécurisés et cryptés",
+    "benefits": "Vous recevrez",
+    "cancel_description": "Le paiement a été annulé. Vous pouvez réessayer quand vous serez prêt.",
+    "success_description": "Votre paiement a réussi. Vous avez maintenant un accès complet à toutes les fonctionnalités.",
+    "currency": "Sélectionner la devise"
   }
 } 

@@ -22,23 +22,14 @@ const stripePromise = loadStripe('pk_test_51RLN2ZQeLScrDDE3hH1BvAl9v7OIKFjInCkFs
 // API endpoint
 const API_URL = 'http://localhost:5000';
 
-// Pricing data with benefits based on locale
-const pricingBenefits = {
-  en: [
-    "Unlimited uploads",
-    "Unlimited characters per file",
-    "5,000,000 characters monthly limit",
-    "Unlimited file size",
-    "Priority email support"
-  ],
-  zh: [
-    "无限上传",
-    "每个文件无字符限制",
-    "5,000,000个字符每月限制",
-    "无文件大小限制",
-    "优先电子邮件支持"
-  ]
-};
+// Pricing data with benefits
+const pricingBenefitsKeys = [
+  "pricing.features.uploads",
+  "pricing.features.char_per_file",
+  "pricing.features.monthly_limit", 
+  "pricing.features.file_size",
+  "pricing.features.support"
+];
 
 // Currency options with symbols
 const currencyOptions = {
@@ -361,8 +352,16 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('checkout');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('');
 
-  // Get benefits in current language
-  const benefits = locale === 'zh' ? pricingBenefits.zh : pricingBenefits.en;
+  // Get benefits using translation system
+  const benefits = pricingBenefitsKeys.map(key => {
+    // Use the paid plan features from translations
+    if (key === "pricing.features.uploads") return t('pricing.paid_plan') + ": " + t(key);
+    if (key === "pricing.features.char_per_file") return t('pricing.paid_plan') + ": " + t(key);
+    if (key === "pricing.features.monthly_limit") return "5,000,000 " + t(key);
+    if (key === "pricing.features.file_size") return t('pricing.paid_plan') + ": " + t(key);
+    if (key === "pricing.features.support") return t('pricing.paid_plan') + ": " + t(key);
+    return t(key);
+  });
 
   // Initialize selected currency based on locale
   useEffect(() => {
