@@ -375,7 +375,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
       switch (locale) {
         case 'zh': defaultCurrency = 'cny'; break;
         case 'es': defaultCurrency = 'eur'; break;
-        case 'fr': 
+        case 'fr': defaultCurrency = 'eur'; break;
         case 'de': defaultCurrency = 'eur'; break;
         case 'ja': defaultCurrency = 'jpy'; break;
         case 'ko': defaultCurrency = 'krw'; break;

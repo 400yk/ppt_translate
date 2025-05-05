@@ -7,7 +7,7 @@ Before deploying, you need to set up the following environment variables:
 1. **NEXT_PUBLIC_API_URL**: Your production API URL
    - This should point to your backend API server
    - Example: `https://api.yourdomain.com`
-   - Currently using a fallback in code: `process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'`
+   - Currently using a fallback in code: `process.env.API_URL || 'http://localhost:5000'`
 
 2. **NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY**: Your Stripe publishable key
    - This is required for Stripe payments integration
@@ -21,7 +21,7 @@ Before deploying, you need to set up the following environment variables:
 Create a `.env.local` file in the root directory with:
 
 ```
-NEXT_PUBLIC_API_URL=http://localhost:5000
+API_URL=http://localhost:5000
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_test_key_here
 ```
 
