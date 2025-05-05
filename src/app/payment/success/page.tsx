@@ -9,7 +9,7 @@ import { Icons } from '@/components/icons';
 import { DynamicHead } from '@/components/dynamic-head';
 
 // API endpoint
-const API_URL = 'http://localhost:5000';
+const API_URL = process.env.API_URL || 'http://localhost:5000';
 
 export default function PaymentSuccessPage() {
   const { t } = useTranslation();

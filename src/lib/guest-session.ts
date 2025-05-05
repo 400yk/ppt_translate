@@ -4,7 +4,7 @@
 const GUEST_SESSION_KEY = 'guest_session';
 const GUEST_USAGE_KEY = 'guest_usage';
 const GUEST_LAST_USAGE_DATE = 'guest_last_usage_date';
-const API_URL = 'http://localhost:5000';
+const API_URL = process.env.API_URL || 'http://localhost:5000';
 
 // Define guest session interface
 interface GuestSession {

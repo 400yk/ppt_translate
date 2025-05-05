@@ -26,7 +26,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 // API endpoint base URL
-const API_URL = 'http://localhost:5000';
+const API_URL = process.env.API_URL || 'http://localhost:5000';
 
 export default function ProfilePage() {
   const router = useRouter();

@@ -191,6 +191,8 @@
     "benefits": "Sie erhalten",
     "cancel_description": "Die Zahlung wurde abgebrochen. Sie können es erneut versuchen, wenn Sie bereit sind.",
     "success_description": "Ihre Zahlung war erfolgreich. Sie haben jetzt vollen Zugriff auf alle Funktionen.",
-    "currency": "Währung auswählen"
+    "currency": "Währung auswählen",
+    "month_abbr": "Mo",
+    "year_abbr": "J"
   }
 } 

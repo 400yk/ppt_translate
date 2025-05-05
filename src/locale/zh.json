@@ -191,6 +191,8 @@
     "benefits": "您将获得",
     "cancel_description": "支付已取消。您可以在准备好时再次尝试。",
     "success_description": "您的支付已成功。现在您可以使用所有功能。",
-    "currency": "选择货币"
+    "currency": "选择货币",
+    "month_abbr": "月",
+    "year_abbr": "年"
   }
 } 

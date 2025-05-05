@@ -9,20 +9,20 @@ from flask import Blueprint, jsonify, request, redirect, url_for
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import User, db
 from user_manager import get_membership_status
-from config import PRICING, CURRENCY_RATES
+from config import PRICING, CURRENCY_RATES, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, FLASK_API_URL
 
 payment_bp = Blueprint('payment', __name__)
 
 # Initialize Stripe with your secret key
 # Replace with your actual secret key, preferably loaded from environment variable
-***REMOVED***
+stripe.api_key = STRIPE_SECRET_KEY
 
 # Webhook signing secret for verifying webhook events
-WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', 'whsec_12345')
+WEBHOOK_SECRET = STRIPE_WEBHOOK_SECRET
 
 # Define your success and cancel URLs
-SUCCESS_URL = os.environ.get('STRIPE_SUCCESS_URL', 'http://localhost:9002/payment/success')
-CANCEL_URL = os.environ.get('STRIPE_CANCEL_URL', 'http://localhost:9002/payment/cancel')
+SUCCESS_URL = STRIPE_SUCCESS_URL
+CANCEL_URL = STRIPE_CANCEL_URL
 
 # Stripe Price lookup keys
 MONTHLY_PRICE_LOOKUP_KEY = 'Translide-monthly'
@@ -240,7 +240,7 @@ def create_portal_session():
         
         # Get return URL from request data, or use default
         data = request.get_json() or {}
-        return_url = data.get('return_url', 'http://localhost:9002/profile')
+        return_url = data.get('return_url', f'{FLASK_API_URL}/profile')
         
         # Get the customer ID from the user model
         # This assumes you store Stripe customer IDs in your user model

@@ -4,6 +4,21 @@ Configuration values for PowerPoint translation.
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables with priority
+# 1. .env.local (highest priority, for secrets and local overrides)
+# 2. .env (shared development settings)
+env_local_path = os.path.join(os.path.dirname(__file__), '.env.local')
+env_path = os.path.join(os.path.dirname(__file__), '.env')
+
+# First load the shared .env file
+if os.path.exists(env_path):
+    load_dotenv(env_path)
+
+# Then load .env.local to override if needed
+if os.path.exists(env_local_path):
+    load_dotenv(env_local_path, override=True)
 
 # Database settings
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -36,6 +51,12 @@ PAID_MEMBERSHIP_MONTHLY = 1  # Duration for monthly paid membership
 PAID_MEMBERSHIP_YEARLY = 12  # Duration for yearly paid membership
 GUEST_FREE_USER_MAX_FILE_SIZE = 50  # 50MB
 
+# Stripe payment settings
+FLASK_API_URL = os.getenv('FLASK_API_URL', 'http://localhost:9002')
+***REMOVED***
+***REMOVED***
+STRIPE_SUCCESS_URL = os.getenv('STRIPE_SUCCESS_URL', f'{FLASK_API_URL}/payment/success')
+STRIPE_CANCEL_URL = os.getenv('STRIPE_CANCEL_URL', f'{FLASK_API_URL}/payment/cancel')
 
 # Pricing configuration (in USD)
 PRICING = {

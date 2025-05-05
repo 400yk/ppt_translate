@@ -191,6 +191,8 @@
     "benefits": "Vous recevrez",
     "cancel_description": "Le paiement a été annulé. Vous pouvez réessayer quand vous serez prêt.",
     "success_description": "Votre paiement a réussi. Vous avez maintenant un accès complet à toutes les fonctionnalités.",
-    "currency": "Sélectionner la devise"
+    "currency": "Sélectionner la devise",
+    "month_abbr": "mois",
+    "year_abbr": "an"
   }
 } 

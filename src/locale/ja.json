@@ -191,6 +191,8 @@
     "benefits": "あなたが受け取るもの",
     "cancel_description": "支払いはキャンセルされました。準備ができたらもう一度お試しください。",
     "success_description": "支払いは正常に完了しました。これですべての機能に完全にアクセスできます。",
-    "currency": "通貨を選択"
+    "currency": "通貨を選択",
+    "month_abbr": "月",
+    "year_abbr": "年"
   }
 } 

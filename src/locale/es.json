@@ -191,6 +191,8 @@
     "benefits": "Usted recibirá",
     "cancel_description": "El pago ha sido cancelado. Puede intentarlo de nuevo cuando esté listo.",
     "success_description": "Su pago fue exitoso. Ahora tiene acceso completo a todas las funciones.",
-    "currency": "Seleccionar moneda"
+    "currency": "Seleccionar moneda",
+    "month_abbr": "mes",
+    "year_abbr": "año"
   }
 } 

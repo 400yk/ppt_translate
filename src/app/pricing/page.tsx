@@ -29,6 +29,8 @@ export default function PricingPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isPaidUser, setIsPaidUser] = useState(false);
 
+  const API_URL = process.env.API_URL || 'http://localhost:5000';
+
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
     setIsClient(true);
@@ -43,7 +45,7 @@ export default function PricingPage() {
         const token = localStorage.getItem('auth_token');
         if (!token) return;
         
-        const response = await fetch('http://localhost:5000/api/membership/status', {
+        const response = await fetch(`${API_URL}/api/membership/status`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },

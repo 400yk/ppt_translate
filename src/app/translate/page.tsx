@@ -35,7 +35,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PaymentModal } from "@/components/payment-modal";
 
 // Define API URL
-const API_URL = 'http://localhost:5000';
+const API_URL = process.env.API_URL || 'http://localhost:5000';
 
 // Define available languages (codes only)
 const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
@@ -210,7 +210,7 @@ export default function TranslationPage() {
       try {
         const token = localStorage.getItem('auth_token');
         if (!token) return;
-        const response = await fetch('http://localhost:5000/api/membership/status', {
+        const response = await fetch(`${API_URL}/api/membership/status`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },

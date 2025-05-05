@@ -42,10 +42,11 @@ next-env.d.ts
 tmp
 test
 
-backend/.env
+backend/.env.local
 backend/__pycache__/
 backend/app.db
 
 .env
 .env.dev
 .env.prod
+.env.local

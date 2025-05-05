@@ -17,13 +17,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 // Initialize Stripe with your publishable key
 // Replace with your actual publishable key
-const stripePromise = loadStripe('pk_test_51RLN2ZQeLScrDDE3hH1BvAl9v7OIKFjInCkFsNxiqVcdcYTKTzweyQXusxQOs3jSXuJtzyIg1iLqoBpHW0QiZ8f4004PWvZRj8');
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 // Helper function to safely cast keys
 const asTranslationKey = (key: string): TranslationKey => key as TranslationKey;
 
 // API endpoint
-const API_URL = 'http://localhost:5000';
+const API_URL = process.env.API_URL || 'http://localhost:5000';
 
 // Pricing data with benefits
 const pricingBenefitsKeys = [
@@ -447,7 +447,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
                 ) : (
                   <div className="text-3xl font-bold mb-1">
                     {pricing.monthly.display}
-                    <span className="text-base font-normal text-muted-foreground">/{locale === 'zh' ? '月' : 'mo'}</span>
+                    <span className="text-base font-normal text-muted-foreground">/{t(asTranslationKey('payment.month_abbr'), { defaultValue: 'mo' })}</span>
                   </div>
                 )}
               </CardContent>
@@ -482,9 +482,9 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
                   <>
                     <div className="text-3xl font-bold mb-1">
                       {pricing.yearly.display_per_month}
-                      <span className="text-base font-normal text-muted-foreground">/{locale === 'zh' ? '月' : 'mo'}</span>
+                      <span className="text-base font-normal text-muted-foreground">/{t(asTranslationKey('payment.month_abbr'), { defaultValue: 'mo' })}</span>
                     </div>
-                    <div className="text-sm text-muted-foreground">{pricing.yearly.display_total}/{locale === 'zh' ? '年' : 'yr'}</div>
+                    <div className="text-sm text-muted-foreground">{pricing.yearly.display_total}/{t(asTranslationKey('payment.year_abbr'), { defaultValue: 'yr' })}</div>
                   </>
                 )}
               </CardContent>

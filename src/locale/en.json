@@ -191,6 +191,8 @@
     "benefits": "You will receive",
     "cancel_description": "Payment has been canceled. You can try again when you're ready.",
     "success_description": "Your payment was successful. You now have full access to all features.",
-    "currency": "Select Currency"
+    "currency": "Select Currency",
+    "month_abbr": "mo",
+    "year_abbr": "yr"
   }
 } 
