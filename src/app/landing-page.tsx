@@ -32,6 +32,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { RegistrationDialog } from '@/components/registration-dialog';
+import { initGuestSession, canGuestUseTranslation } from '@/lib/guest-session';
 
 // Define available languages (codes only)
 const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
@@ -55,10 +57,16 @@ export default function LandingPage() {
   const { t, locale, setLocale } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [forceRender, setForceRender] = useState(0);
+  const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
 
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
     setIsClient(true);
+    
+    // Initialize guest session on first visit
+    if (typeof window !== 'undefined') {
+      initGuestSession();
+    }
   }, []);
 
   // Set HTML lang attribute on initial render
@@ -93,11 +101,37 @@ export default function LandingPage() {
     }
   };
 
+  // Handle the "Get Started" or "免费开始使用" button click
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      router.push('/translate'); // Go to translation page
+      // Authenticated users go straight to translation page
+      router.push('/translate');
     } else {
-      router.push('/auth'); // Go to login page
+      // For guest users, check if they can use the free trial
+      if (canGuestUseTranslation()) {
+        // If they can use their free trial, send them to the translation page
+        router.push('/translate');
+      } else {
+        // If they've used their free trial, show registration dialog
+        setShowRegistrationDialog(true);
+      }
+    }
+  };
+
+  // Handle clicking translate now in the navbar
+  const handleTranslateNow = () => {
+    if (isAuthenticated) {
+      // Authenticated users go straight to translation page
+      router.push('/translate');
+    } else {
+      // For guest users, check if they can use the free trial
+      if (canGuestUseTranslation()) {
+        // If they can use their free trial, send them to the translation page
+        router.push('/translate');
+      } else {
+        // If they've used their free trial, show registration dialog
+        setShowRegistrationDialog(true);
+      }
     }
   };
 
@@ -108,6 +142,12 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <DynamicHead />
+      
+      {/* Registration dialog */}
+      <RegistrationDialog 
+        isOpen={showRegistrationDialog} 
+        onClose={() => setShowRegistrationDialog(false)} 
+      />
       
       {/* Navbar */}
       <header className="border-b">
@@ -120,9 +160,12 @@ export default function LandingPage() {
             
             <div className="flex items-center gap-4">
               <nav className="hidden md:flex items-center space-x-8">
-                <Link href="/translate" className="text-foreground hover:text-primary transition">
+                <button 
+                  onClick={handleTranslateNow} 
+                  className="text-foreground hover:text-primary transition"
+                >
                   {t('nav.translate_now')}
-                </Link>
+                </button>
                 <Link href="/pricing" className="text-foreground hover:text-primary transition">
                   {t('pricing.title')}
                 </Link>
@@ -157,7 +200,7 @@ export default function LandingPage() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button onClick={() => router.push('/auth')} variant="outline" className="hidden md:flex">
+                <Button onClick={() => setShowRegistrationDialog(true)} variant="outline" className="hidden md:flex">
                   {t('auth.login')}
                 </Button>
               )}

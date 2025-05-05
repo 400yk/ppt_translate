@@ -5,21 +5,22 @@ from pptx import Presentation
 from pptx.util import Pt
 from pptx.enum.shapes import PP_PLACEHOLDER
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User, db
+from models import User, db, TranslationRecord
 from api_client import gemini_batch_translate
 from pptx_utils import measure_text_bbox, fit_font_size_to_bbox, fit_font_size_for_title
 from config import DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, DEFAULT_TITLE_FONT_SIZE
+import datetime
 
 def register_routes(app):
     @app.route('/translate', methods=['POST'])
     @jwt_required()
     def translate_pptx_endpoint():
-        # Get user from token
+        """Endpoint to translate PowerPoint files."""
         username = get_jwt_identity()
         user = User.query.filter_by(username=username).first()
         
         if not user:
-            return jsonify({'error': 'Unauthorized'}), 401
+            return jsonify({'error': 'User not found'}), 404
         
         if 'file' not in request.files:
             return jsonify({'error': 'No file uploaded'}), 400
@@ -35,8 +36,9 @@ def register_routes(app):
             # Translate the PPTX file and get the output path
             output_path = translate_pptx(file.stream, src_lang, dest_lang)
             
-            # Update usage count for the user's invitation code
+            # Check user's permission to translate
             if user.invitation_code:
+                # Users with invitation codes use their code's quota
                 if user.invitation_code.is_valid():
                     user.invitation_code.increment_usage()
                     print(f"Updated usage count for invitation code: {user.invitation_code.code}")
@@ -44,8 +46,28 @@ def register_routes(app):
                 else:
                     return jsonify({'error': 'Your invitation code has reached its usage limit or has been deactivated'}), 403
             else:
-                print("User does not have an associated invitation code")
-                return jsonify({'error': 'No valid invitation code associated with this account'}), 403
+                # Users without invitation codes can translate once per week
+                print("User does not have an associated invitation code, checking weekly quota")
+                
+                # Get the start of the current week (Monday 00:00:00)
+                today = datetime.datetime.now()
+                start_of_week = today - datetime.timedelta(days=today.weekday())
+                start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
+                
+                # Count translations in the current week
+                weekly_count = TranslationRecord.query.filter(
+                    TranslationRecord.user_id == user.id,
+                    TranslationRecord.created_at >= start_of_week
+                ).count()
+                
+                if weekly_count >= 1:
+                    # User has already used their weekly quota
+                    return jsonify({
+                        'error': 'Weekly translation limit reached',
+                        'message': 'Without an invitation code, you can only perform one translation per week'
+                    }), 403
+                
+                print(f"User has used {weekly_count}/1 translations this week")
             
             # Record the translation in the database
             user.record_translation(file.filename, src_lang, dest_lang)
@@ -61,6 +83,41 @@ def register_routes(app):
             return response
         except Exception as e:
             print(f"Error during translation: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/guest-translate', methods=['POST'])
+    def guest_translate_pptx_endpoint():
+        """
+        Endpoint for guest users to translate a PowerPoint file without authentication.
+        Only for trial use - limited to one use per IP address.
+        """
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file uploaded'}), 400
+            
+        file = request.files['file']
+        src_lang = request.form.get('src_lang', 'zh')  # Default source language: Chinese
+        dest_lang = request.form.get('dest_lang', 'en')  # Default target language: English
+        
+        print(f"Received guest file: {file.filename}")
+        print(f"Source language: {src_lang}, Target language: {dest_lang}")
+        
+        try:
+            # Translate the PPTX file and get the output path
+            output_path = translate_pptx(file.stream, src_lang, dest_lang)
+            
+            # Return the translated file
+            response = make_response(send_file(output_path, as_attachment=True, 
+                                 download_name=f"translated_{file.filename}"))
+            
+            # Set content type explicitly (helps prevent MIME type issues)
+            response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+            
+            print(f"Guest translation completed successfully.")
+            return response
+        except Exception as e:
+            print(f"Error during guest translation: {e}")
             import traceback
             traceback.print_exc()
             return jsonify({'error': str(e)}), 500

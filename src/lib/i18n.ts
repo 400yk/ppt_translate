@@ -75,7 +75,9 @@ export type TranslationKey =
   | 'errors.invalid_invitation'
   | 'errors.enter_valid_code'
   | 'errors.verification_error'
+  | 'errors.free_trial_used'
   | 'success.translation_complete'
+  | 'success.registration_complete'
   | 'buttons.translate'
   | 'buttons.download'
   | 'buttons.translating'
@@ -85,6 +87,7 @@ export type TranslationKey =
   | 'upload.release'
   | 'footer.description'
   | 'auth.login'
+  | 'auth.login_subtitle'
   | 'auth.register'
   | 'auth.username'
   | 'auth.username_placeholder'
@@ -100,10 +103,13 @@ export type TranslationKey =
   | 'auth.confirm_password'
   | 'auth.confirm_password_placeholder'
   | 'auth.invitation_code'
+  | 'auth.invitation_code_optional'
   | 'auth.invitation_code_placeholder'
   | 'auth.valid_code'
   | 'auth.invalid_code'
   | 'auth.back_to_home'
+  | 'auth.cancel'
+  | 'auth.processing'
   | 'pricing.title'
   | 'pricing.subtitle'
   | 'pricing.free_plan'
@@ -134,7 +140,19 @@ export type TranslationKey =
   | 'landing.styles_desc'
   | 'landing.view_pricing'
   | 'landing.copyright'
-  | LanguageKey;
+  | 'guest.free_trial'
+  | 'guest.free_trial_desc'
+  | 'guest.register_prompt'
+  | 'guest.register_title'
+  | 'guest.register_subtitle'
+  | 'guest.trial_used'
+  | LanguageKey
+  | 'errors.invitation_required'
+  | 'errors.registration_failed'
+  | 'auth.register_success'
+  | 'auth.welcome'
+  | 'auth.use_without_code'
+  | 'auth.no_code_warning';
 
 // Define available locales map
 export const locales = {

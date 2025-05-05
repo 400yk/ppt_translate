@@ -8,14 +8,14 @@ def register_routes(app):
     def register():
         data = request.get_json()
         
-        # Validate input
-        if not data or not data.get('username') or not data.get('email') or not data.get('password') or not data.get('invitation_code'):
+        # Validate input - invitation code is now optional
+        if not data or not data.get('username') or not data.get('email') or not data.get('password'):
             return jsonify({'error': 'Missing required fields'}), 400
         
         username = data.get('username')
         email = data.get('email')
         password = data.get('password')
-        invitation_code_str = data.get('invitation_code')
+        invitation_code_str = data.get('invitation_code')  # This can be None now
         
         # Check if user already exists
         if User.query.filter_by(username=username).first():
@@ -23,20 +23,25 @@ def register_routes(app):
         if User.query.filter_by(email=email).first():
             return jsonify({'error': 'Email already exists'}), 400
         
-        # Verify invitation code
-        invitation_code = InvitationCode.query.filter_by(code=invitation_code_str).first()
-        if not invitation_code:
-            return jsonify({'error': 'Invalid invitation code'}), 400
+        # Variables to track invitation code status
+        has_valid_invitation = False
+        invitation_code = None
         
-        if not invitation_code.is_valid():
-            return jsonify({'error': 'Invitation code is no longer valid'}), 400
+        # Verify invitation code if provided
+        if invitation_code_str:
+            invitation_code = InvitationCode.query.filter_by(code=invitation_code_str).first()
+            if invitation_code and invitation_code.is_valid():
+                has_valid_invitation = True
+            elif invitation_code_str:  # Code was provided but is invalid
+                return jsonify({'error': 'Invalid invitation code'}), 400
         
         # Create new user
         user = User(username=username, email=email, invitation_code=invitation_code)
         user.set_password(password)
         
-        # Increment code usage
-        invitation_code.increment_usage()
+        # Increment code usage if a valid code was provided
+        if has_valid_invitation and invitation_code:
+            invitation_code.increment_usage()
         
         # Save user to database
         db.session.add(user)
@@ -47,6 +52,7 @@ def register_routes(app):
         
         return jsonify({
             'message': 'User registered successfully',
+            'has_invitation': has_valid_invitation,
             'access_token': access_token
         }), 201
 
@@ -72,8 +78,12 @@ def register_routes(app):
         # Generate access token
         access_token = create_access_token(identity=username)
         
+        # Check if the user has a valid invitation code
+        has_invitation = user.invitation_code is not None and user.invitation_code.is_valid()
+        
         return jsonify({
             'message': 'Login successful',
+            'has_invitation': has_invitation,
             'access_token': access_token
         }), 200
 

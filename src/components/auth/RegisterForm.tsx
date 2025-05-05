@@ -72,15 +72,20 @@ export default function RegisterForm() {
 
   // Verify invitation code when it changes
   useEffect(() => {
-    const timeoutId = setTimeout(() => checkInvitationCode(invitationCode), 500);
-    return () => clearTimeout(timeoutId);
+    if (invitationCode) {
+      const timeoutId = setTimeout(() => checkInvitationCode(invitationCode), 500);
+      return () => clearTimeout(timeoutId);
+    } else {
+      setCodeValid(null);
+      setCodeMessage('');
+    }
   }, [invitationCode, forceRender]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
-    if (!email || !password || !invitationCode) {
+    // Validation for required fields
+    if (!email || !password) {
       toast({
         title: t('errors.required_fields'),
         description: t('errors.fill_all_fields'),
@@ -89,7 +94,8 @@ export default function RegisterForm() {
       return;
     }
     
-    if (!codeValid) {
+    // If invitation code is provided but invalid, show error
+    if (invitationCode && !codeValid) {
       toast({
         title: t('errors.invalid_invitation'),
         description: t('errors.enter_valid_code'),
@@ -104,15 +110,15 @@ export default function RegisterForm() {
       // Use email as username since we removed the username field
       await register(email, email, password, invitationCode);
       toast({
-        title: t('auth.login_success'),
-        description: t('auth.welcome_back'),
+        title: t('auth.register_success'),
+        description: t('auth.welcome'),
       });
       // Redirect to translate page after successful registration
       router.push('/translate');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : t('errors.unknown_error');
       toast({
-        title: t('errors.login_failed'),
+        title: t('errors.registration_failed'),
         description: errorMessage,
         variant: 'destructive',
       });
@@ -123,8 +129,6 @@ export default function RegisterForm() {
 
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
-      <h2 className="text-2xl font-bold text-center mb-6">{t('auth.register')}</h2>
-      
       <form onSubmit={handleSubmit} className="space-y-4">        
         <div className="space-y-2">
           <Label htmlFor="email">{t('auth.email')}</Label>
@@ -154,7 +158,7 @@ export default function RegisterForm() {
         
         <div className="space-y-2">
           <Label htmlFor="invitationCode">
-            {t('auth.invitation_code')}
+            {t('auth.invitation_code_optional')}
             {isCheckingCode && (
               <Icons.spinner className="ml-2 h-4 w-4 animate-spin inline" />
             )}
@@ -166,7 +170,6 @@ export default function RegisterForm() {
             onChange={(e) => setInvitationCode(e.target.value)}
             placeholder={t('auth.invitation_code_placeholder')}
             disabled={isLoading}
-            required
             className={
               codeValid === true
                 ? 'border-green-500 focus:border-green-500'
@@ -184,7 +187,11 @@ export default function RegisterForm() {
           )}
         </div>
         
-        <Button type="submit" className="w-full" disabled={isLoading || !codeValid}>
+        <Button 
+          type="submit" 
+          className="w-full" 
+          disabled={isLoading || (invitationCode !== '' && codeValid !== true)}
+        >
           {isLoading ? t('common.loading') : t('auth.register')}
         </Button>
       </form>

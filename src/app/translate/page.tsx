@@ -29,6 +29,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from 'next/link';
+import { canGuestUseTranslation, consumeGuestUsage } from '@/lib/guest-session';
+import { RegistrationDialog } from '@/components/registration-dialog';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Define available languages (codes only)
 const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
@@ -67,6 +70,8 @@ export default function TranslationPage() {
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const [isClient, setIsClient] = useState(false);
   const [forceRender, setForceRender] = useState(0);
+  const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
+  const [isGuestUser, setIsGuestUser] = useState(false);
   
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
@@ -105,10 +110,19 @@ export default function TranslationPage() {
 
   // Check authentication and redirect if necessary
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/auth');
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        // If not authenticated, check if guest can use translation
+        if (canGuestUseTranslation()) {
+          // Allow guest to use the page, but mark them as guest
+          setIsGuestUser(true);
+        } else {
+          // If guest has used their free trial, show registration dialog
+          setShowRegistrationDialog(true);
+        }
+      }
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated]);
 
   // Monitor changes to translatedFileUrl
   useEffect(() => {
@@ -225,6 +239,16 @@ export default function TranslationPage() {
       return;
     }
 
+    // If this is a guest user, consume their free usage
+    if (isGuestUser) {
+      const canUse = consumeGuestUsage();
+      if (!canUse) {
+        // Show registration dialog if they've used their free trial
+        setShowRegistrationDialog(true);
+        return;
+      }
+    }
+
     setIsTranslating(true);
     setProgress(0);
     setTranslatedFileUrl(null); // Reset any previous translated file URL
@@ -248,23 +272,31 @@ export default function TranslationPage() {
         });
       }, 20);
 
-      // Get auth token from localStorage
-      let token;
-      if (isBrowser) {
-        token = localStorage.getItem('auth_token');
-      }
+      // Determine which endpoint to use and prepare headers
+      let endpointUrl = 'http://localhost:5000/translate';
+      let headers: HeadersInit = {};
       
-      if (!token) {
-        throw new Error('Authentication required');
+      if (isGuestUser) {
+        // Use guest endpoint for guest users
+        endpointUrl = 'http://localhost:5000/guest-translate';
+      } else {
+        // Get auth token for authenticated users
+        if (isBrowser) {
+          const token = localStorage.getItem('auth_token');
+          if (!token) {
+            throw new Error('Authentication required');
+          }
+          headers = {
+            'Authorization': `Bearer ${token}`,
+          };
+        }
       }
 
       // Send the file to the Flask backend
-      console.log("Sending translation request to backend");
-      const response = await fetch('http://localhost:5000/translate', {
+      console.log(`Sending translation request to ${isGuestUser ? 'guest' : 'authenticated'} endpoint`);
+      const response = await fetch(endpointUrl, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers,
         body: formData,
       });
 
@@ -416,8 +448,8 @@ export default function TranslationPage() {
     );
   }
 
-  // If not authenticated, we're redirecting, but still show a spinner
-  if (!isAuthenticated) {
+  // If not authenticated and not a guest user, we're redirecting, but still show a spinner
+  if (!isAuthenticated && !isGuestUser) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -426,183 +458,203 @@ export default function TranslationPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-4 md:p-12">
+    <div className="flex flex-col min-h-screen bg-background">
       <DynamicHead />
       
-      {/* Header with user menu */}
-      <div className="w-full flex justify-between items-center mb-8">
-        <div className="flex items-center">
-          <Link href="/">
-            <div className="flex items-center">
-              <Image
-                src={LogoImage}
-                alt={t('title')} 
-                width={40}
-                height={40}
-                className="mr-2"
-              />
-              <h1 className="text-2xl font-bold">{t('title')}</h1>
+      {/* Registration dialog */}
+      <RegistrationDialog 
+        isOpen={showRegistrationDialog} 
+        onClose={() => setShowRegistrationDialog(false)} 
+      />
+      
+      <div className="container mx-auto px-4 py-4 max-w-6xl flex flex-col h-full flex-1">
+        {/* Guest user banner */}
+        {isClient && isGuestUser && (
+          <Alert className="border-teal-500 bg-teal-50 mb-6">
+            <Icons.info className="h-4 w-4 text-teal-500" />
+            <AlertTitle className="text-teal-700">{t('guest.free_trial')}</AlertTitle>
+            <AlertDescription className="text-teal-600">
+              {t('guest.free_trial_desc')}
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {/* Header with user menu */}
+        <div className="w-full flex justify-between items-center py-2">
+          <div className="flex items-center">
+            <Link href="/">
+              <div className="flex items-center">
+                <Image
+                  src={LogoImage}
+                  alt={t('title')} 
+                  width={40}
+                  height={40}
+                  className="mr-2"
+                />
+                <h1 className="text-2xl font-bold">{t('title')}</h1>
+              </div>
+            </Link>
+          </div>
+          
+          {isClient && (
+            <div className="flex items-center gap-4">
+              {/* Language selector */}
+              <LanguageSelector width="w-[100px]" />
+              
+              {/* User dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Icons.user className="h-4 w-4" />
+                    <span className="hidden sm:inline-block">{user?.username}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>{user?.email || user?.username}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push('/pricing')}>
+                    <Icons.pricing className="mr-2 h-4 w-4" />
+                    {t('pricing.title')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <Icons.logout className="mr-2 h-4 w-4" />
+                    {t('auth.logout')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-          </Link>
+          )}
         </div>
         
-        {isClient && (
-          <div className="flex items-center gap-4">
-            {/* Language selector */}
-            <LanguageSelector width="w-[100px]" />
-            
-            {/* User dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Icons.user className="h-4 w-4" />
-                  <span className="hidden sm:inline-block">{user?.username}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{user?.email || user?.username}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push('/pricing')}>
-                  <Icons.pricing className="mr-2 h-4 w-4" />
-                  {t('pricing.title')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>
-                  <Icons.logout className="mr-2 h-4 w-4" />
-                  {t('auth.logout')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )}
-      </div>
-      
-      <div className="flex flex-col items-center justify-center w-full max-w-3xl mx-auto">
-        {/* Update the drop zone div to handle drag and drop events */}
-        <div 
-          ref={dropZoneRef}
-          className={`w-full mb-8 p-8 border-2 border-dashed rounded-lg 
-            transition-all duration-300 ${styles.dropZone}
-            ${isDragging ? `${styles.draggingActive} border-primary` : ''}
-            ${file ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary'}`}
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <div className="flex flex-col items-center justify-center">
-            {!file && (
-              <>
-                <Icons.upload className={`mb-4 h-10 w-10 ${isDragging ? 'text-primary animate-bounce' : 'text-gray-400'}`} />
-                <h3 className="mb-2 text-lg font-medium">{t('upload.title')}</h3>
-                <p className="mb-4 text-sm text-gray-500">{t('upload.description')}</p>
-                {isDragging && (
-                  <div className="mt-4 p-2 bg-primary/10 text-primary rounded-md">
-                    <p className="text-sm font-medium">{t('upload.release')}</p>
-                  </div>
-                )}
-              </>
-            )}
-            
-            {file && (
-              <div className="w-full flex flex-col items-center">
-                <div className="flex items-center justify-between w-full mb-4">
-                  <div className="flex items-center">
-                    <Icons.file className="h-8 w-8 text-primary mr-2" />
-                    <div>
-                      <h3 className="font-medium text-sm">{file.name}</h3>
-                      <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleRevertFile}
-                  >
-                    <Icons.x className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <div className="w-full flex items-center space-x-4">
-                  <div className="flex-1">
-                    <Select value={srcLang} onValueChange={(value) => setSrcLang(value as LanguageCode)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder={getLanguageName(srcLang)} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {languageCodes.map((code) => (
-                          <SelectItem key={code} value={code}>
-                            {getLanguageName(code)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <Icons.arrowRight className="h-4 w-4 flex-shrink-0" />
-                  
-                  <div className="flex-1">
-                    <Select value={destLang} onValueChange={(value) => setDestLang(value as LanguageCode)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder={getLanguageName(destLang)} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {languageCodes.map((code) => (
-                          <SelectItem key={code} value={code}>
-                            {getLanguageName(code)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <div className="w-full mt-4">
-              <input
-                type="file"
-                id="fileInput"
-                accept=".ppt,.pptx"
-                onChange={handleFileChange}
-                className="hidden"
-                ref={fileInputRef}
-              />
-              
+        {/* Main content area - flex-1 to take remaining height */}
+        <div className="flex flex-col items-center justify-center w-full max-w-3xl mx-auto flex-1">
+          {/* Update the drop zone div to handle drag and drop events */}
+          <div 
+            ref={dropZoneRef}
+            className={`w-full mb-8 p-10 border-2 border-dashed rounded-lg 
+              transition-all duration-300 ${styles.dropZone}
+              ${isDragging ? `${styles.draggingActive} border-primary` : ''}
+              ${file ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary'}`}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <div className="flex flex-col items-center justify-center">
               {!file && (
-                <Button 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full" 
-                  variant="outline"
-                >
-                  {t('buttons.select_file')}
-                </Button>
+                <>
+                  <Icons.upload className={`mb-4 h-10 w-10 ${isDragging ? 'text-primary animate-bounce' : 'text-gray-400'}`} />
+                  <h3 className="mb-2 text-lg font-medium">{t('upload.title')}</h3>
+                  <p className="mb-4 text-sm text-gray-500">{t('upload.description')}</p>
+                  {isDragging && (
+                    <div className="mt-4 p-2 bg-primary/10 text-primary rounded-md">
+                      <p className="text-sm font-medium">{t('upload.release')}</p>
+                    </div>
+                  )}
+                </>
               )}
               
               {file && (
-                <Button 
-                  onClick={handleButtonAction}
-                  className={`w-full ${translatedFileUrl ? styles.shiningButton : ''}`}
-                  disabled={isTranslating || invalidFileType}
-                >
-                  {isTranslating && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-                  {getButtonText()}
-                </Button>
+                <div className="w-full flex flex-col items-center">
+                  <div className="flex items-center justify-between w-full mb-4">
+                    <div className="flex items-center">
+                      <Icons.file className="h-8 w-8 text-primary mr-2" />
+                      <div>
+                        <h3 className="font-medium text-sm">{file.name}</h3>
+                        <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRevertFile}
+                    >
+                      <Icons.x className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  <div className="w-full flex items-center space-x-4">
+                    <div className="flex-1">
+                      <Select value={srcLang} onValueChange={(value) => setSrcLang(value as LanguageCode)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={getLanguageName(srcLang)} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {languageCodes.map((code) => (
+                            <SelectItem key={code} value={code}>
+                              {getLanguageName(code)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <Icons.arrowRight className="h-4 w-4 flex-shrink-0" />
+                    
+                    <div className="flex-1">
+                      <Select value={destLang} onValueChange={(value) => setDestLang(value as LanguageCode)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={getLanguageName(destLang)} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {languageCodes.map((code) => (
+                            <SelectItem key={code} value={code}>
+                              {getLanguageName(code)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
               )}
+              
+              <div className="w-full mt-6">
+                <input
+                  type="file"
+                  id="fileInput"
+                  accept=".ppt,.pptx"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  ref={fileInputRef}
+                />
+                
+                {!file && (
+                  <Button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full" 
+                    variant="outline"
+                  >
+                    {t('buttons.select_file')}
+                  </Button>
+                )}
+                
+                {file && (
+                  <Button 
+                    onClick={handleButtonAction}
+                    className={`w-full ${translatedFileUrl ? styles.shiningButton : ''}`}
+                    disabled={isTranslating || invalidFileType}
+                  >
+                    {isTranslating && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                    {getButtonText()}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {(isTranslating || progress > 0) && (
-          <div className="w-full mb-4">
-            <Progress value={progress} className="h-2" />
-            <p className="text-xs text-center mt-2">{progress}%</p>
-          </div>
-        )}
-        
-        <p className="text-sm text-gray-500 text-center max-w-lg">
-          {t('footer.description')}
-        </p>
+          {(isTranslating || progress > 0) && (
+            <div className="w-full mb-4">
+              <Progress value={progress} className="h-2" />
+              <p className="text-xs text-center mt-2">{progress}%</p>
+            </div>
+          )}
+          
+          <p className="text-sm text-gray-500 text-center max-w-lg">
+            {t('footer.description')}
+          </p>
+        </div>
       </div>
-    </main>
+    </div>
   );
 } 

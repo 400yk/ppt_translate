@@ -27,10 +27,14 @@
     "passwords_dont_match": "两次输入的密码不一致。",
     "invalid_invitation": "邀请码无效",
     "enter_valid_code": "请输入有效的邀请码。",
-    "verification_error": "验证邀请码时出错。"
+    "verification_error": "验证邀请码时出错。",
+    "free_trial_used": "您已使用过免费试用，请注册账号继续使用。",
+    "invitation_required": "请输入邀请码或选择不使用邀请码注册。",
+    "registration_failed": "注册失败"
   },
   "success": {
-    "translation_complete": "文件已成功翻译！"
+    "translation_complete": "文件已成功翻译！",
+    "registration_complete": "注册成功！您已获得一次免费翻译机会。"
   },
   "buttons": {
     "translate": "翻译",
@@ -48,6 +52,7 @@
   },
   "auth": {
     "login": "登录",
+    "login_subtitle": "登录您的账户以继续",
     "register": "注册",
     "username": "用户名",
     "username_placeholder": "输入您的用户名",
@@ -63,10 +68,17 @@
     "confirm_password": "确认密码",
     "confirm_password_placeholder": "确认您的密码",
     "invitation_code": "邀请码",
+    "invitation_code_optional": "邀请码（可选）",
     "invitation_code_placeholder": "输入您的邀请码",
     "valid_code": "有效的邀请码。剩余 {0} 次使用机会。",
     "invalid_code": "无效的邀请码。",
-    "back_to_home": "返回主页"
+    "back_to_home": "返回主页",
+    "cancel": "取消",
+    "processing": "处理中...",
+    "use_without_code": "不使用邀请码注册",
+    "register_success": "注册成功",
+    "welcome": "欢迎使用幻翻！",
+    "no_code_warning": "不使用邀请码注册的用户每周仅能使用一次翻译服务。"
   },
   "languages": {
     "zh": "中文",
@@ -115,5 +127,13 @@
     "styles_desc": "保持PowerPoint幻灯片的原始样式不变。",
     "view_pricing": "查看定价",
     "copyright": "幻翻。保留所有权利。"
+  },
+  "guest": {
+    "free_trial": "免费试用",
+    "free_trial_desc": "您正在使用免费试用版，可以使用一次翻译服务。",
+    "register_prompt": "请注册以获得额外的免费翻译机会",
+    "register_title": "注册账号",
+    "register_subtitle": "注册一个免费账户，获得一次额外的免费翻译机会",
+    "trial_used": "免费试用已用完"
   }
 } 

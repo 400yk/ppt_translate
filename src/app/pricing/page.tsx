@@ -14,6 +14,7 @@ import LogoImage from '@/assets/Pure_logo.png';
 import Link from 'next/link';
 import { LanguageSelector } from '@/components/language-selector';
 import { DynamicHead } from '@/components/dynamic-head';
+import { RegistrationDialog } from '@/components/registration-dialog';
 
 // Pricing data with locale support
 const pricingData = {
@@ -111,6 +112,7 @@ export default function PricingPage() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const [forceRender, setForceRender] = useState(0);
+  const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
 
   // Get the appropriate pricing data based on locale
   const pricing = locale === 'zh' ? pricingData.zh : pricingData.en;
@@ -140,7 +142,7 @@ export default function PricingPage() {
 
   const handleUpgradeClick = () => {
     if (!isAuthenticated) {
-      router.push('/auth'); // Redirect to login when clicking upgrade button if not logged in
+      setShowRegistrationDialog(true); // Show registration dialog instead of redirect
     } else {
       // Handle upgrade process for logged-in users
       // This is where you would add actual upgrade functionality
@@ -150,6 +152,12 @@ export default function PricingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <DynamicHead />
+      
+      {/* Registration dialog */}
+      <RegistrationDialog 
+        isOpen={showRegistrationDialog} 
+        onClose={() => setShowRegistrationDialog(false)} 
+      />
       
       {/* Navbar */}
       <header className="border-b">
@@ -185,7 +193,7 @@ export default function PricingPage() {
                   <span>{user?.username}</span>
                 </Button>
               ) : (
-                <Button onClick={() => router.push('/auth')} variant="outline">{t('auth.login')}</Button>
+                <Button onClick={() => setShowRegistrationDialog(true)} variant="outline">{t('auth.login')}</Button>
               )}
             </div>
             
@@ -263,7 +271,7 @@ export default function PricingPage() {
             <Button 
               className="mt-8 w-full" 
               variant="outline"
-              onClick={() => isAuthenticated ? null : router.push('/auth')}
+              onClick={() => isAuthenticated ? null : setShowRegistrationDialog(true)}
             >
               {isAuthenticated ? t('pricing.current_plan') : t('auth.login')}
             </Button>

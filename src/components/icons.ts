@@ -28,7 +28,8 @@ import {
   X, 
   Workflow,
   CreditCard,
-  Menu
+  Menu,
+  Info
 } from 'lucide-react';
 
 const Icons = {
@@ -45,6 +46,7 @@ const Icons = {
   file: File,
   help: HelpCircle,
   home: Home,
+  info: Info,
   light: Sun,
   loader: Loader2,
   logout: LogOut,

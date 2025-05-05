@@ -27,10 +27,14 @@
     "passwords_dont_match": "Passwords do not match.",
     "invalid_invitation": "Invalid Invitation Code",
     "enter_valid_code": "Please enter a valid invitation code.",
-    "verification_error": "Error verifying code."
+    "verification_error": "Error verifying code.",
+    "free_trial_used": "You have used your free trial. Please register to continue.",
+    "invitation_required": "Please enter an invitation code or choose to register without one.",
+    "registration_failed": "Registration Failed"
   },
   "success": {
-    "translation_complete": "File translated successfully!"
+    "translation_complete": "File translated successfully!",
+    "registration_complete": "Registration successful! You have received a free translation credit."
   },
   "buttons": {
     "translate": "Translate",
@@ -48,6 +52,7 @@
   },
   "auth": {
     "login": "Login",
+    "login_subtitle": "Sign in to your account to continue",
     "register": "Register",
     "username": "Username",
     "username_placeholder": "Enter your username",
@@ -63,10 +68,17 @@
     "confirm_password": "Confirm Password",
     "confirm_password_placeholder": "Confirm your password",
     "invitation_code": "Invitation Code",
+    "invitation_code_optional": "Invitation Code (Optional)",
     "invitation_code_placeholder": "Enter your invitation code",
     "valid_code": "Valid code. {0} uses remaining.",
     "invalid_code": "Invalid invitation code.",
-    "back_to_home": "Back to Home"
+    "back_to_home": "Back to Home",
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "use_without_code": "Register without an invitation code",
+    "register_success": "Registration Successful",
+    "welcome": "Welcome to Translide!",
+    "no_code_warning": "Without an invitation code, you'll be limited to one translation per week."
   },
   "languages": {
     "zh": "Chinese",
@@ -115,5 +127,13 @@
     "styles_desc": "Keep the style of your PowerPoint slides same as original.",
     "view_pricing": "View Pricing Plans",
     "copyright": "Translide. All rights reserved."
+  },
+  "guest": {
+    "free_trial": "Free Trial",
+    "free_trial_desc": "You are using the free trial version with one translation credit.",
+    "register_prompt": "Please register to get an additional free translation credit",
+    "register_title": "Register Account",
+    "register_subtitle": "Register a free account to get an additional free translation credit",
+    "trial_used": "Free trial has been used"
   }
 } 
