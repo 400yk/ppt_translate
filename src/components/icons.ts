@@ -29,7 +29,8 @@ import {
   Workflow,
   CreditCard,
   Menu,
-  Info
+  Info,
+  AlertCircle
 } from 'lucide-react';
 
 const Icons = {
@@ -67,6 +68,7 @@ const Icons = {
   upload: Upload,
   user: User,
   x: X,
+  alertCircle: AlertCircle
 };
 
 export {Icons};

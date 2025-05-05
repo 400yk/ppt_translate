@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Check } from 'lucide-react';
 import { usePricing } from '@/lib/pricing-service';
 import { useMembership } from '@/lib/membership-service';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+// Initialize Stripe with your publishable key
+// Replace with your actual publishable key
+const stripePromise = loadStripe('pk_test_51RLN2ZQeLScrDDE3hH1BvAl9v7OIKFjInCkFsNxiqVcdcYTKTzweyQXusxQOs3jSXuJtzyIg1iLqoBpHW0QiZ8f4004PWvZRj8');
+
+// API endpoint
+const API_URL = 'http://localhost:5000';
 
 // Pricing data with benefits based on locale
 const pricingBenefits = {
@@ -30,34 +40,365 @@ const pricingBenefits = {
   ]
 };
 
+// Currency options with symbols
+const currencyOptions = {
+  usd: { label: 'USD ($)', symbol: '$' },
+  cny: { label: 'CNY (¥)', symbol: '¥' },
+  eur: { label: 'EUR (€)', symbol: '€' },
+  jpy: { label: 'JPY (¥)', symbol: '¥' },
+  krw: { label: 'KRW (₩)', symbol: '₩' },
+  rub: { label: 'RUB (₽)', symbol: '₽' },
+  gbp: { label: 'GBP (£)', symbol: '£' },
+  mxn: { label: 'MXN ($)', symbol: 'Mex$' },
+  ars: { label: 'ARS ($)', symbol: 'AR$' }
+};
+
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
+// Card component styling
+const cardStyle = {
+  base: {
+    color: '#32325d',
+    fontFamily: 'Arial, sans-serif',
+    fontSmoothing: 'antialiased',
+    fontSize: '16px',
+    '::placeholder': {
+      color: '#aab7c4',
+    },
+  },
+  invalid: {
+    color: '#fa755a',
+    iconColor: '#fa755a',
+  },
+};
+
+// Payment methods enum
+type PaymentMethod = 'elements' | 'checkout';
+
+// Internal Payment form component using Elements
+function CheckoutForm({ 
+  selectedPlan, 
+  onSuccessfulPayment, 
+  price,
+  currency
+}: { 
+  selectedPlan: 'monthly' | 'yearly', 
+  onSuccessfulPayment: () => void,
+  price: string,
+  currency: string
+}) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [clientSecret, setClientSecret] = useState('');
+  
+  const stripe = useStripe();
+  const elements = useElements();
+
+  // Get payment intent from backend when selectedPlan changes
+  useEffect(() => {
+    const getPaymentIntent = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        
+        if (!token) {
+          toast({
+            title: t('errors.login_failed'),
+            description: t('auth.login_subtitle'),
+            variant: 'destructive',
+          });
+          return;
+        }
+        
+        const response = await fetch(`${API_URL}/api/payment/create-payment-intent`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ 
+            plan_type: selectedPlan,
+            currency: currency
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to create payment intent');
+        }
+        
+        const data = await response.json();
+        setClientSecret(data.clientSecret);
+      } catch (error) {
+        console.error('Error creating payment intent:', error);
+        setErrorMessage(error instanceof Error ? error.message : 'Failed to set up payment');
+      }
+    };
+    
+    getPaymentIntent();
+  }, [selectedPlan, currency, toast, t]);
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    
+    if (!stripe || !elements) {
+      // Stripe.js has not yet loaded.
+      return;
+    }
+    
+    setIsProcessing(true);
+    setErrorMessage(null);
+    
+    try {
+      // Get the card element
+      const cardElement = elements.getElement(CardElement);
+      
+      if (!cardElement) {
+        throw new Error('Card element not found');
+      }
+      
+      // Confirm the payment with Stripe
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+        }
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      } else if (paymentIntent.status === 'succeeded') {
+        // Call the membership service to finalize the purchase on the backend
+        const token = localStorage.getItem('auth_token');
+        
+        if (!token) {
+          throw new Error('Authentication token not found');
+        }
+        
+        const response = await fetch(`${API_URL}/api/membership/confirm`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ 
+            payment_intent_id: paymentIntent.id,
+            plan_type: selectedPlan 
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to confirm payment with server');
+        }
+        
+        toast({
+          title: t('payment.success'),
+          description: selectedPlan === 'monthly' 
+            ? t('payment.monthly_success') 
+            : t('payment.yearly_success'),
+        });
+        
+        onSuccessfulPayment();
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      setErrorMessage(error instanceof Error ? error.message : t('payment.error_description'));
+      toast({
+        title: t('payment.error'),
+        description: error instanceof Error ? error.message : t('payment.error_description'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="space-y-4">
+        <div className="border rounded-md p-4">
+          <CardElement options={{ style: cardStyle }} />
+        </div>
+        
+        {errorMessage && (
+          <div className="text-sm text-red-500">{errorMessage}</div>
+        )}
+        
+        <Button 
+          type="submit"
+          className="w-full" 
+          disabled={isProcessing || !stripe || !elements || !clientSecret}
+        >
+          {isProcessing ? (
+            <>
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              {t('payment.processing')}
+            </>
+          ) : (
+            <>
+              <Icons.payment className="mr-2 h-4 w-4" />
+              {t('payment.pay')} {price}
+            </>
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+// Checkout redirect component
+function CheckoutRedirect({
+  selectedPlan,
+  onSuccessfulPayment,
+  price,
+  currency
+}: {
+  selectedPlan: 'monthly' | 'yearly',
+  onSuccessfulPayment: () => void,
+  price: string,
+  currency: string
+}) {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleCheckout = async () => {
+    setIsProcessing(true);
+    setErrorMessage(null);
+    
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        toast({
+          title: t('errors.login_failed'),
+          description: t('auth.login_subtitle'),
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      console.log(`Creating checkout session for plan: ${selectedPlan}`);
+      
+      // Create a checkout session
+      const response = await fetch(`${API_URL}/api/payment/checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          plan_type: selectedPlan,
+          currency: currency
+        })
+      });
+      
+      console.log(`Checkout response status: ${response.status}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(e => ({ message: 'Failed to parse error response' }));
+        console.error('Checkout session error data:', errorData);
+        throw new Error(errorData.message || `Failed to create checkout session: ${response.status} ${response.statusText}`);
+      }
+      
+      const responseData = await response.json();
+      console.log('Checkout session created successfully:', responseData);
+      
+      if (!responseData.url) {
+        throw new Error('No checkout URL returned from server');
+      }
+      
+      // Redirect to Stripe Checkout
+      window.location.href = responseData.url;
+      
+    } catch (error) {
+      console.error('Checkout error:', error);
+      setErrorMessage(error instanceof Error ? error.message : t('payment.error_description'));
+      toast({
+        title: t('payment.error'),
+        description: error instanceof Error ? error.message : t('payment.error_description'),
+        variant: 'destructive',
+      });
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {errorMessage && (
+        <div className="text-sm text-red-500">{errorMessage}</div>
+      )}
+      
+      <Button 
+        className="w-full" 
+        onClick={handleCheckout}
+        disabled={isProcessing}
+      >
+        {isProcessing ? (
+          <>
+            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            {t('payment.processing')}
+          </>
+        ) : (
+          <>
+            <Icons.payment className="mr-2 h-4 w-4" />
+            {t('payment.pay')} {price}
+          </>
+        )}
+      </Button>
+    </div>
+  );
+}
+
 export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) {
   const { t, locale } = useTranslation();
-  const { toast } = useToast();
-  const { pricing, isLoading } = usePricing();
-  const { isProcessing, purchaseMembership } = useMembership();
+  const { pricing, isLoading, updateCurrency } = usePricing();
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('checkout');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('');
 
   // Get benefits in current language
   const benefits = locale === 'zh' ? pricingBenefits.zh : pricingBenefits.en;
 
-  const handlePayment = async () => {
-    // Process payment through membership service
-    const success = await purchaseMembership(selectedPlan);
-    
-    if (success) {
-      // Call the onSuccess callback if provided
-      if (onSuccess) {
-        onSuccess();
+  // Initialize selected currency based on locale
+  useEffect(() => {
+    if (!selectedCurrency) {
+      let defaultCurrency = 'usd';
+      
+      // Map locale to default currency
+      switch (locale) {
+        case 'zh': defaultCurrency = 'cny'; break;
+        case 'es': defaultCurrency = 'eur'; break;
+        case 'fr': 
+        case 'de': defaultCurrency = 'eur'; break;
+        case 'ja': defaultCurrency = 'jpy'; break;
+        case 'ko': defaultCurrency = 'krw'; break;
+        case 'ru': defaultCurrency = 'rub'; break;
+        default: defaultCurrency = 'usd';
       }
-      // Close modal on success
-      onClose();
+      
+      setSelectedCurrency(defaultCurrency);
+      updateCurrency(defaultCurrency);
     }
+  }, [locale, selectedCurrency, updateCurrency]);
+
+  // Handle currency change
+  const handleCurrencyChange = (currency: string) => {
+    setSelectedCurrency(currency);
+    updateCurrency(currency);
+  };
+
+  const handleSuccessfulPayment = () => {
+    // Call the onSuccess callback if provided
+    if (onSuccess) {
+      onSuccess();
+    }
+    // Close modal on success
+    onClose();
   };
 
   return (
@@ -69,6 +410,20 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
         </DialogHeader>
 
         <div className="grid gap-6 py-4">
+          {/* Currency selector */}
+          <div className="flex justify-end">
+            <Select value={selectedCurrency} onValueChange={handleCurrencyChange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder={t('payment.currency')} />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(currencyOptions).map(([value, { label }]) => (
+                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Monthly subscription option */}
             <Card 
@@ -153,30 +508,42 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
               {t('payment.secure_info')}
             </div>
             
-            <Button 
-              className="w-full" 
-              onClick={handlePayment}
-              disabled={isProcessing || isLoading}
-            >
-              {isProcessing ? (
-                <>
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                  {t('payment.processing')}
-                </>
-              ) : isLoading ? (
-                <>
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                  {t('common.loading')}
-                </>
-              ) : (
-                <>
-                  <Icons.payment className="mr-2 h-4 w-4" />
-                  {selectedPlan === 'monthly' 
-                    ? `${locale === 'zh' ? '月付' : 'Pay'} ${pricing.monthly.display}`
-                    : `${locale === 'zh' ? '年付' : 'Pay'} ${pricing.yearly.display_total}`}
-                </>
-              )}
-            </Button>
+            {/* Payment option tabs - uncomment to enable both payment methods
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <Button 
+                variant={paymentMethod === 'elements' ? 'default' : 'outline'}
+                onClick={() => setPaymentMethod('elements')}
+                className="w-full"
+              >
+                Card Payment
+              </Button>
+              <Button 
+                variant={paymentMethod === 'checkout' ? 'default' : 'outline'}
+                onClick={() => setPaymentMethod('checkout')}
+                className="w-full"
+              >
+                Checkout
+              </Button>
+            </div>
+            */}
+            
+            {paymentMethod === 'elements' ? (
+              <Elements stripe={stripePromise}>
+                <CheckoutForm 
+                  selectedPlan={selectedPlan} 
+                  onSuccessfulPayment={handleSuccessfulPayment} 
+                  price={selectedPlan === 'monthly' ? pricing.monthly.display : pricing.yearly.display_total}
+                  currency={selectedCurrency}
+                />
+              </Elements>
+            ) : (
+              <CheckoutRedirect
+                selectedPlan={selectedPlan}
+                onSuccessfulPayment={handleSuccessfulPayment}
+                price={selectedPlan === 'monthly' ? pricing.monthly.display : pricing.yearly.display_total}
+                currency={selectedCurrency}
+              />
+            )}
           </div>
         </div>
       </DialogContent>

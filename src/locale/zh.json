@@ -165,7 +165,8 @@
     "reset_monthly": "翻译次数于每月开始时重置",
     "free_user_description": "您目前是免费用户。升级会员可获得无限翻译次数。",
     "upgrade_membership": "升级会员",
-    "extend_membership": "延长会员"
+    "extend_membership": "延长会员",
+    "manage_billing": "管理账单"
   },
   "payment": {
     "title": "选择订阅方案",
@@ -174,6 +175,7 @@
     "billed_yearly": "按年计费",
     "pay_monthly": "月付 ¥{price}",
     "pay_yearly": "年付 ¥{price}",
+    "pay": "付款",
     "processing": "支付处理中...",
     "success": "支付成功",
     "monthly_success": "您已成功订阅月付方案",
@@ -181,6 +183,9 @@
     "error": "支付失败",
     "error_description": "处理您的支付时出现错误，请重试。",
     "secure_info": "所有支付都是安全加密的",
-    "benefits": "您将获得"
+    "benefits": "您将获得",
+    "cancel_description": "支付已取消。您可以在准备好时再次尝试。",
+    "success_description": "您的支付已成功。现在您可以使用所有功能。",
+    "currency": "选择货币"
   }
 } 

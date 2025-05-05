@@ -11,15 +11,26 @@ pricing_bp = Blueprint('pricing', __name__)
 @pricing_bp.route('/api/pricing', methods=['GET'])
 def get_pricing():
     """
-    Get pricing information in the appropriate currency based on locale.
+    Get pricing information in the appropriate currency.
     Query parameters:
     - locale: The user's locale (e.g., 'en', 'zh')
+    - currency: Optional override for currency (e.g., 'usd', 'cny')
     """
     # Get locale from query parameter, default to 'en'
     locale = request.args.get('locale', 'en')
     
-    # Determine currency based on locale
-    currency = LOCALE_TO_CURRENCY.get(locale, 'usd')
+    # Get currency from query parameter or determine based on locale
+    currency_param = request.args.get('currency')
+    
+    if currency_param and currency_param.lower() in CURRENCY_RATES:
+        # Use the provided currency if valid
+        currency = currency_param.lower()
+        # Map ESP to EUR
+        if currency == 'esp':
+            currency = 'eur'
+    else:
+        # Otherwise determine from locale
+        currency = LOCALE_TO_CURRENCY.get(locale, 'usd')
     
     # Get currency conversion rate
     rate = CURRENCY_RATES.get(currency, 1.0)

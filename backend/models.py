@@ -80,6 +80,8 @@ class User(db.Model):
     membership_start = db.Column(db.DateTime)
     membership_end = db.Column(db.DateTime)
     is_paid_user = db.Column(db.Boolean, default=False)
+    # Stripe integration
+    stripe_customer_id = db.Column(db.String(255), nullable=True)
     
     def set_password(self, password):
         """Hash the password and store it."""

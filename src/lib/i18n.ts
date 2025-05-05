@@ -182,12 +182,14 @@ export type TranslationKey =
   | 'profile.free_user_description'
   | 'profile.upgrade_membership'
   | 'profile.extend_membership'
+  | 'profile.manage_billing'
   | 'payment.title'
   | 'payment.subtitle'
   | 'payment.billed_monthly'
   | 'payment.billed_yearly'
   | 'payment.pay_monthly'
   | 'payment.pay_yearly'
+  | 'payment.pay'
   | 'payment.processing'
   | 'payment.success'
   | 'payment.monthly_success'
@@ -195,7 +197,10 @@ export type TranslationKey =
   | 'payment.error'
   | 'payment.error_description'
   | 'payment.secure_info'
-  | 'payment.benefits';
+  | 'payment.benefits'
+  | 'payment.cancel_description'
+  | 'payment.success_description'
+  | 'payment.currency';
 
 // Define available locales map
 export const locales = {

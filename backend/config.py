@@ -33,6 +33,8 @@ FREE_USER_TRANSLATION_PERIOD = 'weekly'  # 'daily', 'weekly', or 'monthly'
 INVITATION_MEMBERSHIP_MONTHS = 3  # Default duration for invitation-based membership in months
 PAID_MEMBERSHIP_MONTHLY = 1  # Duration for monthly paid membership
 PAID_MEMBERSHIP_YEARLY = 12  # Duration for yearly paid membership
+GUEST_FREE_USER_MAX_FILE_SIZE = 50000000  # 50MB
+
 
 # Pricing configuration (in USD)
 PRICING = {
@@ -50,7 +52,7 @@ PRICING = {
 # These rates should be updated regularly via an external API
 CURRENCY_RATES = {
     "usd": 1.0,     # US Dollar (base currency)
-    "cny": 7.22,    # Chinese Yuan
+    "cny": 6.2565,    # Chinese Yuan, made discount to achieve 49.99CNY/month
     "eur": 0.93,    # Euro (for French and German)
     "jpy": 159.40,  # Japanese Yen
     "krw": 1370.50, # Korean Won
@@ -65,7 +67,7 @@ CURRENCY_RATES = {
 LOCALE_TO_CURRENCY = {
     "en": "usd",  # English - US Dollar
     "zh": "cny",  # Chinese - Yuan
-    "es": "esp",  # Spanish - Euro (Spain) 
+    "es": "eur",  # Spanish - Euro
     "fr": "eur",  # French - Euro
     "de": "eur",  # German - Euro
     "ja": "jpy",  # Japanese - Yen

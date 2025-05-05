@@ -23,6 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 
 // API endpoint base URL
 const API_URL = 'http://localhost:5000';
@@ -36,6 +37,8 @@ export default function ProfilePage() {
   const [isLoadingMembership, setIsLoadingMembership] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
@@ -144,6 +147,47 @@ export default function ProfilePage() {
   const handlePaymentSuccess = () => {
     // Refresh membership status after successful payment
     fetchMembershipStatus();
+  };
+
+  // Add this function to handle opening the Stripe Customer Portal
+  const handleManageSubscription = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+      
+      const response = await fetch(`${API_URL}/api/payment/create-portal-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          return_url: window.location.href
+        })
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to create portal session');
+      }
+      
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (error) {
+      console.error('Error opening portal:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to open subscription management',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // If not yet client-side (first render), return minimal content to avoid hydration mismatch
@@ -325,10 +369,16 @@ export default function ProfilePage() {
                 )}
                 
                 {membershipStatus && membershipStatus.user_type === 'paid' && (
-                  <Button onClick={openPaymentModal} variant="outline">
-                    <Icons.payment className="mr-2 h-4 w-4" />
-                    {t('profile.extend_membership')}
-                  </Button>
+                  <>
+                    <Button onClick={openPaymentModal} variant="outline">
+                      <Icons.payment className="mr-2 h-4 w-4" />
+                      {t('profile.extend_membership')}
+                    </Button>
+                    <Button onClick={handleManageSubscription} variant="outline" className="ml-2">
+                      <Icons.settings className="mr-2 h-4 w-4" />
+                      {t('profile.manage_billing')}
+                    </Button>
+                  </>
                 )}
               </CardFooter>
             </Card>

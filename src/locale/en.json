@@ -165,7 +165,8 @@
     "reset_monthly": "Translations reset at the start of each month",
     "free_user_description": "You are currently on the free plan. Upgrade to get unlimited translations.",
     "upgrade_membership": "Upgrade Membership",
-    "extend_membership": "Extend Membership"
+    "extend_membership": "Extend Membership",
+    "manage_billing": "Manage Billing"
   },
   "payment": {
     "title": "Choose a Subscription Plan",
@@ -174,6 +175,7 @@
     "billed_yearly": "Billed annually",
     "pay_monthly": "Pay ¥{price} monthly",
     "pay_yearly": "Pay ¥{price} yearly",
+    "pay": "Pay",
     "processing": "Processing payment...",
     "success": "Payment Successful",
     "monthly_success": "You have successfully subscribed to the monthly plan",
@@ -181,6 +183,9 @@
     "error": "Payment Failed",
     "error_description": "There was an error processing your payment. Please try again.",
     "secure_info": "All payments are secure and encrypted",
-    "benefits": "You will receive"
+    "benefits": "You will receive",
+    "cancel_description": "Payment has been canceled. You can try again when you're ready.",
+    "success_description": "Your payment was successful. You now have full access to all features.",
+    "currency": "Select Currency"
   }
 } 

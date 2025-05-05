@@ -8,6 +8,7 @@ import auth
 import translate
 from pricing import pricing_bp
 import membership_api
+import payment_api
 
 # Load Gemini API key from .env - try multiple locations
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -56,6 +57,7 @@ def create_app():
     translate.register_routes(app)
     app.register_blueprint(pricing_bp)
     app.register_blueprint(membership_api.membership_bp)
+    app.register_blueprint(payment_api.payment_bp)
 
     return app
 
