@@ -14,11 +14,11 @@
     "loading": "Cargando..."
   },
   "errors": {
-    "no_file": "Por favor, suba un archivo primero.",
-    "same_language": "Los idiomas de origen y destino no pueden ser iguales.",
+    "no_file": "Por favor, sube un archivo primero.",
+    "same_language": "Los idiomas de origen y destino no pueden ser los mismos.",
     "translation_failed": "Se produjo un error durante la traducción.",
     "download_failed": "Error al descargar el archivo traducido.",
-    "invalid_file_type": "Por favor, suba un archivo PowerPoint (.ppt o .pptx).",
+    "invalid_file_type": "Por favor, sube un archivo PowerPoint (solo se admite el formato .pptx).",
     "unknown_error": "Se produjo un error desconocido.",
     "required_fields": "Campos obligatorios",
     "fill_all_fields": "Por favor, complete todos los campos obligatorios.",

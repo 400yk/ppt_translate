@@ -33,7 +33,7 @@ FREE_USER_TRANSLATION_PERIOD = 'weekly'  # 'daily', 'weekly', or 'monthly'
 INVITATION_MEMBERSHIP_MONTHS = 3  # Default duration for invitation-based membership in months
 PAID_MEMBERSHIP_MONTHLY = 1  # Duration for monthly paid membership
 PAID_MEMBERSHIP_YEARLY = 12  # Duration for yearly paid membership
-GUEST_FREE_USER_MAX_FILE_SIZE = 50000000  # 50MB
+GUEST_FREE_USER_MAX_FILE_SIZE = 50  # 50MB
 
 
 # Pricing configuration (in USD)

@@ -14,11 +14,11 @@
     "loading": "로딩 중..."
   },
   "errors": {
-    "no_file": "먼저 파일을 업로드해 주세요.",
-    "same_language": "원본 언어와 대상 언어가 동일할 수 없습니다.",
+    "no_file": "파일을 먼저 업로드해 주세요.",
+    "same_language": "원본 언어와 대상 언어가 같을 수 없습니다.",
     "translation_failed": "번역 중 오류가 발생했습니다.",
     "download_failed": "번역된 파일 다운로드에 실패했습니다.",
-    "invalid_file_type": "PowerPoint 파일(.ppt 또는 .pptx)을 업로드해 주세요.",
+    "invalid_file_type": "PowerPoint 파일을 업로드해 주세요(.pptx 형식만 지원됩니다).",
     "unknown_error": "알 수 없는 오류가 발생했습니다.",
     "required_fields": "필수 항목",
     "fill_all_fields": "모든 필수 항목을 작성해 주세요.",

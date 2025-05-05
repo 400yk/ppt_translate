@@ -6,6 +6,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import User, db
 from user_manager import process_membership_purchase, get_membership_status
+import config
 
 membership_bp = Blueprint('membership', __name__)
 
@@ -110,4 +111,25 @@ def purchase_membership():
         return jsonify({
             'error': 'Failed to process payment',
             'message': str(e)
+        }), 500
+
+@membership_bp.route('/config/file-size-limit', methods=['GET'])
+def get_file_size_limit():
+    """
+    Returns the maximum file size allowed for free/guest users.
+    This endpoint is public and doesn't require authentication.
+    
+    Returns:
+        JSON response with maxFileSizeMB field
+    """
+    try:
+        return jsonify({
+            'maxFileSizeMB': config.GUEST_FREE_USER_MAX_FILE_SIZE
+        })
+    except Exception as e:
+        print(f"Error getting file size limit: {str(e)}")
+        return jsonify({
+            'error': 'Failed to get file size limit',
+            'message': str(e),
+            'maxFileSizeMB': 50  # Default fallback value
         }), 500 

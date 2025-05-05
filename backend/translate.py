@@ -31,6 +31,17 @@ def register_routes(app):
             return jsonify({'error': 'No file uploaded'}), 400
             
         file = request.files['file']
+        
+        # Check if file has a name
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+            
+        # Check file extension
+        if not file.filename.lower().endswith('.pptx'):
+            return jsonify({
+                'error': 'Invalid file format. Only .pptx files are supported. Please save your PowerPoint file in the .pptx format and try again.'
+            }), 400
+            
         src_lang = request.form.get('src_lang', 'zh')  # Default source language: Chinese
         dest_lang = request.form.get('dest_lang', 'en')  # Default target language: English
         
@@ -82,6 +93,17 @@ def register_routes(app):
             return jsonify({'error': 'No file uploaded'}), 400
             
         file = request.files['file']
+        
+        # Check if file has a name
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+            
+        # Check file extension
+        if not file.filename.lower().endswith('.pptx'):
+            return jsonify({
+                'error': 'Invalid file format. Only .pptx files are supported. Please save your PowerPoint file in the .pptx format and try again.'
+            }), 400
+            
         src_lang = request.form.get('src_lang', 'zh')  # Default source language: Chinese
         dest_lang = request.form.get('dest_lang', 'en')  # Default target language: English
         

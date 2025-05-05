@@ -16,9 +16,9 @@
   "errors": {
     "no_file": "Veuillez d'abord télécharger un fichier.",
     "same_language": "Les langues source et cible ne peuvent pas être identiques.",
-    "translation_failed": "Une erreur s'est produite pendant la traduction.",
+    "translation_failed": "Une erreur s'est produite lors de la traduction.",
     "download_failed": "Échec du téléchargement du fichier traduit.",
-    "invalid_file_type": "Veuillez télécharger un fichier PowerPoint (.ppt ou .pptx).",
+    "invalid_file_type": "Veuillez télécharger un fichier PowerPoint (seul le format .pptx est pris en charge).",
     "unknown_error": "Une erreur inconnue s'est produite.",
     "required_fields": "Champs obligatoires",
     "fill_all_fields": "Veuillez remplir tous les champs obligatoires.",

@@ -34,6 +34,9 @@ import { RegistrationDialog } from '@/components/registration-dialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PaymentModal } from "@/components/payment-modal";
 
+// Define API URL
+const API_URL = 'http://localhost:5000';
+
 // Define available languages (codes only)
 const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
 type LanguageCode = typeof languageCodes[number];
@@ -77,11 +80,37 @@ export default function TranslationPage() {
   const [limitMessage, setLimitMessage] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [fileSizeExceeded, setFileSizeExceeded] = useState(false);
+  const [maxFileSizeMB, setMaxFileSizeMB] = useState(50); // Default to 50MB, will be updated from backend
   
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Fetch max file size from backend config when component mounts
+  useEffect(() => {
+    const fetchMaxFileSize = async () => {
+      try {
+        // Use the API_URL constant instead of hardcoding
+        const response = await fetch(`${API_URL}/config/file-size-limit`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.maxFileSizeMB) {
+            setMaxFileSizeMB(data.maxFileSizeMB);
+            console.log("Max file size loaded from backend:", data.maxFileSizeMB, "MB");
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch max file size from backend:", error);
+        // Keep using the default 50MB value
+      }
+    };
+
+    if (isClient) {
+      fetchMaxFileSize();
+    }
+  }, [isClient]);
 
   // Set HTML lang attribute on initial render
   useEffect(() => {
@@ -206,9 +235,25 @@ export default function TranslationPage() {
 
   // Validate file extension
   const validateFileExtension = (fileName: string): boolean => {
-    const validExtensions = ['.pptx', '.ppt'];
+    const validExtensions = ['.pptx'];
     const fileExtension = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
     return validExtensions.includes(fileExtension);
+  };
+
+  // Check if file size is within limits for non-paid users
+  const validateFileSize = (fileSize: number): boolean => {
+    // Use max file size from backend config
+    const MAX_SIZE_BYTES = maxFileSizeMB * 1024 * 1024;
+    
+    // Only apply size limit for non-paid users
+    // For now, assume all authenticated users who aren't guests are paid users
+    const isPaidUser = isAuthenticated && !isGuestUser;
+    
+    if (!isPaidUser && fileSize > MAX_SIZE_BYTES) {
+      return false;
+    }
+    
+    return true;
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -227,8 +272,20 @@ export default function TranslationPage() {
         return;
       }
       
-      // Reset invalid file type flag
+      // Check file size limit for non-paid users
+      if (!validateFileSize(selectedFile.size)) {
+        setFileSizeExceeded(true);
+        toast({
+          title: 'Warning',
+          description: `File size exceeds ${maxFileSizeMB}MB limit for free users. Please upgrade to upload larger files.`,
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      // Reset validation flags
       setInvalidFileType(false);
+      setFileSizeExceeded(false);
       
       // Reset weekly limit reached flag
       setWeeklyLimitReached(false);
@@ -248,6 +305,7 @@ export default function TranslationPage() {
     setProgress(0);
     setInvalidFileType(false);
     setWeeklyLimitReached(false);
+    setFileSizeExceeded(false);
     
     // Reset the file input
     if (fileInputRef.current) {
@@ -319,12 +377,12 @@ export default function TranslationPage() {
       }, 20);
 
       // Determine which endpoint to use and prepare headers
-      let endpointUrl = 'http://localhost:5000/translate';
+      let endpointUrl = `${API_URL}/translate`;
       let headers: HeadersInit = {};
       
       if (isGuestUser) {
         // Use guest endpoint for guest users
-        endpointUrl = 'http://localhost:5000/guest-translate';
+        endpointUrl = `${API_URL}/guest-translate`;
       } else {
         // Get auth token for authenticated users
         if (isBrowser) {
@@ -477,20 +535,33 @@ export default function TranslationPage() {
     if (droppedFiles.length > 0) {
       const droppedFile = droppedFiles[0];
       
-      // Use the same validation as in handleFileChange
-      if (validateFileExtension(droppedFile.name)) {
-        setInvalidFileType(false);
-        setFile(droppedFile);
-        setTranslatedFileUrl(null);
-        setProgress(0);
-      } else {
+      // Use the same validations as in handleFileChange
+      if (!validateFileExtension(droppedFile.name)) {
         setInvalidFileType(true);
         toast({
           title: 'Warning',
           description: t('errors.invalid_file_type'),
           variant: 'destructive',
         });
+        return;
       }
+      
+      // Check file size limit for non-paid users
+      if (!validateFileSize(droppedFile.size)) {
+        setFileSizeExceeded(true);
+        toast({
+          title: 'Warning',
+          description: `File size exceeds ${maxFileSizeMB}MB limit for free users. Please upgrade to upload larger files.`,
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      setInvalidFileType(false);
+      setFileSizeExceeded(false);
+      setFile(droppedFile);
+      setTranslatedFileUrl(null);
+      setProgress(0);
     }
   };
 
@@ -658,6 +729,24 @@ export default function TranslationPage() {
             </Alert>
           )}
           
+          {/* File size limit exceeded banner */}
+          {isClient && fileSizeExceeded && (
+            <Alert className="border-amber-500 bg-amber-50 w-full mb-8">
+              <Icons.info className="h-4 w-4 text-amber-500" />
+              <AlertTitle className="text-amber-700">File Size Limit</AlertTitle>
+              <AlertDescription className="text-amber-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <span>File size exceeds {maxFileSizeMB}MB limit for free users. Please upgrade to upload larger files.</span>
+                <Button 
+                  variant="outline" 
+                  className="border-amber-500 text-amber-700 hover:bg-amber-200 hover:text-amber-900 shrink-0"
+                  onClick={() => setShowPaymentModal(true)}
+                >
+                  {t('buttons.upgrade') || 'Upgrade'}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {/* Update the drop zone div to handle drag and drop events */}
           <div 
             ref={dropZoneRef}
@@ -763,7 +852,7 @@ export default function TranslationPage() {
                   <Button 
                     onClick={handleButtonAction}
                     className={`w-full ${translatedFileUrl ? styles.shiningButton : ''}`}
-                    disabled={isTranslating || invalidFileType}
+                    disabled={isTranslating || invalidFileType || fileSizeExceeded}
                   >
                     {isTranslating && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
                     {getButtonText()}

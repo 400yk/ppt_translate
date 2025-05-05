@@ -14,11 +14,11 @@
     "loading": "読み込み中..."
   },
   "errors": {
-    "no_file": "先にファイルをアップロードしてください。",
-    "same_language": "翻訳元と翻訳先の言語は同じにできません。",
+    "no_file": "ファイルをアップロードしてください。",
+    "same_language": "元の言語と翻訳先の言語が同じです。",
     "translation_failed": "翻訳中にエラーが発生しました。",
     "download_failed": "翻訳ファイルのダウンロードに失敗しました。",
-    "invalid_file_type": "PowerPointファイル（.pptまたは.pptx）をアップロードしてください。",
+    "invalid_file_type": "PowerPointファイルをアップロードしてください（.pptx形式のみ対応）。",
     "unknown_error": "不明なエラーが発生しました。",
     "required_fields": "必須項目",
     "fill_all_fields": "すべての必須項目を入力してください。",

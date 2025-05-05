@@ -18,7 +18,7 @@
     "same_language": "源语言和目标语言不能相同。",
     "translation_failed": "翻译过程中发生错误。",
     "download_failed": "下载已翻译文件失败。",
-    "invalid_file_type": "请上传PowerPoint文件（.ppt或.pptx）。",
+    "invalid_file_type": "请上传PowerPoint文件（仅支持pptx）。",
     "unknown_error": "发生未知错误。",
     "required_fields": "必填字段",
     "fill_all_fields": "请填写所有必填字段。",

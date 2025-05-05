@@ -18,7 +18,7 @@
     "same_language": "Source and target languages cannot be the same.",
     "translation_failed": "An error occurred during translation.",
     "download_failed": "Failed to download the translated file.",
-    "invalid_file_type": "Please upload a PowerPoint file (.ppt or .pptx).",
+    "invalid_file_type": "Please upload a PowerPoint file (only .pptx format is supported).",
     "unknown_error": "An unknown error occurred.",
     "required_fields": "Required Fields",
     "fill_all_fields": "Please fill out all required fields.",
