@@ -76,5 +76,24 @@
     "ja": "Japanese",
     "ko": "Korean",
     "ru": "Russian"
+  },
+  "pricing": {
+    "title": "Pricing",
+    "subtitle": "Choose the plan that fits your translation needs",
+    "free_plan": "Free Plan",
+    "paid_plan": "Paid Plan",
+    "free_desc": "For occasional translation needs",
+    "paid_desc": "For regular translation needs",
+    "monthly": "Monthly",
+    "yearly": "Yearly (15% off)",
+    "current_plan": "Current Plan",
+    "upgrade": "Upgrade Now",
+    "features": {
+      "upload_limit": "File Upload Limit",
+      "char_per_file": "Max Characters per File",
+      "monthly_limit": "Monthly Character Limit",
+      "file_size": "Max File Size",
+      "support": "Support"
+    }
   }
 } 

@@ -58,23 +58,42 @@
     "login_success": "登录成功",
     "welcome_back": "欢迎回来！",
     "logout": "退出登录",
-    "no_account": "还没有账号？",
+    "no_account": "没有账号？",
     "have_account": "已有账号？",
     "confirm_password": "确认密码",
     "confirm_password_placeholder": "确认您的密码",
     "invitation_code": "邀请码",
     "invitation_code_placeholder": "输入您的邀请码",
-    "valid_code": "有效的邀请码。剩余使用次数：{0}。",
+    "valid_code": "有效的邀请码。剩余 {0} 次使用机会。",
     "invalid_code": "无效的邀请码。"
   },
   "languages": {
     "zh": "中文",
     "en": "英文",
-    "es": "西班牙文",
-    "fr": "法文",
-    "de": "德文",
-    "ja": "日文",
-    "ko": "韩文",
-    "ru": "俄文"
+    "es": "西班牙语",
+    "fr": "法语",
+    "de": "德语",
+    "ja": "日语",
+    "ko": "韩语",
+    "ru": "俄语"
+  },
+  "pricing": {
+    "title": "价格方案",
+    "subtitle": "选择适合您翻译需求的方案",
+    "free_plan": "免费方案",
+    "paid_plan": "付费方案",
+    "free_desc": "适用于偶尔翻译需求",
+    "paid_desc": "适用于经常性翻译需求",
+    "monthly": "按月付费",
+    "yearly": "按年付费（优惠15%）",
+    "current_plan": "当前方案",
+    "upgrade": "立即升级",
+    "features": {
+      "upload_limit": "文件上传限制",
+      "char_per_file": "每个文件字符限制",
+      "monthly_limit": "每月字符限制",
+      "file_size": "最大文件大小",
+      "support": "客户支持"
+    }
   }
 } 

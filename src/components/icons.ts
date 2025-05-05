@@ -26,7 +26,9 @@ import {
   Upload,
   User, 
   X, 
-  Workflow
+  Workflow,
+  CreditCard,
+  Menu
 } from 'lucide-react';
 
 const Icons = {
@@ -47,9 +49,11 @@ const Icons = {
   loader: Loader2,
   logout: LogOut,
   mail: Mail,
+  menu: Menu,
   messageSquare: MessageSquare,
   plus: Plus,
   plusCircle: PlusCircle,
+  pricing: CreditCard,
   search: Search,
   server: Server,
   settings: Settings,

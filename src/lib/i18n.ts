@@ -103,6 +103,21 @@ export type TranslationKey =
   | 'auth.invitation_code_placeholder'
   | 'auth.valid_code'
   | 'auth.invalid_code'
+  | 'pricing.title'
+  | 'pricing.subtitle'
+  | 'pricing.free_plan'
+  | 'pricing.paid_plan'
+  | 'pricing.free_desc'
+  | 'pricing.paid_desc'
+  | 'pricing.monthly'
+  | 'pricing.yearly'
+  | 'pricing.current_plan'
+  | 'pricing.upgrade'
+  | 'pricing.features.upload_limit'
+  | 'pricing.features.char_per_file'
+  | 'pricing.features.monthly_limit'
+  | 'pricing.features.file_size'
+  | 'pricing.features.support'
   | LanguageKey;
 
 // Define available locales map

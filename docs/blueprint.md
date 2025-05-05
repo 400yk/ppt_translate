@@ -1,4 +1,4 @@
-# **App Name**: LinguaSlides
+# **App Name**: Translide
 
 ## Core Features:
 
