@@ -69,7 +69,7 @@ def check_and_update_schema():
                 
                 # Now run the migration script to update existing users
                 logger.info("Running data migration...")
-                from migrate_sqlite.add_membership_fields import migrate
+                from db.migrate_sqlite.add_membership_fields import migrate
                 migrate_result = migrate()
                 
                 if migrate_result:
