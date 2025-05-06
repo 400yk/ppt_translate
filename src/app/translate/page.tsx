@@ -33,6 +33,7 @@ import { canGuestUseTranslation, consumeGuestUsage, fetchGuestUsage } from '@/li
 import { RegistrationDialog } from '@/components/registration-dialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PaymentModal } from "@/components/payment-modal";
+import { GuestExpired } from "@/components/guest-expired";
 
 // Define API URL
 const API_URL = process.env.API_URL || 'http://localhost:5000';
@@ -84,6 +85,7 @@ export default function TranslationPage() {
   const [maxFileSizeMB, setMaxFileSizeMB] = useState(50); // Default to 50MB, will be updated from backend
   const [membershipStatus, setMembershipStatus] = useState<any>(null);
   const [isLoadingMembership, setIsLoadingMembership] = useState(false);
+  const [guestCheckComplete, setGuestCheckComplete] = useState(false); // New state to track guest check completion
   
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
@@ -165,6 +167,9 @@ export default function TranslationPage() {
             } else {
               setShowRegistrationDialog(true);
             }
+          } finally {
+            // Mark guest check as complete regardless of outcome
+            setGuestCheckComplete(true);
           }
         };
         
@@ -175,6 +180,8 @@ export default function TranslationPage() {
         setIsGuestUser(false);
         // Clear any weekly limit flags that might be set for the current session
         setWeeklyLimitReached(false);
+        // Authentication is complete, so guest check is also complete
+        setGuestCheckComplete(true);
       }
     }
   }, [isLoading, isAuthenticated]);
@@ -597,7 +604,7 @@ export default function TranslationPage() {
   // Add a useEffect to force rerender on locale changes
   useEffect(() => {
     // Ensure translations are updated when locale changes
-    const forceUpdate = () => {
+    const forceUpdate = (): void => {
       setForceRender(prev => prev + 1);
     };
     
@@ -618,8 +625,18 @@ export default function TranslationPage() {
     );
   }
 
-  // If not authenticated and not a guest user, we're redirecting, but still show a spinner
-  if (!isAuthenticated && !isGuestUser) {
+  // If not authenticated and guest check is complete but not a guest user, show the guest expired page
+  if (!isAuthenticated && !isGuestUser && guestCheckComplete) {
+    return (
+      <GuestExpired
+        locale={locale}
+        onRegister={() => setShowRegistrationDialog(true)}
+      />
+    );
+  }
+
+  // If auth is not loading but guest check is not complete, show loading spinner
+  if (!guestCheckComplete) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
