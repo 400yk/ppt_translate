@@ -34,7 +34,13 @@
     "invitation_required": "招待コードを入力するか、コードなしで登録を選択してください。",
     "registration_failed": "登録に失敗しました",
     "authentication_error": "認証エラー",
-    "session_expired": "セッションが期限切れになりました。もう一度ログインしてください。"
+    "session_expired": "セッションが期限切れになりました。もう一度ログインしてください。",
+    "code_already_used": "招待コードは既に使用されています",
+    "code_deactivated": "招待コードは無効化されています",
+    "code_invalid": "無効な招待コードです",
+    "missing_fields": "必須項目が不足しています",
+    "username_exists": "ユーザー名は既に存在します",
+    "email_exists": "メールアドレスは既に登録されています"
   },
   "success": {
     "title": "成功",
@@ -77,7 +83,7 @@
     "invitation_code": "招待コード",
     "invitation_code_optional": "招待コード（任意）",
     "invitation_code_placeholder": "招待コードを入力",
-    "valid_code": "有効なコードです。残り{0}回使用可能。",
+    "valid_code": "有効なコードです。",
     "invalid_code": "無効な招待コードです。",
     "back_to_home": "ホームに戻る",
     "cancel": "キャンセル",

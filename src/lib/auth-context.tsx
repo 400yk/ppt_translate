@@ -25,6 +25,9 @@ interface AuthContextType {
     valid: boolean;
     remaining?: number;
     error?: string;
+    errorKey?: string;
+    message?: string;
+    messageKey?: string;
   }>;
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script to generate invitation codes for the application.
-Run this script to create the initial set of 50 invitation codes.
+Run this script to create a set of invitation codes.
 """
 
 import os
@@ -24,7 +24,7 @@ def create_app():
     
     return app
 
-def generate_invitation_codes(count=50, max_uses=10):
+def generate_invitation_codes(count=50):
     """Generate invitation codes and print them."""
     app = create_app()
     
@@ -33,7 +33,7 @@ def generate_invitation_codes(count=50, max_uses=10):
         db.create_all()
         
         # Generate codes
-        codes = InvitationCode.generate_batch(count=count, max_uses=max_uses)
+        codes = InvitationCode.generate_batch(count=count)
         
         # Print the generated codes
         print(f"Generated {len(codes)} invitation codes:")
@@ -43,7 +43,6 @@ def generate_invitation_codes(count=50, max_uses=10):
 if __name__ == '__main__':
     # Parse command line arguments
     count = 50
-    max_uses = 10
     
     if len(sys.argv) > 1:
         try:
@@ -51,10 +50,4 @@ if __name__ == '__main__':
         except ValueError:
             print(f"Invalid count: {sys.argv[1]}. Using default: {count}")
     
-    if len(sys.argv) > 2:
-        try:
-            max_uses = int(sys.argv[2])
-        except ValueError:
-            print(f"Invalid max_uses: {sys.argv[2]}. Using default: {max_uses}")
-    
-    generate_invitation_codes(count, max_uses) 
+    generate_invitation_codes(count) 

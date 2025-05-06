@@ -10,7 +10,10 @@ def register_routes(app):
         
         # Validate input - invitation code is now optional
         if not data or not data.get('username') or not data.get('email') or not data.get('password'):
-            return jsonify({'error': 'Missing required fields'}), 400
+            return jsonify({
+                'error': 'errors.missing_fields',
+                'message': 'errors.fill_all_fields'
+            }), 400
         
         username = data.get('username')
         email = data.get('email')
@@ -19,9 +22,15 @@ def register_routes(app):
         
         # Check if user already exists
         if User.query.filter_by(username=username).first():
-            return jsonify({'error': 'Username already exists'}), 400
+            return jsonify({
+                'error': 'Username already exists',
+                'errorKey': 'errors.username_exists'
+            }), 400
         if User.query.filter_by(email=email).first():
-            return jsonify({'error': 'Email already exists'}), 400
+            return jsonify({
+                'error': 'Email already exists',
+                'errorKey': 'errors.email_exists'
+            }), 400
         
         # Variables to track invitation code status
         has_valid_invitation = False
@@ -33,15 +42,24 @@ def register_routes(app):
             if invitation_code and invitation_code.is_valid():
                 has_valid_invitation = True
             elif invitation_code_str:  # Code was provided but is invalid
-                return jsonify({'error': 'Invalid invitation code'}), 400
+                if not invitation_code:
+                    return jsonify({
+                        'error': 'Invalid invitation code',
+                        'errorKey': 'errors.code_invalid'
+                    }), 400
+                else:
+                    return jsonify({
+                        'error': 'Invitation code has already been used',
+                        'errorKey': 'errors.code_already_used'
+                    }), 400
         
         # Create new user
         user = User(username=username, email=email, invitation_code=invitation_code)
         user.set_password(password)
         
-        # Increment code usage if a valid code was provided
+        # Mark code as used if a valid code was provided
         if has_valid_invitation and invitation_code:
-            invitation_code.increment_usage()
+            invitation_code.mark_as_used()
         
         # Save user to database
         db.session.add(user)
@@ -52,6 +70,7 @@ def register_routes(app):
         
         return jsonify({
             'message': 'User registered successfully',
+            'messageKey': 'auth.register_success',
             'has_invitation': has_valid_invitation,
             'access_token': access_token
         }), 201
@@ -61,7 +80,10 @@ def register_routes(app):
         data = request.get_json()
         
         if not data or not data.get('username') or not data.get('password'):
-            return jsonify({'error': 'Missing username or password'}), 400
+            return jsonify({
+                'error': 'Missing username or password',
+                'errorKey': 'errors.missing_fields'
+            }), 400
         
         username = data.get('username')
         password = data.get('password')
@@ -69,7 +91,10 @@ def register_routes(app):
         # Find user
         user = User.query.filter_by(username=username).first()
         if not user or not user.check_password(password):
-            return jsonify({'error': 'Invalid username or password'}), 401
+            return jsonify({
+                'error': 'Invalid username or password',
+                'errorKey': 'errors.login_failed'
+            }), 401
         
         # Update last login time
         user.last_login = datetime.datetime.utcnow()
@@ -83,6 +108,7 @@ def register_routes(app):
         
         return jsonify({
             'message': 'Login successful',
+            'messageKey': 'auth.login_success',
             'has_invitation': has_invitation,
             'access_token': access_token
         }), 200
@@ -95,10 +121,13 @@ def register_routes(app):
         user = User.query.filter_by(username=username).first()
         
         if not user:
-            return jsonify({'error': 'User not found'}), 404
+            return jsonify({
+                'error': 'User not found',
+                'errorKey': 'errors.authentication_error'
+            }), 404
         
         # Generate 50 invitation codes
-        codes = InvitationCode.generate_batch(count=50, max_uses=10)
+        codes = InvitationCode.generate_batch(count=50)
         
         return jsonify({
             'message': 'Invitation codes generated successfully',
@@ -110,22 +139,34 @@ def register_routes(app):
         data = request.get_json()
         
         if not data or not data.get('code'):
-            return jsonify({'error': 'Invitation code is required'}), 400
+            return jsonify({
+                'error': 'Invitation code is required',
+                'errorKey': 'errors.missing_fields',
+                'valid': False
+            }), 400
         
         code = data.get('code')
         invitation = InvitationCode.query.filter_by(code=code).first()
         
         if not invitation:
-            return jsonify({'valid': False, 'error': 'Invalid invitation code'}), 200
+            return jsonify({
+                'valid': False,
+                'error': 'Invalid invitation code',
+                'errorKey': 'errors.code_invalid'
+            }), 200
         
         if not invitation.is_valid():
-            return jsonify({'valid': False, 'error': 'Invitation code has already been used'}), 200
+            return jsonify({
+                'valid': False,
+                'error': 'Invitation code has already been used',
+                'errorKey': 'errors.code_already_used'
+            }), 200
         
         return jsonify({
             'valid': True,
-            'uses': invitation.uses,
-            'max_uses': invitation.max_uses,
-            'remaining': invitation.max_uses - invitation.uses
+            'message': 'Valid invitation code',
+            'messageKey': 'auth.valid_code',
+            'remaining': 1 if invitation.is_valid() else 0
         }), 200
 
     @app.route('/api/user/usage', methods=['GET'])
@@ -143,9 +184,6 @@ def register_routes(app):
             usage_info = {
                 'username': user.username,
                 'invitation_code': invitation_code.code,
-                'translations_used': invitation_code.uses,
-                'translations_max': invitation_code.max_uses,
-                'translations_remaining': invitation_code.max_uses - invitation_code.uses,
                 'code_active': invitation_code.active,
                 'registration_date': user.created_at.isoformat(),
                 'last_login': user.last_login.isoformat() if user.last_login else None
@@ -186,12 +224,10 @@ def register_routes(app):
                 'id': code.id,
                 'code': code.code,
                 'created_at': code.created_at.isoformat(),
-                'max_uses': code.max_uses,
-                'uses': code.uses,
-                'remaining': code.max_uses - code.uses,
                 'active': code.active,
                 'last_used': code.last_used.isoformat() if code.last_used else None,
-                'user_count': user_count
+                'user_count': user_count,
+                'is_used': user_count > 0
             })
             
         return jsonify({
@@ -225,9 +261,6 @@ def register_routes(app):
         if 'active' in data:
             code.active = data['active']
             
-        if 'max_uses' in data:
-            code.max_uses = data['max_uses']
-            
         db.session.commit()
         
         return jsonify({
@@ -235,9 +268,7 @@ def register_routes(app):
             'code': {
                 'id': code.id,
                 'code': code.code,
-                'max_uses': code.max_uses,
-                'uses': code.uses,
-                'remaining': code.max_uses - code.uses,
-                'active': code.active
+                'active': code.active,
+                'is_used': code.users.count() > 0
             }
         }), 200 

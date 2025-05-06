@@ -10,8 +10,6 @@ class InvitationCode(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(12), unique=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-    max_uses = db.Column(db.Integer, default=10)
-    uses = db.Column(db.Integer, default=0)
     active = db.Column(db.Boolean, default=True)
     last_used = db.Column(db.DateTime)
     
@@ -26,33 +24,27 @@ class InvitationCode(db.Model):
                 return code
     
     @classmethod
-    def generate_batch(cls, count=50, max_uses=10):
+    def generate_batch(cls, count=50):
         """Generate multiple invitation codes at once."""
         codes = []
         for _ in range(count):
             code = cls.generate_code()
-            invitation = cls(code=code, max_uses=max_uses)
+            invitation = cls(code=code)
             db.session.add(invitation)
             codes.append(code)
         db.session.commit()
         return codes
     
-    def increment_usage(self):
-        """Increment the usage count for this code."""
-        if self.uses < self.max_uses:
-            self.uses += 1
-            self.last_used = datetime.datetime.utcnow()
-            db.session.commit()
-            return True
-        return False
+    def mark_as_used(self):
+        """Mark this code as used by recording the timestamp."""
+        self.last_used = datetime.datetime.utcnow()
+        db.session.commit()
+        return True
     
     def is_valid(self):
         """Check if the invitation code is still valid."""
-        return self.active and self.uses < self.max_uses
-    
-    def remaining_uses(self):
-        """Get the number of uses remaining."""
-        return max(0, self.max_uses - self.uses)
+        # A code is valid if it's active and not yet used by any user
+        return self.active and not self.users.first()
     
     def deactivate(self):
         """Deactivate this invitation code."""

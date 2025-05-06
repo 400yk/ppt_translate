@@ -34,7 +34,13 @@
     "invitation_required": "Please enter an invitation code or choose to register without one.",
     "registration_failed": "Registration Failed",
     "authentication_error": "Authentication Error",
-    "session_expired": "Your session has expired. Please login again."
+    "session_expired": "Your session has expired. Please login again.",
+    "code_already_used": "Invitation code has already been used",
+    "code_deactivated": "Invitation code has been deactivated",
+    "code_invalid": "Invalid invitation code",
+    "missing_fields": "Missing required fields",
+    "username_exists": "Username already exists",
+    "email_exists": "Email already exists"
   },
   "success": {
     "title": "Success",
@@ -77,7 +83,7 @@
     "invitation_code": "Invitation Code",
     "invitation_code_optional": "Invitation Code (Optional)",
     "invitation_code_placeholder": "Enter your invitation code",
-    "valid_code": "Valid code. {0} uses remaining.",
+    "valid_code": "Valid code.",
     "invalid_code": "Invalid invitation code.",
     "back_to_home": "Back to Home",
     "cancel": "Cancel",

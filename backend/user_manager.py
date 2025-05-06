@@ -7,6 +7,7 @@ from flask import jsonify
 from models import User, TranslationRecord, db
 from config import FREE_USER_TRANSLATION_LIMIT, FREE_USER_TRANSLATION_PERIOD, GUEST_TRANSLATION_LIMIT
 from guest_tracker import guest_tracker
+from utils import error_response
 
 def check_user_permission(user):
     """
@@ -27,11 +28,10 @@ def check_user_permission(user):
         
     # Check if user has a valid invitation code
     elif user.invitation_code:
-        # Users with invitation codes use their code's quota
+        # Check if the invitation code is valid
         if user.invitation_code.is_valid():
-            user.invitation_code.increment_usage()
-            print(f"Updated usage count for invitation code: {user.invitation_code.code}")
-            print(f"Current usage: {user.invitation_code.uses}/{user.invitation_code.max_uses}")
+            user.invitation_code.mark_as_used()
+            print(f"Marked invitation code as used: {user.invitation_code.code}")
             
             # If this is their first use of the invitation code, activate their membership
             if user.is_paid_user is False and user.membership_start is None:
@@ -40,7 +40,11 @@ def check_user_permission(user):
             
             return True, None
         else:
-            return False, jsonify({'error': 'Your invitation code has reached its usage limit or has been deactivated'}), 403
+            return False, error_response(
+                'Your invitation code has already been used or has been deactivated',
+                'errors.code_already_used',
+                403
+            )
         
     # Check free user translation limits
     else:
@@ -57,10 +61,11 @@ def check_user_permission(user):
         
         if period_count >= FREE_USER_TRANSLATION_LIMIT:
             # User has already used their quota
-            return False, jsonify({
-                'error': f'{period_name.capitalize()} translation limit reached',
-                'message': f'Free users can only perform {FREE_USER_TRANSLATION_LIMIT} translation(s) per {period_name}. Consider upgrading to a paid membership for unlimited translations.'
-            }), 403
+            return False, error_response(
+                f'{period_name.capitalize()} translation limit reached',
+                'pricing.weekly_limit_title',
+                403
+            )
         
         print(f"User has used {period_count}/{FREE_USER_TRANSLATION_LIMIT} translations this {period_name}")
         return True, None
@@ -121,10 +126,7 @@ def get_membership_status(user):
             'user_type': 'invitation',
             'is_active': True,
             'invitation_code': user.invitation_code.code,
-            'uses': user.invitation_code.uses,
-            'max_uses': user.invitation_code.max_uses,
-            'remaining_uses': user.invitation_code.remaining_uses(),
-            'translations_limit': user.invitation_code.max_uses
+            'translations_limit': 'unlimited'
         }
     else:
         # Free user

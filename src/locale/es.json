@@ -34,7 +34,13 @@
     "invitation_required": "Por favor, introduzca un código de invitación o elija registrarse sin uno.",
     "registration_failed": "Registro fallido",
     "authentication_error": "Error de autenticación",
-    "session_expired": "Su sesión ha caducado. Por favor, inicie sesión de nuevo."
+    "session_expired": "Su sesión ha caducado. Por favor, inicie sesión de nuevo.",
+    "code_already_used": "El código de invitación ya ha sido utilizado",
+    "code_deactivated": "El código de invitación ha sido desactivado",
+    "code_invalid": "Código de invitación no válido",
+    "missing_fields": "Faltan campos obligatorios",
+    "username_exists": "El nombre de usuario ya existe",
+    "email_exists": "El correo electrónico ya existe"
   },
   "success": {
     "title": "Éxito",
@@ -77,7 +83,7 @@
     "invitation_code": "Código de invitación",
     "invitation_code_optional": "Código de invitación (Opcional)",
     "invitation_code_placeholder": "Ingrese su código de invitación",
-    "valid_code": "Código válido. {0} usos restantes.",
+    "valid_code": "Código válido.",
     "invalid_code": "Código de invitación inválido.",
     "back_to_home": "Volver a inicio",
     "cancel": "Cancelar",

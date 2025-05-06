@@ -34,7 +34,13 @@
     "invitation_required": "请输入邀请码或选择不使用邀请码注册。",
     "registration_failed": "注册失败",
     "authentication_error": "认证错误",
-    "session_expired": "您的会话已过期，请重新登录。"
+    "session_expired": "您的会话已过期，请重新登录。",
+    "code_already_used": "邀请码已被使用",
+    "code_deactivated": "邀请码已被禁用",
+    "code_invalid": "无效的邀请码",
+    "missing_fields": "缺少必填字段",
+    "username_exists": "用户名已存在",
+    "email_exists": "电子邮箱已存在"
   },
   "success": {
     "title": "成功",
@@ -77,7 +83,7 @@
     "invitation_code": "邀请码",
     "invitation_code_optional": "邀请码（可选）",
     "invitation_code_placeholder": "输入您的邀请码",
-    "valid_code": "有效的邀请码。剩余 {0} 次使用机会。",
+    "valid_code": "有效的邀请码。",
     "invalid_code": "无效的邀请码。",
     "back_to_home": "返回主页",
     "cancel": "取消",

@@ -19,6 +19,7 @@ export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingCode, setIsCheckingCode] = useState(false);
   const [forceRender, setForceRender] = useState(0);
+  const [lastVerifiedCode, setLastVerifiedCode] = useState('');
   
   const { register, verifyInvitationCode } = useAuth();
   const { toast } = useToast();
@@ -33,16 +34,21 @@ export default function RegisterForm() {
       return;
     }
     
+    // Skip verification if already checking or if we already verified this exact code
+    if (isCheckingCode || code === lastVerifiedCode) return;
+    
     setIsCheckingCode(true);
     try {
       const result = await verifyInvitationCode(code);
       setCodeValid(result.valid);
+      setLastVerifiedCode(code); // Remember the code we just verified
       
       if (result.valid) {
-        // Use translation with variable replacement
-        setCodeMessage(t('auth.valid_code').replace('{0}', (result.remaining ?? 0).toString()));
+        // Use translation with the translation key from backend
+        setCodeMessage(result.messageKey ? t(result.messageKey as any) : t('auth.valid_code'));
       } else {
-        setCodeMessage(result.error || t('auth.invalid_code'));
+        // Use the error translation key if provided
+        setCodeMessage(result.errorKey ? t(result.errorKey as any) : (result.error || t('auth.invalid_code')));
       }
     } catch (error) {
       setCodeValid(false);
@@ -50,7 +56,7 @@ export default function RegisterForm() {
     } finally {
       setIsCheckingCode(false);
     }
-  }, [verifyInvitationCode, t]);
+  }, [verifyInvitationCode, t, isCheckingCode, lastVerifiedCode]);
 
   // Force component re-render on locale change
   useEffect(() => {
@@ -74,11 +80,14 @@ export default function RegisterForm() {
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     
-    if (invitationCode && invitationCode.length >= 6) {
+    // Only verify if the code is different than the last verified code
+    if (invitationCode && 
+        invitationCode.length >= 6 && 
+        invitationCode !== lastVerifiedCode) {
       timeoutId = setTimeout(() => {
         checkInvitationCode(invitationCode);
-      }, 500);
-    } else {
+      }, 800); // Increased debounce time to prevent frequent API calls
+    } else if (!invitationCode || invitationCode.length < 6) {
       setCodeValid(null);
       setCodeMessage('');
     }
@@ -86,7 +95,7 @@ export default function RegisterForm() {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [invitationCode, checkInvitationCode]);
+  }, [invitationCode, checkInvitationCode, lastVerifiedCode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,10 +131,26 @@ export default function RegisterForm() {
       });
       // Redirect to translate page after successful registration
       router.push('/translate');
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('errors.unknown_error');
+    } catch (error: any) {
+      // Get the error data
+      let errorTitle: any = 'errors.registration_failed';
+      let errorMessage = '';
+      
+      // Check if error has response data with translation keys
+      if (error.errorKey) {
+        errorTitle = error.errorKey;
+      }
+      
+      if (error.messageKey) {
+        errorMessage = t(error.messageKey as any);
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      } else {
+        errorMessage = t('errors.unknown_error');
+      }
+      
       toast({
-        title: t('errors.registration_failed'),
+        title: t(errorTitle),
         description: errorMessage,
         variant: 'destructive',
       });
