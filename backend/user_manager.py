@@ -23,7 +23,15 @@ def check_user_permission(user):
     # Check if user is a paid member
     if user.is_membership_active():
         print(f"User {user.username} has an active membership. Days remaining: {user.get_membership_days_remaining()}")
-        # Paid members have unlimited translations
+        
+        # Check character limit for paid users
+        if user.monthly_characters_used >= user.get_character_limit():
+            return False, error_response(
+                'Monthly character limit reached',
+                'pricing.character_limit_title',
+                403
+            )
+        
         return True, None
         
     # Check if user has a valid invitation code
@@ -38,6 +46,14 @@ def check_user_permission(user):
                 user.activate_paid_membership(is_invitation=True)
                 print(f"Activated invitation-based membership for {user.username} until {user.membership_end}")
             
+            # Check character limit even for invitation users
+            if user.monthly_characters_used >= user.get_character_limit():
+                return False, error_response(
+                    'Monthly character limit reached',
+                    'pricing.character_limit_title',
+                    403
+                )
+            
             return True, None
         else:
             return False, error_response(
@@ -48,7 +64,7 @@ def check_user_permission(user):
         
     # Check free user translation limits
     else:
-        # Free registered users have limited translations based on the period
+        # First check free user weekly/monthly translation limit
         print(f"Free user, checking {FREE_USER_TRANSLATION_PERIOD} limit of {FREE_USER_TRANSLATION_LIMIT}")
         
         period_start, period_name = get_period_start()
@@ -67,7 +83,16 @@ def check_user_permission(user):
                 403
             )
         
+        # Then check character limit for free users
+        if user.monthly_characters_used >= user.get_character_limit():
+            return False, error_response(
+                'Monthly character limit reached',
+                'pricing.character_limit_title',
+                403
+            )
+        
         print(f"User has used {period_count}/{FREE_USER_TRANSLATION_LIMIT} translations this {period_name}")
+        print(f"User has used {user.monthly_characters_used}/{user.get_character_limit()} characters this month")
         return True, None
 
 def get_period_start():
@@ -113,52 +138,57 @@ def get_membership_status(user):
         A dictionary with membership status details
     """
     if user.is_membership_active():
+        # Calculate next character reset date (30 days from last reset)
+        next_character_reset = None
+        if user.last_character_reset:
+            next_character_reset = user.last_character_reset + datetime.timedelta(days=30)
+            
         return {
             'user_type': 'paid',
             'is_active': True,
             'membership_start': user.membership_start.isoformat() if user.membership_start else None,
             'membership_end': user.membership_end.isoformat() if user.membership_end else None,
             'days_remaining': user.get_membership_days_remaining(),
-            'translations_limit': 'unlimited'
+            'translations_limit': 'unlimited',
+            'character_limit': user.get_character_limit(),
+            'characters_used': user.monthly_characters_used,
+            'characters_remaining': user.get_remaining_characters(),
+            'next_character_reset': next_character_reset.isoformat() if next_character_reset else None
         }
     elif user.invitation_code and user.invitation_code.is_valid():
+        # Calculate next character reset date (30 days from last reset)
+        next_character_reset = None
+        if user.last_character_reset:
+            next_character_reset = user.last_character_reset + datetime.timedelta(days=30)
+            
         return {
             'user_type': 'invitation',
             'is_active': True,
             'invitation_code': user.invitation_code.code,
-            'translations_limit': 'unlimited'
+            'translations_limit': 'unlimited',
+            'character_limit': user.get_character_limit(),
+            'characters_used': user.monthly_characters_used,
+            'characters_remaining': user.get_remaining_characters(),
+            'next_character_reset': next_character_reset.isoformat() if next_character_reset else None
         }
     else:
         # Free user
-        # Calculate remaining translations in the current period
         period_start, period_name = get_period_start()
         period_count = TranslationRecord.query.filter(
             TranslationRecord.user_id == user.id,
             TranslationRecord.created_at >= period_start
         ).count()
         
-        remaining = max(0, FREE_USER_TRANSLATION_LIMIT - period_count)
-        
-        # Calculate period end
-        if FREE_USER_TRANSLATION_PERIOD == 'daily':
-            period_end = (period_start + datetime.timedelta(days=1)).isoformat()
-        elif FREE_USER_TRANSLATION_PERIOD == 'weekly':
-            period_end = (period_start + datetime.timedelta(days=7)).isoformat()
-        elif FREE_USER_TRANSLATION_PERIOD == 'monthly':
-            today = datetime.datetime.now()
-            next_month = today.month + 1 if today.month < 12 else 1
-            next_month_year = today.year if today.month < 12 else today.year + 1
-            period_end = datetime.datetime(next_month_year, next_month, 1).isoformat()
-        
         return {
             'user_type': 'free',
             'is_active': True,
             'translations_limit': FREE_USER_TRANSLATION_LIMIT,
             'translations_used': period_count,
-            'translations_remaining': remaining,
-            'period': FREE_USER_TRANSLATION_PERIOD,
-            'period_end': period_end,
-            'reset_info': f"Translations reset at the start of each {period_name}"
+            'translations_remaining': FREE_USER_TRANSLATION_LIMIT - period_count,
+            'period': period_name,
+            'character_limit': user.get_character_limit(),
+            'characters_used': user.monthly_characters_used,
+            'characters_remaining': user.get_remaining_characters()
         }
 
 def get_guest_status(ip_address):
@@ -179,7 +209,10 @@ def get_guest_status(ip_address):
         'translations_used': GUEST_TRANSLATION_LIMIT - remaining,
         'translations_remaining': remaining,
         'period': 'lifetime',
-        'reset_info': 'Guest translations are limited to one per guest, ever'
+        'reset_info': 'Guest translations are limited to one per guest, ever',
+        'character_limit': 25000,  # Hard-coded character limit for guests
+        'characters_used': 0,      # Not tracking per-guest character usage
+        'characters_remaining': 25000
     }
 
 def check_guest_permission(ip_address, filename, src_lang, dest_lang):

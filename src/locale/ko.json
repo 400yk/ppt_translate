@@ -184,7 +184,11 @@
     "free_user_description": "현재 무료 플랜을 사용 중입니다. 무제한 번역을 위해 업그레이드하세요.",
     "upgrade_membership": "멤버십 업그레이드",
     "extend_membership": "멤버십 연장",
-    "manage_billing": "결제 관리"
+    "manage_billing": "결제 관리",
+    "monthly_character_limit": "월간 문자 제한",
+    "characters_used": "사용된 문자 수",
+    "characters_remaining": "남은 문자 수",
+    "next_character_reset": "다음 문자 재설정일"
   },
   "payment": {
     "title": "구독 플랜 선택",

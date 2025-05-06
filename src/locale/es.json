@@ -184,7 +184,11 @@
     "free_user_description": "Actualmente está en el plan gratuito. Actualice para obtener traducciones ilimitadas.",
     "upgrade_membership": "Actualizar membresía",
     "extend_membership": "Extender membresía",
-    "manage_billing": "Administrar facturación"
+    "manage_billing": "Administrar facturación",
+    "monthly_character_limit": "Límite Mensual de Caracteres",
+    "characters_used": "Caracteres Utilizados",
+    "characters_remaining": "Caracteres Restantes",
+    "next_character_reset": "Próximo Reinicio de Caracteres"
   },
   "payment": {
     "title": "Elija un plan de suscripción",

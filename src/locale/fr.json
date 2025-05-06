@@ -184,7 +184,11 @@
     "free_user_description": "Vous utilisez actuellement le forfait gratuit. Passez à l'abonnement pour obtenir des traductions illimitées.",
     "upgrade_membership": "Mettre à niveau l'abonnement",
     "extend_membership": "Prolonger l'abonnement",
-    "manage_billing": "Gérer la facturation"
+    "manage_billing": "Gérer la facturation",
+    "monthly_character_limit": "Limite mensuelle de caractères",
+    "characters_used": "Caractères utilisés",
+    "characters_remaining": "Caractères restants",
+    "next_character_reset": "Prochaine réinitialisation des caractères"
   },
   "payment": {
     "title": "Choisissez un forfait d'abonnement",

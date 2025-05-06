@@ -62,11 +62,11 @@ def register_routes(app):
                     if not allowed:
                         return response_obj
             
-            # Translate the PPTX file and get the output path
-            output_path = translate_pptx(file.stream, src_lang, dest_lang)
+            # Translate the PPTX file and get the output path and character count
+            output_path, character_count = translate_pptx(file.stream, src_lang, dest_lang)
             
-            # Record the translation in the database
-            user.record_translation(file.filename, src_lang, dest_lang)
+            # Record the translation in the database including character count
+            user.record_translation(file.filename, src_lang, dest_lang, character_count)
             
             # Return the translated file
             response = make_response(send_file(output_path, as_attachment=True, 
@@ -75,7 +75,7 @@ def register_routes(app):
             # Set content type explicitly (helps prevent MIME type issues)
             response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
             
-            print(f"Translation completed successfully.")
+            print(f"Translation completed successfully. Used {character_count} characters.")
             return response
         except Exception as e:
             print(f"Error during translation: {e}")
@@ -128,7 +128,7 @@ def register_routes(app):
                         return response_obj
             
             # Translate the PPTX file and get the output path
-            output_path = translate_pptx(file.stream, src_lang, dest_lang)
+            output_path, character_count = translate_pptx(file.stream, src_lang, dest_lang)
             
             # Return the translated file
             response = make_response(send_file(output_path, as_attachment=True, 
@@ -137,7 +137,7 @@ def register_routes(app):
             # Set content type explicitly (helps prevent MIME type issues)
             response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
             
-            print(f"Guest translation completed successfully.")
+            print(f"Guest translation completed successfully. Used {character_count} characters.")
             return response
         except Exception as e:
             print(f"Error during guest translation: {e}")
@@ -222,7 +222,7 @@ def translate_pptx(input_stream, src_lang, dest_lang):
     # Batch translate all text content together using the new batched approach
     all_texts = texts + table_texts
     print(f"Total texts to translate: {len(all_texts)}")
-    all_translated_texts = gemini_batch_translate_with_size(all_texts, src_lang, dest_lang, batch_size=200)
+    all_translated_texts, total_characters = gemini_batch_translate_with_size(all_texts, src_lang, dest_lang, batch_size=200)
     
     # Split the translated texts back into shape texts and table texts
     translated_texts = all_translated_texts[:len(texts)]
@@ -233,6 +233,7 @@ def translate_pptx(input_stream, src_lang, dest_lang):
     print(f"Received {len(all_translated_texts)} translated texts total.")
     print(f"Sample original: {all_texts[:3]}")
     print(f"Sample translated: {all_translated_texts[:3]}")
+    print(f"Total characters: {total_characters}")
     
     # Update regular text shapes
     for shape, translated in zip(text_shapes, translated_texts):
@@ -503,4 +504,4 @@ def translate_pptx(input_stream, src_lang, dest_lang):
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx')
     prs.save(temp_file.name)
     temp_file.close()
-    return temp_file.name 
+    return temp_file.name, total_characters 

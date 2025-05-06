@@ -132,4 +132,57 @@ def get_file_size_limit():
             'error': 'Failed to get file size limit',
             'message': str(e),
             'maxFileSizeMB': 50  # Default fallback value
+        }), 500
+
+@membership_bp.route('/api/config/character-limit', methods=['GET'])
+def get_character_limit():
+    """
+    Returns the paid user character monthly limit from config.
+    This endpoint is public and doesn't require authentication.
+    
+    Returns:
+        JSON response with limit field
+    """
+    try:
+        return jsonify({
+            'limit': config.PAID_USER_CHARACTER_MONTHLY_LIMIT
+        })
+    except Exception as e:
+        print(f"Error getting character limit: {str(e)}")
+        return jsonify({
+            'error': 'Failed to get character limit',
+            'message': str(e),
+            'limit': 5000000  # Default fallback value
+        }), 500
+
+@membership_bp.route('/api/config/limits', methods=['GET'])
+def get_all_limits():
+    """
+    Returns all relevant configuration limits from config.py.
+    This endpoint is public and doesn't require authentication.
+    
+    Returns:
+        JSON response with all limit fields
+    """
+    try:
+        return jsonify({
+            'freeUserCharPerFileLimit': config.FREE_USER_CHARACTER_PER_FILE_LIMIT,
+            'freeUserCharMonthlyLimit': config.FREE_USER_CHARACTER_MONTHLY_LIMIT,
+            'freeUserTranslationLimit': config.FREE_USER_TRANSLATION_LIMIT,
+            'freeUserTranslationPeriod': config.FREE_USER_TRANSLATION_PERIOD,
+            'paidUserCharMonthlyLimit': config.PAID_USER_CHARACTER_MONTHLY_LIMIT,
+            'maxFileSizeMB': config.GUEST_FREE_USER_MAX_FILE_SIZE
+        })
+    except Exception as e:
+        print(f"Error getting configuration limits: {str(e)}")
+        return jsonify({
+            'error': 'Failed to get configuration limits',
+            'message': str(e),
+            # Fallback values
+            'freeUserCharPerFileLimit': 25000,
+            'freeUserCharMonthlyLimit': 100000,
+            'freeUserTranslationLimit': 1,
+            'freeUserTranslationPeriod': 'weekly',
+            'paidUserCharMonthlyLimit': 5000000,
+            'maxFileSizeMB': 50
         }), 500 

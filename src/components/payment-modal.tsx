@@ -354,15 +354,39 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('checkout');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('');
+  const [characterLimit, setCharacterLimit] = useState<number>(5000000); // Default value until fetched
+
+  // Fetch character limit from backend
+  useEffect(() => {
+    const fetchCharacterLimit = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/config/character-limit`);
+        if (response.ok) {
+          const data = await response.json();
+          setCharacterLimit(data.limit);
+        }
+      } catch (error) {
+        console.error('Failed to fetch character limit:', error);
+      }
+    };
+    
+    fetchCharacterLimit();
+  }, []);
 
   // Get benefits using translation system
   const benefits = pricingBenefitsKeys.map(key => {
     // Use the paid plan features from translations
-    if (key === "pricing.features.uploads") return t('pricing.paid_plan') + ": " + t(asTranslationKey(key));
-    if (key === "pricing.features.char_per_file") return t('pricing.paid_plan') + ": " + t(asTranslationKey(key));
-    if (key === "pricing.features.monthly_limit") return "5,000,000 " + t(asTranslationKey(key));
-    if (key === "pricing.features.file_size") return t('pricing.paid_plan') + ": " + t(asTranslationKey(key));
-    if (key === "pricing.features.support") return t('pricing.paid_plan') + ": " + t(asTranslationKey(key));
+    if (key === "pricing.features.uploads") return t('pricing.features.upload_limit') + ": " + t('pricing.no_limit');
+    if (key === "pricing.features.char_per_file") return t('pricing.features.char_per_file') + ": " + t('pricing.no_limit');
+    if (key === "pricing.features.monthly_limit") {
+      // Format the character limit in a more readable way
+      const formattedLimit = characterLimit >= 1000000 
+        ? `${(characterLimit / 1000000).toFixed(1)}M` 
+        : characterLimit.toLocaleString();
+      return t('pricing.features.monthly_limit') + ": " + formattedLimit;
+    }
+    if (key === "pricing.features.file_size") return t('pricing.features.file_size') + ": " + t('pricing.no_limit');
+    if (key === "pricing.features.support") return t('pricing.features.support') + ": " + t('pricing.paid_customer_email_support');
     return t(asTranslationKey(key));
   });
 

@@ -308,11 +308,24 @@ export default function ProfilePage() {
                           <div className="text-muted-foreground">{t('profile.membership_end')}</div>
                           <div>{new Date(membershipStatus.membership_end).toLocaleDateString()}</div>
                           
-                          <div className="text-muted-foreground">{t('profile.days_remaining')}</div>
-                          <div>{membershipStatus.days_remaining}</div>
-                          
                           <div className="text-muted-foreground">{t('profile.translations')}</div>
-                          <div>{membershipStatus.translations_limit}</div>
+                          <div>{t('profile.unlimited')}</div>
+                          
+                          <div className="text-muted-foreground">{t('profile.monthly_character_limit')}</div>
+                          <div>{membershipStatus.character_limit?.toLocaleString()}</div>
+                          
+                          <div className="text-muted-foreground">{t('profile.characters_used')}</div>
+                          <div>{membershipStatus.characters_used?.toLocaleString() || 0}</div>
+                          
+                          <div className="text-muted-foreground">{t('profile.characters_remaining')}</div>
+                          <div>{membershipStatus.characters_remaining?.toLocaleString() || 0}</div>
+                          
+                          {membershipStatus.next_character_reset && (
+                            <>
+                              <div className="text-muted-foreground">{t('profile.next_character_reset')}</div>
+                              <div>{new Date(membershipStatus.next_character_reset).toLocaleDateString()}</div>
+                            </>
+                          )}
                         </div>
                       </>
                     )}
@@ -323,11 +336,24 @@ export default function ProfilePage() {
                           <div className="text-muted-foreground">{t('profile.invitation_code')}</div>
                           <div>{membershipStatus.invitation_code}</div>
                           
-                          <div className="text-muted-foreground">{t('profile.translations_used')}</div>
-                          <div>{membershipStatus.uses} / {membershipStatus.max_uses}</div>
+                          <div className="text-muted-foreground">{t('profile.translations')}</div>
+                          <div>{t('profile.unlimited')}</div>
                           
-                          <div className="text-muted-foreground">{t('profile.translations_remaining')}</div>
-                          <div>{membershipStatus.remaining_uses}</div>
+                          <div className="text-muted-foreground">{t('profile.monthly_character_limit')}</div>
+                          <div>{membershipStatus.character_limit?.toLocaleString()}</div>
+                          
+                          <div className="text-muted-foreground">{t('profile.characters_used')}</div>
+                          <div>{membershipStatus.characters_used?.toLocaleString() || 0}</div>
+                          
+                          <div className="text-muted-foreground">{t('profile.characters_remaining')}</div>
+                          <div>{membershipStatus.characters_remaining?.toLocaleString() || 0}</div>
+                          
+                          {membershipStatus.next_character_reset && (
+                            <>
+                              <div className="text-muted-foreground">{t('profile.next_character_reset')}</div>
+                              <div>{new Date(membershipStatus.next_character_reset).toLocaleDateString()}</div>
+                            </>
+                          )}
                         </div>
                       </>
                     )}
@@ -344,11 +370,18 @@ export default function ProfilePage() {
                           <div className="text-muted-foreground">{t('profile.translations_remaining')}</div>
                           <div>{membershipStatus.translations_remaining}</div>
                           
+                          <div className="text-muted-foreground">{t('profile.monthly_character_limit')}</div>
+                          <div>{membershipStatus.character_limit?.toLocaleString()}</div>
+                          
+                          <div className="text-muted-foreground">{t('profile.characters_used')}</div>
+                          <div>{membershipStatus.characters_used?.toLocaleString() || 0}</div>
+                          
+                          <div className="text-muted-foreground">{t('profile.characters_remaining')}</div>
+                          <div>{membershipStatus.characters_remaining?.toLocaleString() || 0}</div>
+                          
                           <div className="text-muted-foreground">{t('profile.reset_info')}</div>
                           <div>
-                            {membershipStatus.period === 'daily' && t('profile.reset_daily')}
-                            {membershipStatus.period === 'weekly' && t('profile.reset_weekly')}
-                            {membershipStatus.period === 'monthly' && t('profile.reset_monthly')}
+                            {t('profile.reset_weekly')}
                           </div>
                         </div>
                       </>
@@ -362,7 +395,7 @@ export default function ProfilePage() {
               </CardContent>
               <CardFooter className="flex justify-end">
                 {(!membershipStatus || membershipStatus.user_type === 'free' || membershipStatus.user_type === 'invitation') && (
-                  <Button onClick={openPaymentModal} className="bg-primary text-white">
+                  <Button onClick={openPaymentModal} className="bg-teal-600 hover:bg-teal-700 text-white">
                     <Icons.payment className="mr-2 h-4 w-4" />
                     {t('profile.upgrade_membership')}
                   </Button>

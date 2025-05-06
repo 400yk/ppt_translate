@@ -184,7 +184,11 @@
     "free_user_description": "現在無料プランを使用中です。アップグレードして無制限の翻訳を利用できます。",
     "upgrade_membership": "会員をアップグレード",
     "extend_membership": "会員期間を延長",
-    "manage_billing": "請求管理"
+    "manage_billing": "請求管理",
+    "monthly_character_limit": "月間文字数制限",
+    "characters_used": "使用済み文字数",
+    "characters_remaining": "残り文字数",
+    "next_character_reset": "次の文字数リセット日"
   },
   "payment": {
     "title": "サブスクリプションプランを選択",

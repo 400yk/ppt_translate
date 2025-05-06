@@ -184,7 +184,11 @@
     "free_user_description": "Sie nutzen derzeit den kostenlosen Plan. Upgrade für unbegrenzte Übersetzungen.",
     "upgrade_membership": "Mitgliedschaft upgraden",
     "extend_membership": "Mitgliedschaft verlängern",
-    "manage_billing": "Abrechnung verwalten"
+    "manage_billing": "Abrechnung verwalten",
+    "monthly_character_limit": "Monatliches Zeichenlimit",
+    "characters_used": "Verwendete Zeichen",
+    "characters_remaining": "Verbleibende Zeichen",
+    "next_character_reset": "Nächste Zeichenzurücksetzung"
   },
   "payment": {
     "title": "Wählen Sie einen Abonnementplan",

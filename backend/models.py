@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 import datetime
 import secrets
 import string
-from config import PAID_MEMBERSHIP_MONTHLY, PAID_MEMBERSHIP_YEARLY, INVITATION_MEMBERSHIP_MONTHS
+from config import PAID_MEMBERSHIP_MONTHLY, PAID_MEMBERSHIP_YEARLY, INVITATION_MEMBERSHIP_MONTHS, FREE_USER_CHARACTER_MONTHLY_LIMIT, PAID_USER_CHARACTER_MONTHLY_LIMIT
 
 db = SQLAlchemy()
 
@@ -74,6 +74,9 @@ class User(db.Model):
     is_paid_user = db.Column(db.Boolean, default=False)
     # Stripe integration
     stripe_customer_id = db.Column(db.String(255), nullable=True)
+    # Character usage tracking
+    monthly_characters_used = db.Column(db.Integer, default=0)
+    last_character_reset = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     
     def set_password(self, password):
         """Hash the password and store it."""
@@ -89,18 +92,67 @@ class User(db.Model):
         """Get the number of translations performed by this user."""
         return self.translations.count()
     
-    def record_translation(self, filename, src_lang, dest_lang):
+    def record_translation(self, filename, src_lang, dest_lang, character_count=0):
         """Record a translation performed by this user."""
         translation = TranslationRecord(
             user_id=self.id,
             filename=filename,
             source_language=src_lang,
-            target_language=dest_lang
+            target_language=dest_lang,
+            character_count=character_count
         )
         db.session.add(translation)
+        
+        # Update character usage
+        self.update_character_usage(character_count)
+        
         db.session.commit()
         return translation
-        
+    
+    def update_character_usage(self, character_count):
+        """Update the character usage count and check if reset is needed."""
+        # Check if we need to reset the counter
+        now = datetime.datetime.utcnow()
+        if self.last_character_reset:
+            if self.is_membership_active():
+                # For paid users: Reset if it's been at least 30 days since last reset
+                days_since_last_reset = (now - self.last_character_reset).days
+                if days_since_last_reset >= 30:
+                    self.monthly_characters_used = 0
+                    self.last_character_reset = now
+            else:
+                # For free users: Reset if it's a new calendar month
+                last_reset_month = self.last_character_reset.month
+                last_reset_year = self.last_character_reset.year
+                current_month = now.month
+                current_year = now.year
+                
+                if current_month != last_reset_month or current_year != last_reset_year:
+                    self.monthly_characters_used = 0
+                    self.last_character_reset = now
+        else:
+            self.last_character_reset = now
+            
+        # Add the new character count
+        self.monthly_characters_used += character_count
+        return self.monthly_characters_used
+    
+    def get_character_limit(self):
+        """Get the character limit based on user's membership."""
+        if self.is_membership_active():
+            return PAID_USER_CHARACTER_MONTHLY_LIMIT
+        return FREE_USER_CHARACTER_MONTHLY_LIMIT
+    
+    def get_remaining_characters(self):
+        """Get the number of characters remaining for the current month."""
+        limit = self.get_character_limit()
+        used = self.monthly_characters_used or 0
+        return max(0, limit - used)
+    
+    def has_character_quota_available(self, needed_characters):
+        """Check if the user has enough character quota for a translation."""
+        return self.get_remaining_characters() >= needed_characters
+    
     def activate_paid_membership(self, months=None, is_invitation=False, is_yearly=False):
         """
         Activate paid membership for the specified number of months.
@@ -171,6 +223,7 @@ class TranslationRecord(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     source_language = db.Column(db.String(10))
     target_language = db.Column(db.String(10))
+    character_count = db.Column(db.Integer, default=0)
     
     @classmethod
     def get_recent(cls, limit=10):

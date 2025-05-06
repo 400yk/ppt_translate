@@ -37,7 +37,8 @@ DEFAULT_TITLE_FONT_SIZE = 24
 
 # API settings
 GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
-GEMINI_API_BATCH_SIZE = 100
+GEMINI_API_CHARACTER_BATCH_SIZE = 20000  # Maximum characters per batch
+GEMINI_API_BATCH_SIZE = 100  # Keeping for backward compatibility
 
 # Font settings for text measurement
 MIN_FONT_SIZE = 8 
@@ -46,6 +47,7 @@ MIN_FONT_SIZE = 8
 GUEST_TRANSLATION_LIMIT = 1  # Number of translations allowed for guest users
 FREE_USER_TRANSLATION_LIMIT = 1  # Number of translations allowed for free users
 FREE_USER_TRANSLATION_PERIOD = 'weekly'  # 'daily', 'weekly', or 'monthly'
+FREE_USER_CHARACTER_PER_FILE_LIMIT = 25000  # Number of characters allowed for free users
 FREE_USER_CHARACTER_MONTHLY_LIMIT = 100000  # Number of characters allowed for free users
 INVITATION_MEMBERSHIP_MONTHS = 3  # Default duration for invitation-based membership in months
 PAID_MEMBERSHIP_MONTHLY = 1  # Duration for monthly paid membership

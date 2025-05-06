@@ -184,7 +184,11 @@
     "free_user_description": "В настоящее время вы используете бесплатный план. Обновите, чтобы получить неограниченные переводы.",
     "upgrade_membership": "Обновить членство",
     "extend_membership": "Продлить членство",
-    "manage_billing": "Управление счетами"
+    "manage_billing": "Управление счетами",
+    "monthly_character_limit": "Ежемесячный лимит символов",
+    "characters_used": "Использовано символов",
+    "characters_remaining": "Осталось символов",
+    "next_character_reset": "Следующий сброс символов"
   },
   "payment": {
     "title": "Выберите план подписки",

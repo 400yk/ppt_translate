@@ -2,7 +2,7 @@ import os
 import requests
 import json
 import ast  # For safe eval fallback
-from config import GEMINI_API_URL, GEMINI_API_BATCH_SIZE
+from config import GEMINI_API_URL, GEMINI_API_BATCH_SIZE, GEMINI_API_CHARACTER_BATCH_SIZE
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
@@ -74,7 +74,7 @@ def gemini_batch_translate(texts, src_lang, dest_lang):
         print(f"Gemini translation error: {e}")
         return texts  # fallback to original 
 
-def gemini_batch_translate_with_size(texts, src_lang, dest_lang, batch_size=GEMINI_API_BATCH_SIZE):
+def gemini_batch_translate_with_size(texts, src_lang, dest_lang, batch_size=GEMINI_API_BATCH_SIZE, character_batch_size=GEMINI_API_CHARACTER_BATCH_SIZE):
     """
     Translate texts in smaller batches to handle very long files.
     
@@ -83,26 +83,67 @@ def gemini_batch_translate_with_size(texts, src_lang, dest_lang, batch_size=GEMI
         src_lang: Source language
         dest_lang: Target language
         batch_size: Maximum number of texts to process in each batch, defaults to GEMINI_API_BATCH_SIZE
+        character_batch_size: Maximum number of characters to process in each batch
         
     Returns:
         List of translated texts in the same order as input
     """
     all_translated = []
     
-    # Process texts in batches
-    for i in range(0, len(texts), batch_size):
-        batch = texts[i:i + batch_size]
-        translated_batch = gemini_batch_translate(batch, src_lang, dest_lang)
+    # Calculate total characters for tracking usage
+    total_characters = sum(len(text) for text in texts)
+    batch_start = 0
+    
+    while batch_start < len(texts):
+        # Start with an empty batch
+        current_batch = []
+        current_batch_chars = 0
+        current_batch_count = 0
+        
+        # Keep adding texts until we hit either the character limit or text count limit
+        for i in range(batch_start, len(texts)):
+            text = texts[i]
+            text_chars = len(text)
+            
+            # Check if adding this text would exceed the character limit
+            if current_batch_chars + text_chars > character_batch_size:
+                # If this is the first text in the batch and it's too big on its own,
+                # we still need to process it (we'll just exceed the limit for this one item)
+                if current_batch_count == 0:
+                    current_batch.append(text)
+                    current_batch_chars += text_chars
+                    current_batch_count += 1
+                break
+            
+            # Check if adding this text would exceed the count limit
+            if current_batch_count >= batch_size:
+                break
+                
+            # Add the text to the current batch
+            current_batch.append(text)
+            current_batch_chars += text_chars
+            current_batch_count += 1
+        
+        # If we didn't add any texts (shouldn't happen due to the "first text" logic above)
+        if not current_batch:
+            break
+            
+        # Process the current batch
+        print(f"Processing batch: {len(current_batch)} texts, {current_batch_chars} characters")
+        translated_batch = gemini_batch_translate(current_batch, src_lang, dest_lang)
         
         # If translation failed, use original texts
-        if translated_batch == batch:
-            print(f"Warning: Batch {i//batch_size + 1} translation failed, using original texts")
+        if translated_batch == current_batch:
+            print(f"Warning: Batch translation failed, using original texts")
         
         all_translated.extend(translated_batch)
         
+        # Update the batch start for the next iteration
+        batch_start += len(current_batch)
+        
         # Add a small delay between batches to avoid rate limiting
-        if i + batch_size < len(texts):
+        if batch_start < len(texts):
             import time
             time.sleep(1)
     
-    return all_translated 
+    return all_translated, total_characters 

@@ -17,12 +17,14 @@ import { DynamicHead } from '@/components/dynamic-head';
 import { RegistrationDialog } from '@/components/registration-dialog';
 import { PaymentModal } from '@/components/payment-modal';
 import { usePricing } from '@/lib/pricing-service';
+import { useConfigLimits } from '@/lib/config-service';
 
 export default function PricingPage() {
   const { t, locale } = useTranslation();
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const { pricing, isLoading: isPricingLoading } = usePricing();
+  const { limits, isLoading: isLimitsLoading } = useConfigLimits();
   const [isClient, setIsClient] = useState(false);
   const [forceRender, setForceRender] = useState(0);
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
@@ -185,28 +187,38 @@ export default function PricingPage() {
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">1 PPT/{t('pricing.week')}</p>
+                  <p className="font-medium">
+                    {isLimitsLoading ? '...' : limits.freeUserTranslationLimit} PPT/
+                    {isLimitsLoading 
+                      ? t('pricing.week') 
+                      : limits.freeUserTranslationPeriod === 'weekly' 
+                        ? t('pricing.week')
+                        : limits.freeUserTranslationPeriod === 'monthly'
+                          ? t('pricing.month')
+                          : t('pricing.week')
+                    }
+                  </p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.upload_limit')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">25,000</p>
+                  <p className="font-medium">{isLimitsLoading ? '...' : limits.freeUserCharPerFileLimit.toLocaleString()}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.char_per_file')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">100,000</p>
+                  <p className="font-medium">{isLimitsLoading ? '...' : limits.freeUserCharMonthlyLimit.toLocaleString()}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.monthly_limit')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">50 MB</p>
+                  <p className="font-medium">{isLimitsLoading ? '...' : limits.maxFileSizeMB} MB</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.file_size')}</p>
                 </div>
               </div>
@@ -280,7 +292,7 @@ export default function PricingPage() {
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">5,000,000</p>
+                  <p className="font-medium">{isLimitsLoading ? '...' : limits.paidUserCharMonthlyLimit.toLocaleString()}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.monthly_limit')}</p>
                 </div>
               </div>
