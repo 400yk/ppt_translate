@@ -378,13 +378,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
     // Use the paid plan features from translations
     if (key === "pricing.features.uploads") return t('pricing.features.upload_limit') + ": " + t('pricing.no_limit');
     if (key === "pricing.features.char_per_file") return t('pricing.features.char_per_file') + ": " + t('pricing.no_limit');
-    if (key === "pricing.features.monthly_limit") {
-      // Format the character limit in a more readable way
-      const formattedLimit = characterLimit >= 1000000 
-        ? `${(characterLimit / 1000000).toFixed(1)}M` 
-        : characterLimit.toLocaleString();
-      return t('pricing.features.monthly_limit') + ": " + formattedLimit;
-    }
+    if (key === "pricing.features.monthly_limit") return t('pricing.features.monthly_limit') + ": " + characterLimit;
     if (key === "pricing.features.file_size") return t('pricing.features.file_size') + ": " + t('pricing.no_limit');
     if (key === "pricing.features.support") return t('pricing.features.support') + ": " + t('pricing.paid_customer_email_support');
     return t(asTranslationKey(key));
