@@ -256,14 +256,16 @@ export default function TranslationPage() {
     // Skip if we're in the middle of a translation
     if (isTranslating) return;
     
-    // Set source language to UI language
-    setSrcLang(locale as LanguageCode);
-    
-    // If source is English, target is Chinese, otherwise target is English
-    if (locale === 'en') {
-      setDestLang('zh');
-    } else {
-      setDestLang('en');
+    // Set source language to UI language if it's in our supported languages
+    if (languageCodes.includes(locale as LanguageCode)) {
+      setSrcLang(locale as LanguageCode);
+      
+      // Set appropriate target language based on source
+      if (locale === 'en') {
+        setDestLang('zh');
+      } else {
+        setDestLang('en');
+      }
     }
     
     // Don't reset translation state when language changes
@@ -645,9 +647,9 @@ export default function TranslationPage() {
   }
 
   // Get translated texts for the dropdown menu
-  const guestUserText = locale === 'zh' ? '游客用户' : 'Guest User';
-  const registerLoginText = locale === 'zh' ? '注册/登录' : 'Register / Login';
-  const backToHomeText = locale === 'zh' ? '返回首页' : 'Back to Home';
+  const guestUserText = t('guest.guest_user');
+  const registerLoginText = t('auth.register_login');
+  const backToHomeText = t('auth.back_to_home');
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
