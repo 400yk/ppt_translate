@@ -21,8 +21,12 @@ The backend code is organized into several modules to maintain separation of con
 
 ### Migration and Update Utilities
 
-- **migrations/add_membership_fields.py**: Adds membership fields to the database
-- **update_db.py**: Checks and updates the database schema
+- **migrate_db/**: Directory containing all database migration utilities
+  - **add_membership_fields.py**: Adds membership fields to the database
+  - **add_stripe_customer_id.py**: Adds Stripe customer ID field to User model
+  - **db_migrate.py**: Basic database migration utilities
+  - **update_db.py**: Checks and updates the database schema
+  - **update_invitation_code_schema.py**: Updates invitation code table schema
 
 ## Translation Workflow
 

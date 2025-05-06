@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 # Add parent directory to path
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(current_dir)
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
 
 def create_app():
     """Create a Flask app with database configuration."""
@@ -38,10 +39,8 @@ def check_and_update_schema():
     # Get the database inspector
     inspector = inspect(db.engine)
     
-    # Initialize migrations directory if it doesn't exist
-    migrations_dir = os.path.join(current_dir, 'migrations')
-    if not os.path.exists(migrations_dir):
-        os.makedirs(migrations_dir)
+    # Use current migrations directory
+    migrations_dir = os.path.dirname(os.path.abspath(__file__))
     
     # Check if User table exists
     if 'user' in inspector.get_table_names():
@@ -70,7 +69,7 @@ def check_and_update_schema():
                 
                 # Now run the migration script to update existing users
                 logger.info("Running data migration...")
-                from migrations.add_membership_fields import migrate
+                from migrate_db.add_membership_fields import migrate
                 migrate_result = migrate()
                 
                 if migrate_result:

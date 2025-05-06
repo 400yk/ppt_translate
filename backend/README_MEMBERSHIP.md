@@ -70,7 +70,7 @@ To update an existing database with the new membership fields:
 
 1. Run the database update script:
    ```
-   python update_db.py
+   python -m migrate_db.update_db
    ```
    
 2. This will:

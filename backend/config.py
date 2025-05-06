@@ -46,9 +46,11 @@ MIN_FONT_SIZE = 8
 GUEST_TRANSLATION_LIMIT = 1  # Number of translations allowed for guest users
 FREE_USER_TRANSLATION_LIMIT = 1  # Number of translations allowed for free users
 FREE_USER_TRANSLATION_PERIOD = 'weekly'  # 'daily', 'weekly', or 'monthly'
+FREE_USER_CHARACTER_MONTHLY_LIMIT = 100000  # Number of characters allowed for free users
 INVITATION_MEMBERSHIP_MONTHS = 3  # Default duration for invitation-based membership in months
 PAID_MEMBERSHIP_MONTHLY = 1  # Duration for monthly paid membership
 PAID_MEMBERSHIP_YEARLY = 12  # Duration for yearly paid membership
+PAID_USER_CHARACTER_MONTHLY_LIMIT = 5000000  # Number of characters allowed for paid users
 GUEST_FREE_USER_MAX_FILE_SIZE = 50  # 50MB
 
 # Stripe payment settings
