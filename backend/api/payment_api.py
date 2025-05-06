@@ -9,7 +9,7 @@ import logging
 from flask import Blueprint, jsonify, request, redirect, url_for, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import User, db
-from user_manager import get_membership_status
+from services.user_service import get_membership_status, process_membership_purchase
 from config import PRICING, CURRENCY_RATES, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, FLASK_API_URL
 
 payment_bp = Blueprint('payment', __name__)
@@ -427,7 +427,6 @@ def payment_success():
         
         # Update user membership status
         if plan_type:
-            from user_manager import process_membership_purchase
             result = process_membership_purchase(username, plan_type)
         else:
             result = get_membership_status(user)
@@ -524,7 +523,6 @@ def confirm_payment():
             }), 403
         
         # Update user membership status
-        from user_manager import process_membership_purchase
         result = process_membership_purchase(username, plan_type)
         
         print(f"Membership updated: {result}")
@@ -596,7 +594,6 @@ def webhook():
                     # Update user membership status
                     plan_type = session.get('metadata', {}).get('plan_type')
                     if plan_type:
-                        from user_manager import process_membership_purchase
                         process_membership_purchase(username, plan_type)
                     
                     print(f"Successfully processed checkout.session.completed for user: {username}")

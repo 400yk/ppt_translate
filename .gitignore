@@ -47,7 +47,9 @@ backend/__pycache__/
 backend/app.db
 backend/pgadmin_data/
 backend/postgres_data/
-
+backend/db/app.db
+backend/db/postgres_data/
+backend/db/pgadmin_data/
 
 .env
 .env.dev

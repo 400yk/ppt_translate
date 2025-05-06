@@ -4,6 +4,12 @@ Fix PostgreSQL sequence generators after migration from SQLite.
 This script updates all sequence generators to the next value after the highest ID in each table.
 """
 
+import os
+import sys
+
+# Add the parent directory to the Python path so we can import from there
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 from flask import Flask
 from sqlalchemy import text
 from models import db

@@ -250,15 +250,15 @@ def translate_pptx(input_stream, src_lang, dest_lang):
             # Get original font size
             if original_run.font.size:
                 original_font_size = int(original_run.font.size.pt)
-                
-            # Try to get font color
+            
+            # Get original font color
             if original_run.font.color is not None:
                 try:
                     font_color = original_run.font.color.rgb
                 except AttributeError:
                     font_color = None
-                    
-            # Store original formatting information
+            
+            # Store original formatting
             for para in text_frame.paragraphs:
                 para_info = {
                     'level': para.level,
@@ -266,12 +266,11 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                     'runs': []
                 }
                 
-                # Store runs and their formatting
                 for run in para.runs:
                     run_info = {
                         'text_length': len(run.text),
                         'bold': run.font.bold,
-                        'italic': run.font.italic, 
+                        'italic': run.font.italic,
                         'underline': run.font.underline,
                         'font_name': run.font.name or font_name,
                         'color': run.font.color.rgb if hasattr(run.font.color, 'rgb') else None
@@ -280,64 +279,58 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                 
                 original_paragraphs.append(para_info)
         
-        # Measure the bounding box of the original text - for table cells
-        # Table cells have fixed width, so we need to fit text within that constraint
+        # Measure the original text's bounding box
         original_text = cell.text
-        
-        # Get the approximate cell dimensions
-        # For table cells, we calculate width and height based on the cell's margin and text area
-        # We use the text_frame margins to estimate the available space
-        margin_left = text_frame.margin_left.inches if hasattr(text_frame, 'margin_left') else 0.1
-        margin_right = text_frame.margin_right.inches if hasattr(text_frame, 'margin_right') else 0.1
-        margin_top = text_frame.margin_top.inches if hasattr(text_frame, 'margin_top') else 0.05
-        margin_bottom = text_frame.margin_bottom.inches if hasattr(text_frame, 'margin_bottom') else 0.05
-        
-        # Estimate the available width and height in the cell
-        cell_width = (cell.width.inches if hasattr(cell, 'width') else 2.0) - margin_left - margin_right
-        cell_height = (cell.height.inches if hasattr(cell, 'height') else 0.5) - margin_top - margin_bottom
-        
-        # Convert to points for measurement
-        cell_width_pt = cell_width * 72  # 72 points per inch
-        cell_height_pt = cell_height * 72
-        
-        # Measure the original text bounding box
         orig_w, orig_h = measure_text_bbox(original_text, font_name, original_font_size)
         
-        # Calculate the best font size to fit the translated text in the cell
-        best_font_size = fit_font_size_to_bbox(cell_width_pt, cell_height_pt, translated, font_name, original_font_size)
-        
-        # Apply the style scaling factor to the font size
+        # Get the best font size that fits
+        best_font_size = fit_font_size_to_bbox(orig_w, orig_h, translated, font_name, original_font_size)
         best_font_size = int(best_font_size * style_scale_factor)
         
-        # Clear the text frame and add the translated text
+        # Clear and update the text frame
         text_frame.clear()
         
-        # Simple approach for table cells - use a single run to maintain consistent formatting
-        p = text_frame.paragraphs[0]
-        run = p.add_run()
-        run.text = translated
-        run.font.name = font_name
-        run.font.size = Pt(best_font_size)
-        
-        # Apply original formatting
-        if original_paragraphs:
-            # Determine dominant formatting across all runs
-            has_bold = any(run_info['bold'] for para in original_paragraphs 
-                          for run_info in para['runs'] if run_info['bold'] is not None)
-            has_italic = any(run_info['italic'] for para in original_paragraphs 
-                            for run_info in para['runs'] if run_info['italic'] is not None)
-            has_underline = any(run_info['underline'] for para in original_paragraphs 
-                               for run_info in para['runs'] if run_info['underline'] is not None)
+        # Simple case: just a single paragraph with a single run
+        if len(original_paragraphs) == 1 and len(original_paragraphs[0]['runs']) == 1:
+            p = text_frame.paragraphs[0]
+            run = p.add_run()
+            run.text = translated
+            run.font.name = font_name
+            run.font.size = Pt(best_font_size)
+            
+            # Apply original formatting
+            original_run_info = original_paragraphs[0]['runs'][0]
+            if original_run_info['bold'] is not None:
+                run.font.bold = original_run_info['bold']
+            if original_run_info['italic'] is not None:
+                run.font.italic = original_run_info['italic']
+            if original_run_info['underline'] is not None:
+                run.font.underline = original_run_info['underline']
+            if font_color:
+                run.font.color.rgb = font_color
+        else:
+            # Complex case: use dominant formatting
+            p = text_frame.paragraphs[0]
+            run = p.add_run()
+            run.text = translated
+            run.font.name = font_name
+            run.font.size = Pt(best_font_size)
+            
+            # Apply formatting from dominant formatting in original text
+            has_bold = any(run_info['bold'] for para in original_paragraphs for run_info in para['runs'] if run_info['bold'] is not None)
+            has_italic = any(run_info['italic'] for para in original_paragraphs for run_info in para['runs'] if run_info['italic'] is not None)
+            has_underline = any(run_info['underline'] for para in original_paragraphs for run_info in para['runs'] if run_info['underline'] is not None)
             
             run.font.bold = has_bold
             run.font.italic = has_italic
             run.font.underline = has_underline
-        
-        # Apply font color if available
-        if font_color:
-            run.font.color.rgb = font_color
             
-    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx')
-    prs.save(temp_file.name)
-    temp_file.close()
-    return temp_file.name, total_characters 
+            if font_color:
+                run.font.color.rgb = font_color
+    
+    # Save the translated presentation to a temporary file
+    output_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx')
+    prs.save(output_file)
+    output_file.close()
+    
+    return output_file.name, total_characters 

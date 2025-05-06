@@ -4,8 +4,8 @@ API endpoints for handling PowerPoint translation requests.
 from flask import request, send_file, jsonify, make_response, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import User, db
-import user_manager
-from translate import translate_pptx
+from services.user_service import check_user_permission, check_guest_permission
+from services.translate_service import translate_pptx
 
 translate_bp = Blueprint('translate', __name__)
 
@@ -42,7 +42,7 @@ def translate_pptx_endpoint():
     
     try:
         # Check user's permission to translate - MOVED BEFORE translation
-        result = user_manager.check_user_permission(user)
+        result = check_user_permission(user)
         # Handle the case where three values are returned (allowed, response_obj, status_code)
         if isinstance(result, tuple):
             if len(result) == 3:
@@ -107,7 +107,7 @@ def guest_translate_pptx_endpoint():
     
     try:
         # Check guest permission before translating
-        result = user_manager.check_guest_permission(client_ip, file.filename, src_lang, dest_lang)
+        result = check_guest_permission(client_ip, file.filename, src_lang, dest_lang)
         # Handle the case where three values are returned (allowed, response_obj, status_code)
         if isinstance(result, tuple):
             if len(result) == 3:

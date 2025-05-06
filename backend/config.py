@@ -24,7 +24,7 @@ if os.path.exists(env_local_path):
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Default SQLite connection (for development/fallback)
-SQLITE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
+SQLITE_URI = 'sqlite:///' + os.path.join(basedir, 'db', 'app.db')
 
 # PostgreSQL connection string
 # Format: postgresql://username:password@hostname:port/database_name

@@ -4,6 +4,12 @@ Initialize PostgreSQL database for PowerPoint translation app.
 This script creates the database and all tables.
 """
 
+import sys
+import os
+
+# Add the parent directory to the Python path so we can import from there
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 from flask import Flask
 from models import db
 from sqlalchemy import text

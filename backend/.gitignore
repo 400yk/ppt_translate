@@ -9,3 +9,6 @@ app.db
 postgres_data/
 pgadmin_data/
 .env.local.template
+db/app.db
+db/postgres_data/
+db/pgadmin_data/

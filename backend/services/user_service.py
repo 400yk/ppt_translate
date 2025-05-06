@@ -6,7 +6,7 @@ import datetime
 from flask import jsonify
 from models import User, TranslationRecord, db
 from config import FREE_USER_TRANSLATION_LIMIT, FREE_USER_TRANSLATION_PERIOD, GUEST_TRANSLATION_LIMIT
-from guest_tracker import guest_tracker
+from services.guest_service import guest_tracker
 from utils.api_utils import error_response
 
 def check_user_permission(user):
@@ -248,54 +248,26 @@ def process_membership_purchase(user_id, plan_type):
     
     Args:
         user_id: The ID or username of the user purchasing the membership
-        plan_type: 'monthly' or 'yearly'
+        plan_type: The type of membership plan ('monthly', 'annual', 'lifetime')
         
     Returns:
-        A dictionary with updated membership status
+        A tuple containing (success, message, user)
     """
-    # Check if user_id is a username or an actual ID
-    user = None
-    if isinstance(user_id, str):
-        # It's a username
+    # Look up the user by ID or username
+    if isinstance(user_id, int) or user_id.isdigit():
+        user = User.query.get(int(user_id))
+    else:
         user = User.query.filter_by(username=user_id).first()
-    else:
-        # It's a user ID
-        user = User.query.get(user_id)
-        
+    
     if not user:
-        print(f"User not found: {user_id}")
-        return {'error': 'User not found'}, 404
+        return False, f"User with ID/username '{user_id}' not found", None
     
-    print(f"Processing membership purchase for user: {user.username}, plan: {plan_type}")
+    # Update the user's membership status
+    success = user.activate_paid_membership(plan_type=plan_type)
     
-    now = datetime.datetime.now()
-    
-    # If user is currently a free user, start membership from now
-    if not user.is_membership_active():
-        user.membership_start = now
-        user.is_paid_user = True
-        
-        if plan_type == 'monthly':
-            user.membership_end = now + datetime.timedelta(days=30)
-        else:  # yearly
-            user.membership_end = now + datetime.timedelta(days=365)
-    
-    # If user already has an active membership, extend it
+    if success:
+        # Save the changes to the database
+        db.session.commit()
+        return True, f"Membership activated for {user.username} ({plan_type} plan)", user
     else:
-        if plan_type == 'monthly':
-            user.membership_end = user.membership_end + datetime.timedelta(days=30)
-        else:  # yearly
-            user.membership_end = user.membership_end + datetime.timedelta(days=365)
-    
-    db.session.commit()
-    print(f"Membership updated. End date: {user.membership_end}")
-    
-    # Return updated membership status
-    return {
-        'user_type': 'paid',
-        'is_active': True,
-        'membership_start': user.membership_start.isoformat(),
-        'membership_end': user.membership_end.isoformat(),
-        'days_remaining': user.get_membership_days_remaining(),
-        'plan_type': plan_type
-    } 
+        return False, f"Failed to activate membership for {user.username}", user 

@@ -5,7 +5,7 @@ API endpoints for handling user membership actions.
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import User, db
-from user_manager import process_membership_purchase, get_membership_status
+from services.user_service import process_membership_purchase, get_membership_status
 import config
 
 membership_bp = Blueprint('membership', __name__)

@@ -23,7 +23,7 @@ class GuestTracker:
         """
         if data_file is None:
             # Use default path in the same directory as this file
-            self.data_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'guest_translations.json')
+            self.data_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'guest_translations.json')
         else:
             self.data_file = data_file
             

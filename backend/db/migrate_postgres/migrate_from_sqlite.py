@@ -11,6 +11,10 @@ This script:
 import os
 import sys
 import datetime
+
+# Add the parent directory to the Python path so we can import from there
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 from sqlalchemy import create_engine, MetaData, Table, select, text, inspect
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
