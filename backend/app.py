@@ -3,11 +3,8 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from models import db
-import auth
-import translate
-from pricing import pricing_bp
-import membership_api
-import payment_api
+import auth  # Keep for compatibility
+from api import register_blueprints
 
 # Environment loading is now handled in config.py
 import config
@@ -34,12 +31,12 @@ def create_app():
     with app.app_context():
         db.create_all()
 
-    # Register routes from modules
+    # Call the legacy auth.register_routes for compatibility
+    # This is now a no-op but kept for backwards compatibility
     auth.register_routes(app)
-    translate.register_routes(app)
-    app.register_blueprint(pricing_bp)
-    app.register_blueprint(membership_api.membership_bp)
-    app.register_blueprint(payment_api.payment_bp)
+    
+    # Register all API blueprints (contains the actual implementations now)
+    register_blueprints(app)
 
     return app
 
