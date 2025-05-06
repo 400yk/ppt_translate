@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { DynamicHead } from '@/components/dynamic-head';
 // API endpoint
 const API_URL = process.env.API_URL || 'http://localhost:5000';
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -121,5 +121,13 @@ export default function PaymentSuccessPage() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Icons.spinner className="h-16 w-16 animate-spin text-primary" /></div>}>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 } 
