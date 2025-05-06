@@ -219,9 +219,9 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-16 px-4 bg-gradient-to-b from-primary/20 to-background">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-8">
+      <section className="py-20 px-4 bg-gradient-to-b from-primary/20 to-background">
+        <div className="mt-16 container mx-auto max-w-6xl">
+          <div className="text-center mb-10">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               <span className="mr-2">{t('landing.translate')}</span>
               <span className="text-orange-500">{t('landing.powerpoint')}</span>
@@ -244,7 +244,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="pt-0 pb-16 bg-background">
+      <section className="pt-4 pb-16 bg-background">
         <div className="container mx-auto max-w-6xl px-4">
           <h2 className="text-3xl font-bold text-center mb-12">
             {t('landing.simplest_way')}

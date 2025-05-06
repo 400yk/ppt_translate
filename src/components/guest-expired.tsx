@@ -1,10 +1,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { DynamicHead } from '@/components/dynamic-head';
 import { useTranslation } from '@/lib/i18n';
+import { RegistrationDialog } from '@/components/registration-dialog';
 
 interface GuestExpiredProps {
   locale: string;
@@ -14,6 +16,12 @@ interface GuestExpiredProps {
 export function GuestExpired({ locale, onRegister }: GuestExpiredProps) {
   const router = useRouter();
   const { t } = useTranslation();
+  const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
+
+  const handleRegister = () => {
+    setShowRegistrationDialog(true);
+    onRegister();
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -28,8 +36,8 @@ export function GuestExpired({ locale, onRegister }: GuestExpiredProps) {
             {t('errors.free_trial_used')}
           </p>
           <div className="flex flex-col gap-3">
-            <Button onClick={onRegister} className="w-full">
-              {t('auth.register')}
+            <Button onClick={handleRegister} className="w-full">
+              {t('auth.register_login')}
             </Button>
             <Button variant="outline" onClick={() => router.push('/')} className="w-full">
               {t('auth.back_to_home')}
@@ -37,6 +45,12 @@ export function GuestExpired({ locale, onRegister }: GuestExpiredProps) {
           </div>
         </div>
       </div>
+      
+      {/* Registration dialog */}
+      <RegistrationDialog 
+        isOpen={showRegistrationDialog} 
+        onClose={() => setShowRegistrationDialog(false)} 
+      />
     </div>
   );
 } 
