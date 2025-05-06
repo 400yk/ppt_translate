@@ -22,7 +22,23 @@ if os.path.exists(env_local_path):
 
 # Database settings
 basedir = os.path.abspath(os.path.dirname(__file__))
-SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'app.db'))
+
+# Default SQLite connection (for development/fallback)
+SQLITE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
+
+# PostgreSQL connection string
+# Format: postgresql://username:password@hostname:port/database_name
+POSTGRES_USER = os.getenv('POSTGRES_USER', 'postgres')
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD', 'postgres')
+POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'localhost')
+POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
+POSTGRES_DB = os.getenv('POSTGRES_DB', 'ppt_translate')
+
+# Build PostgreSQL URI
+POSTGRES_URI = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+
+# Use PostgreSQL by default, fall back to SQLite if DATABASE_URL is explicitly set to sqlite
+SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', POSTGRES_URI)
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # Secret key for session management

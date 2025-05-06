@@ -96,7 +96,7 @@ export async function translateFile(
       // Get auth token for authenticated users
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        throw new Error('Authentication required');
+        throw new Error('authentication_error');
       }
       headers = {
         'Authorization': `Bearer ${token}`,
@@ -118,7 +118,7 @@ export async function translateFile(
       }
       
       if (response.status === 403) {
-        const err = await response.json();
+        // Handle weekly limit error without using console.error
         throw new Error('weekly_limit_reached');
       }
       

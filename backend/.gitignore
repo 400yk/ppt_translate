@@ -4,3 +4,7 @@
 .env.local
 __pycache__
 app.db
+*.db.backup
+*.sql
+postgres_data/
+.env.local.template

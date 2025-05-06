@@ -167,7 +167,7 @@ export function TranslationForm({
         description: t('success.translation_complete'),
       });
     } catch (error) {
-      console.error("Translation error:", error);
+      // Don't log to console for expected errors
       setProgress(0);
       
       // Handle specific error cases
