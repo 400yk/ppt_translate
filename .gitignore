@@ -45,6 +45,9 @@ test
 backend/.env.local
 backend/__pycache__/
 backend/app.db
+backend/pgadmin_data/
+backend/postgres_data/
+
 
 .env
 .env.dev

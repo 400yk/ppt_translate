@@ -7,4 +7,5 @@ app.db
 *.db.backup
 *.sql
 postgres_data/
+pgadmin_data/
 .env.local.template
