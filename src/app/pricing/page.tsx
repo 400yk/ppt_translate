@@ -176,7 +176,7 @@ export default function PricingPage() {
             
             <div className="space-y-2 mb-6">
               <p className="text-3xl font-bold">{isPricingLoading ? '...' : pricing.symbol}0</p>
-              <p className="text-muted-foreground">{locale === 'zh' ? '永久免费' : 'Forever free'}</p>
+              <p className="text-muted-foreground">{t('pricing.free_plan_desc')}</p>
             </div>
 
             <Separator className="my-4" />
@@ -185,21 +185,21 @@ export default function PricingPage() {
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">1 PPT/{t('pricing.weekly_limit_title').split(' ')[0]}</p>
+                  <p className="font-medium">1 PPT/{t('pricing.week')}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.upload_limit')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">25,000 {t('pricing.features.char_per_file').split(' ').pop()}</p>
+                  <p className="font-medium">25,000</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.char_per_file')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">100,000 {t('pricing.features.monthly_limit').split(' ').pop()}</p>
+                  <p className="font-medium">100,000</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.monthly_limit')}</p>
                 </div>
               </div>
@@ -213,7 +213,7 @@ export default function PricingPage() {
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{t('pricing.free_plan')} {t('pricing.features.support')}</p>
+                  <p className="font-medium">{t('pricing.free_customer_email_support')}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.support')}</p>
                 </div>
               </div>
@@ -233,7 +233,7 @@ export default function PricingPage() {
           {/* Paid Plan */}
           <Card className="p-6 flex flex-col relative border-primary/50 bg-primary/5">
             <div className="absolute -top-4 right-4 bg-primary text-primary-foreground text-sm px-3 py-1 rounded-full">
-              {t('pricing.current_plan')}
+              {t('pricing.recommended_plan')}
             </div>
             
             <div className="space-y-2 mb-6">
@@ -251,10 +251,10 @@ export default function PricingPage() {
                 <>
                   <p className="text-3xl font-bold">
                     {pricing.monthly.display}
-                    <span className="text-lg font-normal">/{locale === 'zh' ? '月' : 'mo'}</span>
+                    <span className="text-lg font-normal">/{t('pricing.month')}</span>
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {pricing.yearly.display_per_month}/{locale === 'zh' ? '月' : 'mo'} {t('pricing.yearly')}
+                    {pricing.yearly.display_per_month}/{t('pricing.month')} {t('pricing.yearly')}
                   </p>
                 </>
               )}
@@ -266,35 +266,35 @@ export default function PricingPage() {
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{t('pricing.paid_plan')} {t('pricing.features.upload_limit')}</p>
+                  <p className="font-medium">{t('pricing.no_limit')}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.upload_limit')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{t('pricing.paid_plan')} {t('pricing.features.char_per_file')}</p>
+                  <p className="font-medium">{t('pricing.no_limit')}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.char_per_file')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">5,000,000 {t('pricing.features.monthly_limit').split(' ').pop()}</p>
+                  <p className="font-medium">5,000,000</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.monthly_limit')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{t('pricing.paid_plan')} {t('pricing.features.file_size')}</p>
+                  <p className="font-medium">{t('pricing.no_limit')}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.file_size')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-green-500 mt-0.5" />
                 <div>
-                  <p className="font-medium">{t('pricing.paid_plan')} {t('pricing.features.support')}</p>
+                  <p className="font-medium">{t('pricing.paid_customer_email_support')}</p>
                   <p className="text-sm text-muted-foreground">{t('pricing.features.support')}</p>
                 </div>
               </div>
