@@ -4,7 +4,7 @@ from pptx import Presentation
 from pptx.util import Pt
 from pptx.enum.shapes import PP_PLACEHOLDER
 from api.llm_api import gemini_batch_translate_with_size
-from pptx_utils import measure_text_bbox, fit_font_size_to_bbox, fit_font_size_for_title
+from utils.pptx_utils import measure_text_bbox, fit_font_size_to_bbox, fit_font_size_for_title
 from config import (
     DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, DEFAULT_TITLE_FONT_SIZE
 )

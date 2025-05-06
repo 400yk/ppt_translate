@@ -3,7 +3,6 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from models import db
-import auth  # Keep for compatibility
 from api import register_blueprints
 
 # Environment loading is now handled in config.py
@@ -30,10 +29,6 @@ def create_app():
     # Create tables if they don't exist
     with app.app_context():
         db.create_all()
-
-    # Call the legacy auth.register_routes for compatibility
-    # This is now a no-op but kept for backwards compatibility
-    auth.register_routes(app)
     
     # Register all API blueprints (contains the actual implementations now)
     register_blueprints(app)

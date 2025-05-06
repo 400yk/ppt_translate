@@ -7,7 +7,7 @@ from flask import jsonify
 from models import User, TranslationRecord, db
 from config import FREE_USER_TRANSLATION_LIMIT, FREE_USER_TRANSLATION_PERIOD, GUEST_TRANSLATION_LIMIT
 from guest_tracker import guest_tracker
-from utils import error_response
+from utils.api_utils import error_response
 
 def check_user_permission(user):
     """

@@ -55,4 +55,4 @@ def fit_font_size_for_title(target_height, text, font_name, max_font_size, min_f
             high = mid - 1
         else:
             low = mid + 1
-    return best_size
+    return best_size 
