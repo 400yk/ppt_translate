@@ -7,7 +7,7 @@ Run this script to create a set of invitation codes.
 import os
 import sys
 from flask import Flask
-from models import db, InvitationCode
+from db.models import db, InvitationCode
 
 def create_app():
     # Create a minimal Flask application

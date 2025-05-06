@@ -5,7 +5,7 @@ API endpoints for handling user authentication and invitation codes.
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 import datetime
-from models import db, User, InvitationCode
+from db.models import db, User, InvitationCode
 
 auth_bp = Blueprint('auth', __name__)
 

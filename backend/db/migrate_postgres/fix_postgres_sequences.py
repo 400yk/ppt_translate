@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 
 from flask import Flask
 from sqlalchemy import text
-from models import db
+from db.models import db
 import config
 
 def fix_postgres_sequences():

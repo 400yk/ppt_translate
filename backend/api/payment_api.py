@@ -8,7 +8,7 @@ import stripe
 import logging
 from flask import Blueprint, jsonify, request, redirect, url_for, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User, db
+from db.models import User, db
 from services.user_service import get_membership_status, process_membership_purchase
 from config import PRICING, CURRENCY_RATES, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, FLASK_API_URL
 

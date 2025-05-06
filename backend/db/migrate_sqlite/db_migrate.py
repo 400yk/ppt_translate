@@ -6,7 +6,7 @@ import sqlite3
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import app, db
-from models import TranslationRecord
+from db.models import TranslationRecord
 
 def migrate_database():
     """

@@ -10,7 +10,7 @@ import datetime
 # Add the parent directory to the path so we can import the models
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from models import db, User
+from db.models import db, User
 from app import create_app
 from sqlalchemy import Column, String
 

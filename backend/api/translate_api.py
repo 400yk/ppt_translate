@@ -3,7 +3,7 @@ API endpoints for handling PowerPoint translation requests.
 """
 from flask import request, send_file, jsonify, make_response, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User, db
+from db.models import User, db
 from services.user_service import check_user_permission, check_guest_permission
 from services.translate_service import translate_pptx
 

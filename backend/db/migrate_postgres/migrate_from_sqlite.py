@@ -19,7 +19,7 @@ from sqlalchemy import create_engine, MetaData, Table, select, text, inspect
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from flask import Flask
-from models import db, User, InvitationCode, TranslationRecord
+from db.models import db, User, InvitationCode, TranslationRecord
 import config
 
 def migrate_sqlite_to_postgres():

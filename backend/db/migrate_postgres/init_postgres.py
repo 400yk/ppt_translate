@@ -11,7 +11,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from flask import Flask
-from models import db
+from db.models import db
 from sqlalchemy import text
 import config
 

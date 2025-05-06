@@ -4,7 +4,7 @@ User management module for handling user permissions, translation limits, and me
 
 import datetime
 from flask import jsonify
-from models import User, TranslationRecord, db
+from db.models import User, TranslationRecord, db
 from config import FREE_USER_TRANSLATION_LIMIT, FREE_USER_TRANSLATION_PERIOD, GUEST_TRANSLATION_LIMIT
 from services.guest_service import guest_tracker
 from utils.api_utils import error_response

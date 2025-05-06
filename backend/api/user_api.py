@@ -4,7 +4,7 @@ API endpoints for handling user-related operations.
 
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User, db
+from db.models import User, db
 
 user_bp = Blueprint('user', __name__)
 

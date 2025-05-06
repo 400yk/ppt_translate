@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from models import db
+from db.models import db
 from api import register_blueprints
 
 # Environment loading is now handled in config.py
