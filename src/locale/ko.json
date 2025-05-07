@@ -131,7 +131,8 @@
       "support": "지원"
     },
     "weekly_limit_title": "주간 번역 한도에 도달했습니다",
-    "weekly_limit_message": "무료 사용자는 주당 1회만 번역할 수 있습니다. 무제한 번역을 위해 유료 멤버십으로 업그레이드를 고려해 보세요."
+    "weekly_limit_message": "무료 사용자는 주당 1회만 번역할 수 있습니다. 무제한 번역을 위해 유료 멤버십으로 업그레이드를 고려해 보세요.",
+    "character_limit_title": "월간 문자 수 한도에 도달했습니다"
   },
   "nav": {
     "translate_now": "지금 번역하기",

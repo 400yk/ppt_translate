@@ -131,7 +131,8 @@
       "support": "Support"
     },
     "weekly_limit_title": "Weekly Translation Limit Reached",
-    "weekly_limit_message": "Free users can only perform 1 translation(s) per week. Consider upgrading to a paid membership for unlimited translations."
+    "weekly_limit_message": "Free users can only perform 1 translation(s) per week. Consider upgrading to a paid membership for unlimited translations.",
+    "character_limit_title": "Monthly Character Limit Reached"
   },
   "nav": {
     "translate_now": "Translate Now",

@@ -130,8 +130,9 @@
       "file_size": "最大ファイルサイズ",
       "support": "サポート"
     },
-    "weekly_limit_title": "週間翻訳回数制限に達しました",
-    "weekly_limit_message": "無料ユーザーは週に1回のみ翻訳できます。有料会員にアップグレードすると無制限の翻訳が可能です。"
+    "weekly_limit_title": "週間翻訳制限に達しました",
+    "weekly_limit_message": "無料ユーザーは週に1回のみ翻訳できます。無制限の翻訳には有料会員へのアップグレードをご検討ください。",
+    "character_limit_title": "月間文字数制限に達しました"
   },
   "nav": {
     "translate_now": "今すぐ翻訳",

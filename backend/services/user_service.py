@@ -5,7 +5,7 @@ User management module for handling user permissions, translation limits, and me
 import datetime
 from flask import jsonify
 from db.models import User, TranslationRecord, db
-from config import FREE_USER_TRANSLATION_LIMIT, FREE_USER_TRANSLATION_PERIOD, GUEST_TRANSLATION_LIMIT
+from config import FREE_USER_TRANSLATION_LIMIT, FREE_USER_TRANSLATION_PERIOD, GUEST_TRANSLATION_LIMIT, GUEST_USER_CHARACTER_MONTHLY_LIMIT
 from services.guest_service import guest_tracker
 from utils.api_utils import error_response
 
@@ -210,12 +210,12 @@ def get_guest_status(ip_address):
         'translations_remaining': remaining,
         'period': 'lifetime',
         'reset_info': 'Guest translations are limited to one per guest, ever',
-        'character_limit': 25000,  # Hard-coded character limit for guests
+        'character_limit': GUEST_USER_CHARACTER_MONTHLY_LIMIT,  # Use config value instead of hard-coded 25000
         'characters_used': 0,      # Not tracking per-guest character usage
-        'characters_remaining': 25000
+        'characters_remaining': GUEST_USER_CHARACTER_MONTHLY_LIMIT
     }
 
-def check_guest_permission(ip_address, filename, src_lang, dest_lang):
+def check_guest_permission(ip_address, filename, src_lang, dest_lang, character_count=0):
     """
     Check if a guest user can translate and record the translation if allowed.
     
@@ -224,15 +224,25 @@ def check_guest_permission(ip_address, filename, src_lang, dest_lang):
         filename: The name of the translated file
         src_lang: Source language code
         dest_lang: Destination language code
+        character_count: The estimated character count for the translation
         
     Returns:
         (allowed, error_response) where allowed is a boolean indicating if the guest can translate,
         and error_response is the Flask response to return if not allowed (or None if allowed).
     """
+    # First check number of translations limit
     if not guest_tracker.can_translate(ip_address):
         return False, jsonify({
             'error': 'Translation limit reached',
             'message': f'Guest users are limited to {GUEST_TRANSLATION_LIMIT} translation only. Please register for more translations.',
+        }), 403
+    
+    # Then check character limit if we have an estimate
+    if character_count > 0 and character_count > GUEST_USER_CHARACTER_MONTHLY_LIMIT:
+        return False, jsonify({
+            'error': 'Character limit exceeded',
+            'message': f'This file exceeds the {GUEST_USER_CHARACTER_MONTHLY_LIMIT} character limit for guest users. Please register for a higher limit.',
+            'i18n_key': 'pricing.character_limit_title'
         }), 403
     
     # Record the translation

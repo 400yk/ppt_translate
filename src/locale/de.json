@@ -130,8 +130,9 @@
       "file_size": "Max. Dateigröße",
       "support": "Support"
     },
-    "weekly_limit_title": "Wöchentliches Übersetzungslimit erreicht",
-    "weekly_limit_message": "Kostenlose Benutzer können nur 1 Übersetzung(en) pro Woche durchführen. Erwägen Sie ein Upgrade auf eine kostenpflichtige Mitgliedschaft für unbegrenzte Übersetzungen."
+    "weekly_limit_title": "Wöchentliches Übersetzungslimit Erreicht",
+    "weekly_limit_message": "Kostenlose Benutzer können nur 1 Übersetzung pro Woche durchführen. Erwägen Sie ein Upgrade auf eine kostenpflichtige Mitgliedschaft für unbegrenzte Übersetzungen.",
+    "character_limit_title": "Monatliches Zeichenlimit Erreicht"
   },
   "nav": {
     "translate_now": "Jetzt übersetzen",

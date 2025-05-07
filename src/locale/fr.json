@@ -130,8 +130,9 @@
       "file_size": "Taille maximale de fichier",
       "support": "Support"
     },
-    "weekly_limit_title": "Limite hebdomadaire de traduction atteinte",
-    "weekly_limit_message": "Les utilisateurs gratuits ne peuvent effectuer que 1 traduction(s) par semaine. Envisagez de passer à un abonnement payant pour des traductions illimitées."
+    "weekly_limit_title": "Limite Hebdomadaire de Traductions Atteinte",
+    "weekly_limit_message": "Les utilisateurs gratuits ne peuvent effectuer qu'une seule traduction par semaine. Envisagez de passer à un abonnement payant pour des traductions illimitées.",
+    "character_limit_title": "Limite Mensuelle de Caractères Atteinte"
   },
   "nav": {
     "translate_now": "Traduire maintenant",

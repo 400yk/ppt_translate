@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from db.models import User, db
 from services.user_service import check_user_permission, check_guest_permission
 from services.translate_service import translate_pptx
+from pptx import Presentation
 
 translate_bp = Blueprint('translate', __name__)
 
@@ -106,8 +107,39 @@ def guest_translate_pptx_endpoint():
     client_ip = request.remote_addr
     
     try:
+        # Estimate the character count before translating
+        estimated_character_count = 0
+        try:
+            # Make a copy of the file stream
+            file_copy = file.stream.read()
+            file.stream.seek(0)  # Reset the file pointer for later use
+            
+            # Load the presentation to count characters
+            prs = Presentation(file_copy)
+            
+            # Count characters in text shapes and tables
+            for slide in prs.slides:
+                for shape in slide.shapes:
+                    # Handle regular text shapes
+                    if hasattr(shape, "text") and shape.text.strip():
+                        estimated_character_count += len(shape.text)
+                    
+                    # Handle tables
+                    if hasattr(shape, "has_table") and shape.has_table:
+                        table = shape.table
+                        for row in table.rows:
+                            for cell in row.cells:
+                                if cell.text.strip():
+                                    estimated_character_count += len(cell.text)
+                                    
+            print(f"Estimated character count: {estimated_character_count}")
+            file.stream.seek(0)  # Reset file pointer again after counting
+        except Exception as e:
+            print(f"Error estimating character count: {e}")
+            # If estimation fails, continue with character count of 0
+
         # Check guest permission before translating
-        result = check_guest_permission(client_ip, file.filename, src_lang, dest_lang)
+        result = check_guest_permission(client_ip, file.filename, src_lang, dest_lang, estimated_character_count)
         # Handle the case where three values are returned (allowed, response_obj, status_code)
         if isinstance(result, tuple):
             if len(result) == 3:
@@ -119,7 +151,7 @@ def guest_translate_pptx_endpoint():
                 if not allowed:
                     return response_obj
         
-        # Translate the PPTX file and get the output path
+        # Translate the PPTX file and get the output path and character count
         output_path, character_count = translate_pptx(file.stream, src_lang, dest_lang)
         
         # Return the translated file

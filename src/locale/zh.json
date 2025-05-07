@@ -131,7 +131,8 @@
       "support": "客户支持"
     },
     "weekly_limit_title": "已达到每周翻译次数限制",
-    "weekly_limit_message": "免费用户每周只能翻译1次。升级到付费会员可以获得无限翻译次数。"
+    "weekly_limit_message": "免费用户每周只能翻译1次。升级到付费会员可以获得无限翻译次数。",
+    "character_limit_title": "已达到每月字符数限制"
   },
   "nav": {
     "translate_now": "立即翻译",

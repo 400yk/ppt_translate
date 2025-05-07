@@ -124,7 +124,7 @@ def get_file_size_limit():
     """
     try:
         return jsonify({
-            'maxFileSizeMB': config.GUEST_FREE_USER_MAX_FILE_SIZE
+            'maxFileSizeMB': config.GUEST_USER_MAX_FILE_SIZE
         })
     except Exception as e:
         print(f"Error getting file size limit: {str(e)}")
@@ -171,7 +171,7 @@ def get_all_limits():
             'freeUserTranslationLimit': config.FREE_USER_TRANSLATION_LIMIT,
             'freeUserTranslationPeriod': config.FREE_USER_TRANSLATION_PERIOD,
             'paidUserCharMonthlyLimit': config.PAID_USER_CHARACTER_MONTHLY_LIMIT,
-            'maxFileSizeMB': config.GUEST_FREE_USER_MAX_FILE_SIZE
+            'maxFileSizeMB': config.GUEST_USER_MAX_FILE_SIZE
         })
     except Exception as e:
         print(f"Error getting configuration limits: {str(e)}")
