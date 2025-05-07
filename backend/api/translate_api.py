@@ -7,6 +7,8 @@ from db.models import User, db
 from services.user_service import check_user_permission, check_guest_permission
 from services.translate_service import translate_pptx
 from pptx import Presentation
+from services.guest_service import guest_tracker
+from db.models import GuestTranslation, db
 
 translate_bp = Blueprint('translate', __name__)
 
@@ -153,6 +155,12 @@ def guest_translate_pptx_endpoint():
         
         # Translate the PPTX file and get the output path and character count
         output_path, character_count = translate_pptx(file.stream, src_lang, dest_lang)
+        
+        # Update the guest translation record with actual character count
+        latest_translation = GuestTranslation.query.filter_by(ip_address=client_ip).order_by(GuestTranslation.created_at.desc()).first()
+        if latest_translation:
+            latest_translation.character_count = character_count
+            db.session.commit()
         
         # Return the translated file
         response = make_response(send_file(output_path, as_attachment=True, 

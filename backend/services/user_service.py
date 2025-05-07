@@ -246,7 +246,7 @@ def check_guest_permission(ip_address, filename, src_lang, dest_lang, character_
         }), 403
     
     # Record the translation
-    guest_tracker.record_translation(ip_address, filename, src_lang, dest_lang)
+    guest_tracker.record_translation(ip_address, filename, src_lang, dest_lang, character_count)
     remaining = guest_tracker.get_remaining_translations(ip_address)
     print(f"Guest translation from IP {ip_address}: {GUEST_TRANSLATION_LIMIT - remaining + 1}/{GUEST_TRANSLATION_LIMIT}")
     

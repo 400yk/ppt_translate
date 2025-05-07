@@ -11,7 +11,16 @@ import config
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
+    
+    # Configure CORS to allow frontend origins
+    cors_origins = [
+        "https://translide-42ac7178fd60.herokuapp.com",  # Production frontend
+        "http://localhost:9002",  # Local development frontend
+        "http://127.0.0.1:9002",
+        # Add the new backend domain
+        "https://translide-backend-33c323064d5f.herokuapp.com"
+    ]
+    CORS(app, resources={r"/*": {"origins": cors_origins, "supports_credentials": True}})
 
     # Configure the Flask app from config.py
     app.config['SECRET_KEY'] = config.SECRET_KEY

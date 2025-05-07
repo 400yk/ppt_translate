@@ -229,3 +229,21 @@ class TranslationRecord(db.Model):
     def get_recent(cls, limit=10):
         """Get the most recent translations."""
         return cls.query.order_by(cls.created_at.desc()).limit(limit).all() 
+
+class GuestTranslation(db.Model):
+    """
+    Stores translation records for guest users identified by IP address.
+    Replaces the file-based guest_translations.json storage for Heroku compatibility.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    ip_address = db.Column(db.String(45), index=True, nullable=False)  # IPv6 can be up to 45 chars
+    filename = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    source_language = db.Column(db.String(10))
+    target_language = db.Column(db.String(10))
+    character_count = db.Column(db.Integer, default=0)
+    
+    @classmethod
+    def count_by_ip(cls, ip_address):
+        """Count the number of translations made by a specific IP address."""
+        return cls.query.filter_by(ip_address=ip_address).count() 

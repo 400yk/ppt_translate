@@ -60,6 +60,12 @@ export function initGuestSession(): GuestSession {
       // Update last used time
       session.lastUsedAt = new Date().toISOString();
       localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify(session));
+      
+      // Refresh usage data from backend (but don't wait for it)
+      fetchGuestUsage().catch(err => 
+        console.error('Failed to refresh guest usage:', err)
+      );
+      
       return session;
     } catch (e) {
       // If parse fails, create a new session
@@ -76,6 +82,15 @@ export function initGuestSession(): GuestSession {
 
   // Store in localStorage (just the session ID, not usage)
   localStorage.setItem(GUEST_SESSION_KEY, JSON.stringify(newSession));
+  
+  // Initialize usage data with default values and sync with backend
+  const defaultUsage: GuestUsage = { remainingUses: 1, totalUses: 0 };
+  localStorage.setItem(GUEST_USAGE_KEY, JSON.stringify(defaultUsage));
+  
+  // Refresh usage data from backend (but don't wait for it)
+  fetchGuestUsage().catch(err => 
+    console.error('Failed to fetch initial guest usage:', err)
+  );
 
   return newSession;
 }
@@ -115,12 +130,14 @@ export async function fetchGuestUsage(): Promise<GuestUsage> {
 
   try {
     // Call the backend API to get current guest status
+    console.log("Fetching guest status from API:", `${API_URL}/api/guest/status`);
     const response = await fetch(`${API_URL}/api/guest/status`);
     if (!response.ok) {
       throw new Error('Failed to fetch guest status');
     }
 
     const data = await response.json() as GuestStatus;
+    console.log("Guest status response:", data);
     
     // Convert API format to our local format
     const usage: GuestUsage = {
@@ -161,8 +178,14 @@ export function getGuestUsage(): GuestUsage {
 
   const usageData = localStorage.getItem(GUEST_USAGE_KEY);
   if (!usageData) {
-    // Return a default, fetchGuestUsage() should be called to get accurate data
-    return { remainingUses: 1, totalUses: 0 };
+    // For first time visitors, assume they have 1 use
+    // Only used for immediate UI rendering before backend call completes
+    const defaultUsage: GuestUsage = { remainingUses: 1, totalUses: 0 };
+    
+    // Store default in localStorage 
+    localStorage.setItem(GUEST_USAGE_KEY, JSON.stringify(defaultUsage));
+    
+    return defaultUsage;
   }
 
   try {

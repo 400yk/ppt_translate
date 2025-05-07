@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { RegistrationDialog } from '@/components/registration-dialog';
-import { initGuestSession, canGuestUseTranslation } from '@/lib/guest-session';
+import { initGuestSession, canGuestUseTranslation, fetchGuestUsage } from '@/lib/guest-session';
 
 // Define available languages (codes only)
 const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
@@ -58,6 +58,7 @@ export default function LandingPage() {
   const [isClient, setIsClient] = useState(false);
   const [forceRender, setForceRender] = useState(0);
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
+  const [guestStatusLoaded, setGuestStatusLoaded] = useState(false);
 
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
@@ -66,6 +67,14 @@ export default function LandingPage() {
     // Initialize guest session on first visit
     if (typeof window !== 'undefined') {
       initGuestSession();
+      
+      // Fetch guest usage status from the backend
+      const loadGuestStatus = async () => {
+        await fetchGuestUsage();
+        setGuestStatusLoaded(true);
+      };
+      
+      loadGuestStatus();
     }
   }, []);
 
@@ -107,14 +116,24 @@ export default function LandingPage() {
       // Authenticated users go straight to translation page
       router.push('/translate');
     } else {
-      // For guest users, check if they can use the free trial
-      if (canGuestUseTranslation()) {
-        // If they can use their free trial, send them to the translation page
-        router.push('/translate');
-      } else {
-        // If they've used their free trial, show registration dialog
-        setShowRegistrationDialog(true);
-      }
+      // For guest users, first make sure we have latest status from backend
+      fetchGuestUsage().then(usage => {
+        if (usage.remainingUses > 0) {
+          // If they can use their free trial, send them to the translation page
+          router.push('/translate');
+        } else {
+          // If they've used their free trial, show registration dialog
+          setShowRegistrationDialog(true);
+        }
+      }).catch(err => {
+        console.error("Error fetching guest status:", err);
+        // Fallback to cached check if API fails
+        if (canGuestUseTranslation()) {
+          router.push('/translate');
+        } else {
+          setShowRegistrationDialog(true);
+        }
+      });
     }
   };
 
@@ -124,14 +143,24 @@ export default function LandingPage() {
       // Authenticated users go straight to translation page
       router.push('/translate');
     } else {
-      // For guest users, check if they can use the free trial
-      if (canGuestUseTranslation()) {
-        // If they can use their free trial, send them to the translation page
-        router.push('/translate');
-      } else {
-        // If they've used their free trial, show registration dialog
-        setShowRegistrationDialog(true);
-      }
+      // For guest users, first make sure we have latest status from backend
+      fetchGuestUsage().then(usage => {
+        if (usage.remainingUses > 0) {
+          // If they can use their free trial, send them to the translation page
+          router.push('/translate');
+        } else {
+          // If they've used their free trial, show registration dialog
+          setShowRegistrationDialog(true);
+        }
+      }).catch(err => {
+        console.error("Error fetching guest status:", err);
+        // Fallback to cached check if API fails
+        if (canGuestUseTranslation()) {
+          router.push('/translate');
+        } else {
+          setShowRegistrationDialog(true);
+        }
+      });
     }
   };
 
