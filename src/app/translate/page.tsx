@@ -20,7 +20,7 @@ import {
 import { fetchMaxFileSize } from '@/lib/translation-service';
 
 // Define API URL
-const API_URL = process.env.API_URL || 'http://localhost:5000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 // Check for browser environment
 const isBrowser = typeof window !== 'undefined';

@@ -4,7 +4,7 @@ import { useTranslation } from '@/lib/i18n';
 import { useState, useEffect, useCallback } from 'react';
 
 // API endpoint
-const API_URL = process.env.API_URL || 'http://localhost:5000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 // Types for pricing information
 export interface PricingInfo {

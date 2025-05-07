@@ -44,7 +44,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 // API endpoint base URL
-const API_URL = process.env.API_URL || 'http://localhost:5000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

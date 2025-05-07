@@ -31,7 +31,7 @@ export default function PricingPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isPaidUser, setIsPaidUser] = useState(false);
 
-  const API_URL = process.env.API_URL || 'http://localhost:5000';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {

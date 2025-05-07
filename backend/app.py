@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from db.models import db
 from api import register_blueprints
+from flask_migrate import Migrate
 
 # Environment loading is now handled in config.py
 import config
@@ -32,6 +33,9 @@ def create_app():
     
     # Register all API blueprints (contains the actual implementations now)
     register_blueprints(app)
+
+    # After initializing your app and db:
+    migrate = Migrate(app, db)
 
     return app
 

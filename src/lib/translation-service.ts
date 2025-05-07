@@ -1,7 +1,7 @@
 import { toast } from '@/hooks/use-toast';
 
 // Define API URL
-const API_URL = process.env.API_URL || 'http://localhost:5000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 // Define available languages (codes only)
 export const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;

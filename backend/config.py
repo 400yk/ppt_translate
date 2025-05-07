@@ -6,6 +6,10 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Patch Heroku's DATABASE_URL to be compatible with SQLAlchemy
+if 'DATABASE_URL' in os.environ:
+    os.environ['DATABASE_URL'] = os.environ['DATABASE_URL'].replace('postgres://', 'postgresql://', 1)
+
 # Load environment variables with priority
 # 1. .env.local (highest priority, for secrets and local overrides)
 # 2. .env (shared development settings)

@@ -23,7 +23,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 const asTranslationKey = (key: string): TranslationKey => key as TranslationKey;
 
 // API endpoint
-const API_URL = process.env.API_URL || 'http://localhost:5000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 // Pricing data with benefits
 const pricingBenefitsKeys = [
