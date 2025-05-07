@@ -287,7 +287,9 @@ function CheckoutRedirect({
         },
         body: JSON.stringify({ 
           plan_type: selectedPlan,
-          currency: currency
+          currency: currency,
+          success_url: `${window.location.origin}/payment/success`,
+          cancel_url: `${window.location.origin}/payment/cancel`
         })
       });
       

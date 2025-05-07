@@ -102,6 +102,10 @@ def create_checkout_session():
         plan_type = data.get('plan_type')
         currency = data.get('currency', 'usd').lower()
         
+        # Get custom URLs if provided
+        success_url = data.get('success_url', SUCCESS_URL)
+        cancel_url = data.get('cancel_url', CANCEL_URL)
+        
         # Map ESP to EUR
         if currency == 'esp':
             currency = 'eur'
@@ -185,8 +189,8 @@ def create_checkout_session():
         
         # Create a new checkout session
         checkout_session = stripe.checkout.Session.create(
-            success_url=f"{SUCCESS_URL}?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=CANCEL_URL,
+            success_url=f"{success_url}?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=cancel_url,
             payment_method_types=['card'],
             mode='subscription',
             customer_email=user.email,  # Pre-fill customer email
