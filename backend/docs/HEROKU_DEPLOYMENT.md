@@ -142,6 +142,67 @@ Visit `https://your-app-name-backend.herokuapp.com` in your browser to check if 
   2. Check for `ERR_CONNECTION_REFUSED` errors in your browser console - this usually means your frontend is still trying to use localhost.
   3. Check CORS settings in your backend if you get CORS errors.
 
+## Database Migration Issues
+
+Heroku's ephemeral filesystem can cause issues with database migrations and file-based storage. Here are some common problems and solutions:
+
+### File Storage Issues
+
+**Problem**: Files saved to the filesystem (like JSON data files) don't persist between Heroku dynos or after restarts.
+
+**Solution**: Always use the database or another persistent storage solution (e.g., S3) for any data that needs to persist. For example:
+- Instead of storing data in JSON files, create database tables
+- For user uploads, use cloud storage like AWS S3 or Cloudinary
+
+### Migration Problems
+
+If you encounter migration issues, try these steps:
+
+1. **Check migration files for errors**:
+   - Ensure revision IDs don't contain placeholders like `[auto-generated]`
+   - Make sure table names match between your models and migrations
+
+2. **Check current migration status**:
+   ```sh
+   heroku run flask db current
+   ```
+
+3. **Manually set the migration version** if needed:
+   ```sh
+   heroku run flask db stamp <revision_id>
+   ```
+
+4. **Create tables directly** (emergency fallback):
+   ```sh
+   heroku run python
+   ```
+   ```python
+   from app import app, db
+   with app.app_context():
+       db.create_all()
+       print("Tables created successfully")
+   ```
+
+5. **Reset database and migrations** (caution: destroys all data):
+   ```sh
+   heroku pg:reset DATABASE_URL --confirm your-app-name
+   heroku run flask db upgrade
+   ```
+
+6. **Synchronize environments**:
+   Always ensure your local and Heroku environments are on the same migration version to prevent conflicts.
+
+### Best Practices
+
+1. **Test migrations locally** before deploying to Heroku
+2. **Version control your migrations** - ensure all migration files are committed to Git
+3. **Use proper naming conventions** in your models (e.g., explicit `__tablename__`)
+4. **Backup your data** before major migrations
+5. **Check logs** for detailed error messages during migration issues:
+   ```sh
+   heroku logs --tail
+   ```
+
 ---
 
 Happy deploying! 
