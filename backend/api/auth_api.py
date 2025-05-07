@@ -65,6 +65,9 @@ def register():
     # Mark code as used if a valid code was provided
     if has_valid_invitation and invitation_code:
         invitation_code.mark_as_used()
+        # Activate membership for the new user with invitation code
+        user.activate_paid_membership(is_invitation=True)
+        print(f"Activated invitation-based membership for {user.username} until {user.membership_end}")
     
     # Save user to database
     db.session.add(user)
