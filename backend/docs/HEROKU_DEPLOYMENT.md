@@ -82,10 +82,25 @@ Add any other variables your backend needs.
 ---
 
 ## 5. Update Frontend API URL
-After deployment, update your frontend's `API_URL` to point to your Heroku backend:
+After deployment, update your frontend's environment variables to point to your Heroku backend.
+
+### For Next.js Frontend (Important!)
+With Next.js, you must use the `NEXT_PUBLIC_` prefix for any environment variables that need to be accessible in the browser:
+
 ```sh
-heroku config:set API_URL=https://your-app-name-backend.herokuapp.com -a your-frontend-app-name
+heroku config:set NEXT_PUBLIC_API_URL=https://your-app-name-backend.herokuapp.com -a your-frontend-app-name
 ```
+
+Also update your frontend code to use this environment variable:
+```javascript
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+```
+
+**Why `NEXT_PUBLIC_` is required:**
+- Next.js only exposes environment variables prefixed with `NEXT_PUBLIC_` to the browser.
+- Regular environment variables (without this prefix) are only available server-side.
+- Since API calls are often made from the client-side, the `NEXT_PUBLIC_` prefix is essential.
+
 Make sure your frontend is **not** using `localhost` for the backend in production.
 
 ---
@@ -122,7 +137,10 @@ Visit `https://your-app-name-backend.herokuapp.com` in your browser to check if 
   heroku logs --tail
   ```
 - Ensure your backend is listening on `0.0.0.0` and the port provided by Heroku (already handled in `app.py`).
-- If your frontend cannot reach the backend, double-check that both `FLASK_API_URL` (backend) and `API_URL` (frontend) are set to the correct Heroku backend URL, **not** localhost.
+- If your frontend cannot reach the backend, check these common issues:
+  1. Verify both `FLASK_API_URL` (backend) and `NEXT_PUBLIC_API_URL` (frontend) are set to the correct Heroku backend URL, **not** localhost.
+  2. Check for `ERR_CONNECTION_REFUSED` errors in your browser console - this usually means your frontend is still trying to use localhost.
+  3. Check CORS settings in your backend if you get CORS errors.
 
 ---
 

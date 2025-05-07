@@ -13,10 +13,12 @@ def create_app():
     # Create a minimal Flask application
     app = Flask(__name__)
     
+    # Import the database URI from your config
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+    from config import SQLALCHEMY_DATABASE_URI
+    
     # Configure database
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    db_path = os.path.join(current_dir, '..', 'app.db')  # Updated path to reflect new location
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # Initialize database
