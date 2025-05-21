@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-// API endpoint
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+import apiClient from '@/lib/api-client';
 
 // Valid period types for translation limits
 export type TranslationPeriod = 'daily' | 'weekly' | 'monthly';
@@ -41,29 +39,25 @@ export function useConfigLimits() {
         setIsLoading(true);
         
         // Fetch file size limit
-        const fileSizeResponse = await fetch(`${API_URL}/config/file-size-limit`);
-        const fileSizeData = await fileSizeResponse.json();
+        const fileSizeResponse = await apiClient.get('/config/file-size-limit');
+        const fileSizeData = fileSizeResponse.data;
         
         // Fetch character limit
-        const charLimitResponse = await fetch(`${API_URL}/api/config/character-limit`);
-        const charLimitData = await charLimitResponse.json();
+        const charLimitResponse = await apiClient.get('/api/config/character-limit');
+        const charLimitData = charLimitResponse.data;
         
-        // Create endpoint for all config limits
-        const allLimitsResponse = await fetch(`${API_URL}/api/config/limits`);
-        let allLimitsData = defaultLimits;
-        
-        if (allLimitsResponse.ok) {
-          allLimitsData = await allLimitsResponse.json();
-        } else {
+        try {
+          // Create endpoint for all config limits
+          const allLimitsResponse = await apiClient.get('/api/config/limits');
+          setLimits(allLimitsResponse.data);
+        } catch (error) {
           // If the all limits endpoint doesn't exist yet, construct from available endpoints
-          allLimitsData = {
+          setLimits({
             ...defaultLimits,
             maxFileSizeMB: fileSizeData.maxFileSizeMB || defaultLimits.maxFileSizeMB,
             paidUserCharMonthlyLimit: charLimitData.limit || defaultLimits.paidUserCharMonthlyLimit
-          };
+          });
         }
-        
-        setLimits(allLimitsData);
       } catch (err) {
         console.error('Error fetching config limits:', err);
         setError('Failed to load configuration limits');

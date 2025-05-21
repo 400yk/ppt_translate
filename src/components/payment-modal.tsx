@@ -14,6 +14,7 @@ import { useMembership } from '@/lib/membership-service';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import apiClient from '@/lib/api-client';
 
 // Initialize Stripe with your publishable key
 // Replace with your actual publishable key
@@ -98,35 +99,12 @@ function CheckoutForm({
   useEffect(() => {
     const getPaymentIntent = async () => {
       try {
-        const token = localStorage.getItem('auth_token');
-        
-        if (!token) {
-          toast({
-            title: t('errors.login_failed'),
-            description: t('auth.login_subtitle'),
-            variant: 'destructive',
-          });
-          return;
-        }
-        
-        const response = await fetch(`${API_URL}/api/payment/create-payment-intent`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ 
-            plan_type: selectedPlan,
-            currency: currency
-          })
+        const response = await apiClient.post('/api/payment/create-payment-intent', { 
+          plan_type: selectedPlan,
+          currency: currency
         });
         
-        if (!response.ok) {
-          throw new Error('Failed to create payment intent');
-        }
-        
-        const data = await response.json();
-        setClientSecret(data.clientSecret);
+        setClientSecret(response.data.clientSecret);
       } catch (error) {
         console.error('Error creating payment intent:', error);
         setErrorMessage(error instanceof Error ? error.message : 'Failed to set up payment');
@@ -166,27 +144,10 @@ function CheckoutForm({
         throw new Error(error.message);
       } else if (paymentIntent.status === 'succeeded') {
         // Call the membership service to finalize the purchase on the backend
-        const token = localStorage.getItem('auth_token');
-        
-        if (!token) {
-          throw new Error('Authentication token not found');
-        }
-        
-        const response = await fetch(`${API_URL}/api/membership/confirm`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ 
-            payment_intent_id: paymentIntent.id,
-            plan_type: selectedPlan 
-          })
+        const response = await apiClient.post('/api/membership/confirm', { 
+          payment_intent_id: paymentIntent.id,
+          plan_type: selectedPlan 
         });
-        
-        if (!response.ok) {
-          throw new Error('Failed to confirm payment with server');
-        }
         
         toast({
           title: t('payment.success'),
@@ -265,60 +226,38 @@ function CheckoutRedirect({
     setErrorMessage(null);
     
     try {
-      const token = localStorage.getItem('auth_token');
-      
-      if (!token) {
-        toast({
-          title: t('errors.login_failed'),
-          description: t('auth.login_subtitle'),
-          variant: 'destructive',
-        });
-        return;
-      }
-      
       console.log(`Creating checkout session for plan: ${selectedPlan}`);
       
       // Create a checkout session
-      const response = await fetch(`${API_URL}/api/payment/checkout-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-          plan_type: selectedPlan,
-          currency: currency,
-          success_url: `${window.location.origin}/payment/success`,
-          cancel_url: `${window.location.origin}/payment/cancel`
-        })
+      const response = await apiClient.post('/api/payment/checkout-session', { 
+        plan_type: selectedPlan,
+        currency: currency,
+        success_url: `${window.location.origin}/payment/success`,
+        cancel_url: `${window.location.origin}/payment/cancel`
       });
       
       console.log(`Checkout response status: ${response.status}`);
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(e => ({ message: 'Failed to parse error response' }));
-        console.error('Checkout session error data:', errorData);
-        throw new Error(errorData.message || `Failed to create checkout session: ${response.status} ${response.statusText}`);
-      }
-      
-      const responseData = await response.json();
-      console.log('Checkout session created successfully:', responseData);
-      
-      if (!responseData.url) {
-        throw new Error('No checkout URL returned from server');
-      }
-      
       // Redirect to Stripe Checkout
-      window.location.href = responseData.url;
-      
-    } catch (error) {
+      window.location.href = response.data.url;
+    } catch (error: any) {
       console.error('Checkout error:', error);
-      setErrorMessage(error instanceof Error ? error.message : t('payment.error_description'));
+      
+      let errorMessage = t('payment.error_description');
+      // Handle axios error
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      setErrorMessage(errorMessage);
       toast({
         title: t('payment.error'),
-        description: error instanceof Error ? error.message : t('payment.error_description'),
+        description: errorMessage,
         variant: 'destructive',
       });
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -362,13 +301,10 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
   useEffect(() => {
     const fetchCharacterLimit = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/config/character-limit`);
-        if (response.ok) {
-          const data = await response.json();
-          setCharacterLimit(data.limit);
-        }
+        const response = await apiClient.get('/api/config/character-limit');
+        setCharacterLimit(response.data.character_limit);
       } catch (error) {
-        console.error('Failed to fetch character limit:', error);
+        console.error('Error fetching character limit:', error);
       }
     };
     

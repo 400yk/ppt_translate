@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useRouter as useNavigationRouter } from 'next/navigation';
 import { clearGuestSession } from './guest-session';
+import apiClient from '@/lib/api-client';
 
 // Check for browser environment
 const isBrowser = typeof window !== 'undefined';
@@ -29,6 +30,7 @@ interface AuthContextType {
     message?: string;
     messageKey?: string;
   }>;
+  fetchWithAuth: (url: string, options?: RequestInit) => Promise<Response>;
 }
 
 // Create context with default values
@@ -41,6 +43,7 @@ const AuthContext = createContext<AuthContextType>({
   register: async () => {},
   logout: () => {},
   verifyInvitationCode: async () => ({ valid: false }),
+  fetchWithAuth: async () => new Response(),
 });
 
 // API endpoint base URL
@@ -83,20 +86,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Login function
   const login = async (username: string, password: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
+      const response = await apiClient.post('/api/login', {
+        username, 
+        password
       });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Login failed');
-      }
-
-      const data = await response.json();
+      const data = response.data;
       
       // Save auth data
       setToken(data.access_token);
@@ -119,20 +114,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Register function
   const register = async (username: string, email: string, password: string, invitationCode: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, email, password, invitation_code: invitationCode }),
+      const response = await apiClient.post('/api/register', {
+        username, 
+        email, 
+        password, 
+        invitation_code: invitationCode
       });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Registration failed');
-      }
-
-      const data = await response.json();
+      const data = response.data;
       
       // Save auth data after successful registration
       setToken(data.access_token);
@@ -174,22 +163,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Fetch with auth token and automatic logout on token expiration
+  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+    if (!token) {
+      throw new Error('No authentication token available');
+    }
+
+    // Prepare headers with authentication token
+    const headers = {
+      ...options.headers,
+      'Authorization': `Bearer ${token}`
+    };
+
+    // Make the request
+    const response = await fetch(url, {
+      ...options,
+      headers
+    });
+
+    // Check if token has expired
+    if (!response.ok) {
+      try {
+        const errorData = await response.json();
+        if (errorData.msg === 'Token has expired') {
+          console.log('Token expired, logging out...');
+          
+          // Show a toast notification using createToast
+          if (isBrowser && typeof window !== 'undefined') {
+            // Import and execute the toast function directly
+            import('@/hooks/use-toast').then(({ toast }) => {
+              toast({
+                title: 'Session Expired',
+                description: 'Your session has expired. Please log in again.',
+                variant: 'destructive',
+              });
+            }).catch(err => {
+              // Fallback to alert if toast doesn't work
+              console.error('Failed to show toast:', err);
+              alert('Your session has expired. Please log in again.');
+            });
+          }
+          
+          // Log out the user after a short delay to allow the notification to be seen
+          setTimeout(() => {
+            logout();
+          }, 2000);
+          
+          throw new Error('Session expired. Please log in again.');
+        }
+      } catch (error) {
+        // If JSON parsing fails, just continue with the response
+        console.error('Error parsing response:', error);
+      }
+    }
+
+    return response;
+  };
+
   // Verify invitation code
   const verifyInvitationCode = async (code: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/verify-invitation`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code }),
+      const response = await apiClient.post('/api/verify-invitation', {
+        code
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to verify invitation code');
-      }
-
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('Verify invitation code error:', error);
       return { valid: false, error: 'Failed to verify invitation code' };
@@ -207,6 +245,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         verifyInvitationCode,
+        fetchWithAuth
       }}
     >
       {children}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/lib/i18n';
+import apiClient from '@/lib/api-client';
 
 // API endpoint
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -40,47 +41,15 @@ export function useMembership() {
     setIsProcessing(true);
     
     try {
-      // Get token from local storage
-      const token = localStorage.getItem('auth_token');
-      
-      if (!token) {
-        toast({
-          title: t('errors.login_failed'),
-          description: t('auth.login_subtitle'),
-          variant: 'destructive',
-        });
-        return false;
-      }
-      
       console.log(`Sending payment request for plan: ${planType}`);
       const requestData = { plan_type: planType };
       console.log('Request payload:', requestData);
       
       // Send request to purchase membership
-      const response = await fetch(`${API_URL}/api/membership/purchase`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(requestData)
-      });
+      const response = await apiClient.post('/api/membership/purchase', requestData);
       
       console.log(`Response status: ${response.status}`);
-      
-      // Handle non-JSON responses
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        console.error('Non-JSON response received:', await response.text());
-        throw new Error('Server returned non-JSON response');
-      }
-      
-      const responseData = await response.json();
-      console.log('Response data:', responseData);
-      
-      if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to process payment');
-      }
+      console.log('Response data:', response.data);
       
       toast({
         title: t('payment.success'),
@@ -90,11 +59,20 @@ export function useMembership() {
       });
       
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Payment processing error:', error);
+      
+      let errorMessage = t('payment.error_description');
+      // Handle axios error
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: t('payment.error'),
-        description: error instanceof Error ? error.message : t('payment.error_description'),
+        description: errorMessage,
         variant: 'destructive',
       });
       return false;

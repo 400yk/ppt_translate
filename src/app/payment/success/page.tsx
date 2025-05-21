@@ -7,9 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
 import { Icons } from '@/components/icons';
 import { DynamicHead } from '@/components/dynamic-head';
-
-// API endpoint
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+import apiClient from '@/lib/api-client';
 
 function PaymentSuccessContent() {
   const { t } = useTranslation();
@@ -38,18 +36,20 @@ function PaymentSuccessContent() {
         }
         
         // Verify the payment with the backend
-        const response = await fetch(`${API_URL}/api/payment/success?session_id=${sessionId}`);
+        const response = await apiClient.get(`/api/payment/success?session_id=${sessionId}`);
         
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to verify payment');
+        setSuccess(true);
+      } catch (error: any) {
+        console.error('Error verifying payment:', error);
+        let errorMessage = 'An unknown error occurred';
+        
+        if (error.response && error.response.data && error.response.data.message) {
+          errorMessage = error.response.data.message;
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
         }
         
-        await response.json();
-        setSuccess(true);
-      } catch (error) {
-        console.error('Error verifying payment:', error);
-        setError(error instanceof Error ? error.message : 'An unknown error occurred');
+        setError(errorMessage);
         setSuccess(false);
       } finally {
         setLoading(false);

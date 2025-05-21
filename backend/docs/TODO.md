@@ -4,5 +4,6 @@
 4. For bold / italic / underscore texts, since they affect text length, now we just used a simple scaler, but to be exact we should import the font and measure the difference in order to determine the correct font size.
 5. For partially bold content, right now everything becomes bold in that text box.
 6. For text color, problem still exists where translated text doesn't match original text's color
-7. PPT files are not supported yet.l
+7. PPT files are not supported yet.
 8. Count of total characters used is not implemented yet.
+9. The progress bar is unevenly progressed and stuck at 90% for majority of time.

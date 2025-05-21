@@ -18,6 +18,8 @@ import {
   FileSizeAlert 
 } from '@/components/translation/TranslationAlerts';
 import { fetchMaxFileSize } from '@/lib/translation-service';
+import { LanguageSelector } from '@/components/language-selector';
+import apiClient from '@/lib/api-client';
 
 // Define API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -153,20 +155,10 @@ export default function TranslationPage() {
       if (!isAuthenticated) return;
       setIsLoadingMembership(true);
       try {
-        const token = localStorage.getItem('auth_token');
-        if (!token) return;
-        const response = await fetch(`${API_URL}/api/membership/status`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setMembershipStatus(data);
-        } else {
-          setMembershipStatus(null);
-        }
+        const response = await apiClient.get('/api/membership/status');
+        setMembershipStatus(response.data);
       } catch (e) {
+        console.error('Error fetching membership status:', e);
         setMembershipStatus(null);
       } finally {
         setIsLoadingMembership(false);

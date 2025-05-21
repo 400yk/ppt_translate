@@ -1,5 +1,7 @@
 'use client';
 
+import apiClient from '@/lib/api-client';
+
 // Define constant for session storage keys
 const GUEST_SESSION_KEY = 'guest_session';
 const GUEST_USAGE_KEY = 'guest_usage';
@@ -130,13 +132,9 @@ export async function fetchGuestUsage(): Promise<GuestUsage> {
 
   try {
     // Call the backend API to get current guest status
-    console.log("Fetching guest status from API:", `${API_URL}/api/guest/status`);
-    const response = await fetch(`${API_URL}/api/guest/status`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch guest status');
-    }
-
-    const data = await response.json() as GuestStatus;
+    console.log("Fetching guest status from API");
+    const response = await apiClient.get('/api/guest/status');
+    const data = response.data as GuestStatus;
     console.log("Guest status response:", data);
     
     // Convert API format to our local format

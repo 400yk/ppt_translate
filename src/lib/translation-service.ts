@@ -1,4 +1,5 @@
 import { toast } from '@/hooks/use-toast';
+import apiClient from '@/lib/api-client';
 
 // Define API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -85,52 +86,110 @@ export async function translateFile(
   }, 20);
 
   try {
-    // Determine which endpoint to use and prepare headers
-    let endpointUrl = `${API_URL}/translate`;
-    let headers: HeadersInit = {};
+    let response;
     
     if (isGuestUser) {
-      // Use guest endpoint for guest users
-      endpointUrl = `${API_URL}/guest-translate`;
+      // Use guest endpoint for guest users with apiClient
+      try {
+        response = await apiClient.post('/guest-translate', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          responseType: 'blob',
+        });
+        
+        clearInterval(progressInterval);
+      } catch (error: any) {
+        clearInterval(progressInterval);
+        
+        // Handle specific error status codes
+        if (error.response) {
+          if (error.response.status === 401) {
+            throw new Error('authentication_error');
+          }
+          
+          if (error.response.status === 403) {
+            throw new Error('weekly_limit_reached');
+          }
+
+          if (error.response.status === 503) {
+            throw new Error('service_unavailable');
+          }
+          
+          // Try to parse error response if it's JSON
+          if (error.response.data instanceof Blob) {
+            try {
+              const textData = await error.response.data.text();
+              const jsonData = JSON.parse(textData);
+              throw new Error(jsonData.error || 'Translation failed');
+            } catch (parseError) {
+              throw new Error('Translation failed');
+            }
+          }
+        }
+        
+        // Handle network errors
+        if (error.message === 'Network Error') {
+          throw new Error('service_unavailable');
+        }
+        
+        throw error;
+      }
     } else {
-      // Get auth token for authenticated users
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        throw new Error('authentication_error');
-      }
-      headers = {
-        'Authorization': `Bearer ${token}`,
-      };
-    }
+      // Use apiClient for authenticated users
+      try {
+        // We need to use raw axios for file uploads with progress
+        response = await apiClient.post('/translate', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          responseType: 'blob',
+        });
+        
+        clearInterval(progressInterval);
+      } catch (error: any) {
+        clearInterval(progressInterval);
+        
+        // Handle specific error status codes
+        if (error.response) {
+          if (error.response.status === 401) {
+            throw new Error('authentication_error');
+          }
+          
+          if (error.response.status === 403) {
+            throw new Error('weekly_limit_reached');
+          }
 
-    // Send the file to the Flask backend
-    const response = await fetch(endpointUrl, {
-      method: 'POST',
-      headers,
-      body: formData,
-    });
-
-    clearInterval(progressInterval);
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('authentication_error');
+          if (error.response.status === 503) {
+            throw new Error('service_unavailable');
+          }
+          
+          // Try to parse error response if it's JSON
+          if (error.response.data instanceof Blob) {
+            try {
+              const textData = await error.response.data.text();
+              const jsonData = JSON.parse(textData);
+              throw new Error(jsonData.error || 'Translation failed');
+            } catch (parseError) {
+              throw new Error('Translation failed');
+            }
+          }
+        }
+        
+        // Handle network errors
+        if (error.message === 'Network Error') {
+          throw new Error('service_unavailable');
+        }
+        
+        throw error;
       }
-      
-      if (response.status === 403) {
-        // Handle weekly limit error without using console.error
-        throw new Error('weekly_limit_reached');
-      }
-      
-      const err = await response.json();
-      throw new Error(err.error || 'Translation failed');
     }
 
     // Set progress to 100%
     onProgress(100);
     
     // Create a blob URL for the translated file
-    const blob = await response.blob();
+    const blob = response.data;
     return URL.createObjectURL(blob);
   } catch (error) {
     clearInterval(progressInterval);
@@ -145,14 +204,11 @@ export async function translateFile(
  */
 export async function fetchMaxFileSize(): Promise<number> {
   try {
-    const response = await fetch(`${API_URL}/config/file-size-limit`);
-    if (response.ok) {
-      const data = await response.json();
-      if (data.maxFileSizeMB) {
-        return data.maxFileSizeMB;
-      }
+    const response = await apiClient.get('/config/file-size-limit');
+    if (response.data.maxFileSizeMB) {
+      return response.data.maxFileSizeMB;
     }
-    return 50; // Default to 50MB if the API call fails
+    return 50; // Default to 50MB if the value is not in the response
   } catch (error) {
     console.error("Failed to fetch max file size from backend:", error);
     return 50; // Default to 50MB

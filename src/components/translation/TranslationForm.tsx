@@ -181,6 +181,15 @@ export function TranslationForm({
           onWeeklyLimitReached();
           return;
         }
+
+        if (error.message === 'service_unavailable') {
+          toast({
+            title: 'Service Unavailable',
+            description: 'The translation service is currently unavailable. Please try again later.',
+            variant: 'destructive',
+          });
+          return;
+        }
         
         toast({
           title: 'Error',

@@ -18,6 +18,7 @@ import { RegistrationDialog } from '@/components/registration-dialog';
 import { PaymentModal } from '@/components/payment-modal';
 import { usePricing } from '@/lib/pricing-service';
 import { useConfigLimits } from '@/lib/config-service';
+import apiClient from '@/lib/api-client';
 
 export default function PricingPage() {
   const { t, locale } = useTranslation();
@@ -44,19 +45,8 @@ export default function PricingPage() {
       if (!isAuthenticated || !isClient) return;
       
       try {
-        const token = localStorage.getItem('auth_token');
-        if (!token) return;
-        
-        const response = await fetch(`${API_URL}/api/membership/status`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setIsPaidUser(data.user_type === 'paid');
-        }
+        const response = await apiClient.get('/api/membership/status');
+        setIsPaidUser(response.data.user_type === 'paid');
       } catch (error) {
         console.error('Error checking membership status:', error);
       }

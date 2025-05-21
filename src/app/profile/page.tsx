@@ -15,6 +15,7 @@ import { DynamicHead } from '@/components/dynamic-head';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { PaymentModal } from '@/components/payment-modal';
+import apiClient from '@/lib/api-client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -79,21 +80,10 @@ export default function ProfilePage() {
       setIsLoadingMembership(true);
       console.log('Fetching membership status...');
       
-      const response = await fetch(`${API_URL}/api/membership/status`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Error response:', errorData);
-        throw new Error(errorData.message || 'Failed to fetch membership status');
-      }
-
-      const data = await response.json();
-      console.log('Membership status:', data);
-      setMembershipStatus(data);
+      const response = await apiClient.get('/api/membership/status');
+      
+      console.log('Membership status:', response.data);
+      setMembershipStatus(response.data);
     } catch (error) {
       console.error('Error fetching membership status:', error);
     } finally {
@@ -153,31 +143,12 @@ export default function ProfilePage() {
   const handleManageSubscription = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('auth_token');
       
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-      
-      const response = await fetch(`${API_URL}/api/payment/create-portal-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          return_url: window.location.href
-        })
+      const response = await apiClient.post('/api/payment/create-portal-session', {
+        return_url: window.location.href
       });
       
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Failed to create portal session');
-      }
-      
-      const { url } = await response.json();
-      window.location.href = url;
+      window.location.href = response.data.url;
     } catch (error) {
       console.error('Error opening portal:', error);
       toast({
