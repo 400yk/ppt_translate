@@ -48,7 +48,9 @@
     "service_unavailable_title": "Servicio no disponible",
     "service_unavailable_message": "El servicio de traducción no está disponible actualmente. Por favor, inténtelo más tarde.",
     "task_not_found_message": "Tarea de traducción no encontrada. Por favor, inténtelo de nuevo.",
-    "file_not_found_message": "Archivo traducido no encontrado. Por favor, inténtelo de nuevo."
+    "file_not_found_message": "Archivo traducido no encontrado. Por favor, inténtelo de nuevo.",
+    "no_download_url": "No se proporcionó URL de descarga",
+    "translation_failed_fallback": "Falló la traducción"
   },
   "success": {
     "title": "Éxito",
@@ -223,5 +225,24 @@
     "currency": "Seleccionar moneda",
     "month_abbr": "mes",
     "year_abbr": "año"
+  },
+  "progress": {
+    "loading": "Cargando...",
+    "collecting_text": "Recopilando texto de las diapositivas...",
+    "extraction_complete": "Extracción de texto completa",
+    "translation_start": "Iniciando traducción...",
+    "translating": "Traduciendo texto...",
+    "translation_complete": "Traducción completa",
+    "updating_shapes": "Actualizando formas de diapositivas...",
+    "updating_text_shapes": "Actualizando formas de texto...",
+    "updating_tables": "Actualizando tablas...",
+    "updating_table_cells": "Actualizando celdas de tabla...",
+    "saving": "Guardando archivo traducido...",
+    "complete": "¡Completo!",
+    "starting_translation": "Iniciando traducción...",
+    "translation_in_progress": "Traducción en progreso...",
+    "processing": "Procesando...",
+    "downloading_file": "Descargando archivo...",
+    "timeout_error": "Tiempo de espera de traducción agotado - por favor inténtelo de nuevo"
   }
 } 

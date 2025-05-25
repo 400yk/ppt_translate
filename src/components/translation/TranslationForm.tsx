@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { Progress } from '@/components/ui/progress';
@@ -45,15 +45,33 @@ export function TranslationForm({
   const [translatedFileUrl, setTranslatedFileUrl] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string>('');
-  const [srcLang, setSrcLang] = useState<LanguageCode>("zh"); // Default source language: Chinese
-  const [destLang, setDestLang] = useState<LanguageCode>("en"); // Default target language: English
-  const [invalidFileType, setInvalidFileType] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [fileSizeExceeded, setFileSizeExceeded] = useState(false);
   const { toast } = useToast();
   const { t, locale } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
+  const [invalidFileType, setInvalidFileType] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [fileSizeExceeded, setFileSizeExceeded] = useState(false);
+
+  // Set default languages based on current locale
+  const getDefaultLanguages = () => {
+    // Source language defaults to current page locale
+    const defaultSrc = locale as LanguageCode;
+    // Destination language defaults to English, unless current locale is English, then use Chinese
+    const defaultDest: LanguageCode = locale === 'en' ? 'zh' : 'en';
+    return { defaultSrc, defaultDest };
+  };
+
+  const { defaultSrc, defaultDest } = getDefaultLanguages();
+  const [srcLang, setSrcLang] = useState<LanguageCode>(defaultSrc);
+  const [destLang, setDestLang] = useState<LanguageCode>(defaultDest);
+
+  // Update languages when locale changes
+  useEffect(() => {
+    const { defaultSrc: newDefaultSrc, defaultDest: newDefaultDest } = getDefaultLanguages();
+    setSrcLang(newDefaultSrc);
+    setDestLang(newDefaultDest);
+  }, [locale]);
 
   // Helper function to get translated language name
   const getLanguageName = (code: LanguageCode): string => {
@@ -153,6 +171,22 @@ export function TranslationForm({
     setTranslatedFileUrl(null); // Reset any previous translated file URL
 
     try {
+      // Prepare translated status messages
+      const statusMessages = {
+        starting: t('progress.starting_translation'),
+        inProgress: t('progress.translation_in_progress'),
+        processing: t('progress.processing'),
+        downloading: t('progress.downloading_file'),
+        complete: t('progress.complete'),
+        timeout: t('progress.timeout_error')
+      };
+
+      // Prepare translated error messages
+      const errorMessages = {
+        noDownloadUrl: t('errors.no_download_url'),
+        translationFailed: t('errors.translation_failed_fallback')
+      };
+
       // Use the async translation service
       const url = await translateFileAsync(
         file,
@@ -160,7 +194,9 @@ export function TranslationForm({
         destLang,
         isGuestUser,
         setProgress,
-        setStatusMessage
+        setStatusMessage,
+        statusMessages,
+        errorMessages
       );
       
       // Store the translated file URL

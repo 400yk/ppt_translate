@@ -48,7 +48,9 @@
     "service_unavailable_title": "サービス利用不可",
     "service_unavailable_message": "翻訳サービスは現在利用できません。後でもう一度お試しください。",
     "task_not_found_message": "翻訳タスクが見つかりません。もう一度お試しください。",
-    "file_not_found_message": "翻訳されたファイルが見つかりません。もう一度お試しください。"
+    "file_not_found_message": "翻訳されたファイルが見つかりません。もう一度お試しください。",
+    "no_download_url": "ダウンロードURLが提供されていません",
+    "translation_failed_fallback": "翻訳に失敗しました"
   },
   "success": {
     "title": "成功",
@@ -223,5 +225,24 @@
     "currency": "通貨を選択",
     "month_abbr": "月",
     "year_abbr": "年"
+  },
+  "progress": {
+    "loading": "読み込み中...",
+    "collecting_text": "スライドからテキストを収集中...",
+    "extraction_complete": "テキスト抽出完了",
+    "translation_start": "翻訳を開始中...",
+    "translating": "テキストを翻訳中...",
+    "translation_complete": "翻訳完了",
+    "updating_shapes": "スライドの図形を更新中...",
+    "updating_text_shapes": "テキスト図形を更新中...",
+    "updating_tables": "表を更新中...",
+    "updating_table_cells": "表のセルを更新中...",
+    "saving": "翻訳ファイルを保存中...",
+    "complete": "完了！",
+    "starting_translation": "翻訳を開始中...",
+    "translation_in_progress": "翻訳進行中...",
+    "processing": "処理中...",
+    "downloading_file": "ファイルをダウンロード中...",
+    "timeout_error": "翻訳タイムアウト - もう一度お試しください"
   }
 } 

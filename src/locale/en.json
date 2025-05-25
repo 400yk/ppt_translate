@@ -48,7 +48,9 @@
     "code_invalid": "Invalid invitation code",
     "missing_fields": "Missing required fields",
     "username_exists": "Username already exists",
-    "email_exists": "Email already exists"
+    "email_exists": "Email already exists",
+    "no_download_url": "No download URL provided",
+    "translation_failed_fallback": "Translation failed"
   },
   "success": {
     "title": "Success",
@@ -223,5 +225,24 @@
     "currency": "Select Currency",
     "month_abbr": "mo",
     "year_abbr": "yr"
+  },
+  "progress": {
+    "loading": "Loading...",
+    "collecting_text": "Collecting text from slides...",
+    "extraction_complete": "Text extraction complete",
+    "translation_start": "Starting translation...",
+    "translating": "Translating text...",
+    "translation_complete": "Translation complete",
+    "updating_shapes": "Updating slide shapes...",
+    "updating_text_shapes": "Updating text shapes...",
+    "updating_tables": "Updating tables...",
+    "updating_table_cells": "Updating table cells...",
+    "saving": "Saving translated file...",
+    "complete": "Complete!",
+    "starting_translation": "Starting translation...",
+    "translation_in_progress": "Translation in progress...",
+    "processing": "Processing...",
+    "downloading_file": "Downloading file...",
+    "timeout_error": "Translation timeout - please try again"
   }
 } 

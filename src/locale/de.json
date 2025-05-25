@@ -48,7 +48,9 @@
     "code_invalid": "Ungültiger Einladungscode",
     "missing_fields": "Fehlende Pflichtfelder",
     "username_exists": "Benutzername existiert bereits",
-    "email_exists": "E-Mail-Adresse existiert bereits"
+    "email_exists": "E-Mail-Adresse existiert bereits",
+    "no_download_url": "Keine Download-URL bereitgestellt",
+    "translation_failed_fallback": "Übersetzung fehlgeschlagen"
   },
   "success": {
     "title": "Erfolg",
@@ -223,5 +225,24 @@
     "currency": "Währung auswählen",
     "month_abbr": "Mo",
     "year_abbr": "J"
+  },
+  "progress": {
+    "loading": "Wird geladen...",
+    "collecting_text": "Sammle Text von Folien...",
+    "extraction_complete": "Textextraktion abgeschlossen",
+    "translation_start": "Übersetzung wird gestartet...",
+    "translating": "Text wird übersetzt...",
+    "translation_complete": "Übersetzung abgeschlossen",
+    "updating_shapes": "Folienformen werden aktualisiert...",
+    "updating_text_shapes": "Textformen werden aktualisiert...",
+    "updating_tables": "Tabellen werden aktualisiert...",
+    "updating_table_cells": "Tabellenzellen werden aktualisiert...",
+    "saving": "Übersetzte Datei wird gespeichert...",
+    "complete": "Abgeschlossen!",
+    "starting_translation": "Übersetzung wird gestartet...",
+    "translation_in_progress": "Übersetzung läuft...",
+    "processing": "Verarbeitung...",
+    "downloading_file": "Datei wird heruntergeladen...",
+    "timeout_error": "Übersetzungs-Timeout - bitte versuchen Sie es erneut"
   }
 } 

@@ -48,7 +48,9 @@
     "code_invalid": "无效的邀请码",
     "missing_fields": "缺少必填字段",
     "username_exists": "用户名已存在",
-    "email_exists": "电子邮箱已存在"
+    "email_exists": "电子邮箱已存在",
+    "no_download_url": "未提供下载链接",
+    "translation_failed_fallback": "翻译失败"
   },
   "success": {
     "title": "成功",
@@ -223,5 +225,24 @@
     "currency": "选择货币",
     "month_abbr": "月",
     "year_abbr": "年"
+  },
+  "progress": {
+    "loading": "加载中...",
+    "collecting_text": "从幻灯片收集文本...",
+    "extraction_complete": "文本提取完成",
+    "translation_start": "开始翻译...",
+    "translating": "翻译文本中...",
+    "translation_complete": "翻译完成",
+    "updating_shapes": "更新幻灯片形状...",
+    "updating_text_shapes": "更新文本形状...",
+    "updating_tables": "更新表格...",
+    "updating_table_cells": "更新表格单元格...",
+    "saving": "保存翻译文件...",
+    "complete": "完成！",
+    "starting_translation": "开始翻译...",
+    "translation_in_progress": "翻译进行中...",
+    "processing": "处理中...",
+    "downloading_file": "下载文件中...",
+    "timeout_error": "翻译超时 - 请重试"
   }
 } 

@@ -48,7 +48,9 @@
     "service_unavailable_title": "Сервис недоступен",
     "service_unavailable_message": "Сервис перевода в настоящее время недоступен. Пожалуйста, попробуйте позже.",
     "task_not_found_message": "Задача перевода не найдена. Пожалуйста, попробуйте снова.",
-    "file_not_found_message": "Переведенный файл не найден. Пожалуйста, попробуйте снова."
+    "file_not_found_message": "Переведенный файл не найден. Пожалуйста, попробуйте снова.",
+    "no_download_url": "URL для загрузки не предоставлен",
+    "translation_failed_fallback": "Перевод не удался"
   },
   "success": {
     "title": "Успех",
@@ -223,5 +225,24 @@
     "currency": "Выберите валюту",
     "month_abbr": "мес",
     "year_abbr": "год"
+  },
+  "progress": {
+    "loading": "Загрузка...",
+    "collecting_text": "Сбор текста со слайдов...",
+    "extraction_complete": "Извлечение текста завершено",
+    "translation_start": "Запуск перевода...",
+    "translating": "Перевод текста...",
+    "translation_complete": "Перевод завершен",
+    "updating_shapes": "Обновление фигур слайдов...",
+    "updating_text_shapes": "Обновление текстовых фигур...",
+    "updating_tables": "Обновление таблиц...",
+    "updating_table_cells": "Обновление ячеек таблицы...",
+    "saving": "Сохранение переведенного файла...",
+    "complete": "Завершено!",
+    "starting_translation": "Запуск перевода...",
+    "translation_in_progress": "Перевод в процессе...",
+    "processing": "Обработка...",
+    "downloading_file": "Загрузка файла...",
+    "timeout_error": "Тайм-аут перевода - пожалуйста, попробуйте снова"
   }
 } 

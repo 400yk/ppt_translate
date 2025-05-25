@@ -48,7 +48,9 @@
     "service_unavailable_title": "Service indisponible",
     "service_unavailable_message": "Le service de traduction est actuellement indisponible. Veuillez réessayer plus tard.",
     "task_not_found_message": "Tâche de traduction introuvable. Veuillez réessayer.",
-    "file_not_found_message": "Fichier traduit introuvable. Veuillez réessayer."
+    "file_not_found_message": "Fichier traduit introuvable. Veuillez réessayer.",
+    "no_download_url": "Aucune URL de téléchargement fournie",
+    "translation_failed_fallback": "Échec de la traduction"
   },
   "success": {
     "title": "Succès",
@@ -223,5 +225,24 @@
     "currency": "Sélectionner la devise",
     "month_abbr": "mois",
     "year_abbr": "an"
+  },
+  "progress": {
+    "loading": "Chargement...",
+    "collecting_text": "Collecte du texte des diapositives...",
+    "extraction_complete": "Extraction de texte terminée",
+    "translation_start": "Démarrage de la traduction...",
+    "translating": "Traduction du texte...",
+    "translation_complete": "Traduction terminée",
+    "updating_shapes": "Mise à jour des formes de diapositives...",
+    "updating_text_shapes": "Mise à jour des formes de texte...",
+    "updating_tables": "Mise à jour des tableaux...",
+    "updating_table_cells": "Mise à jour des cellules de tableau...",
+    "saving": "Sauvegarde du fichier traduit...",
+    "complete": "Terminé !",
+    "starting_translation": "Démarrage de la traduction...",
+    "translation_in_progress": "Traduction en cours...",
+    "processing": "Traitement...",
+    "downloading_file": "Téléchargement du fichier...",
+    "timeout_error": "Délai de traduction dépassé - veuillez réessayer"
   }
 } 

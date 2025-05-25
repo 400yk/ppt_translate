@@ -378,6 +378,8 @@ export async function downloadTranslatedFile(downloadUrl: string, fileName: stri
  * @param isGuestUser - Whether the user is a guest
  * @param onProgress - Callback for progress updates
  * @param onStatusUpdate - Callback for status updates
+ * @param statusMessages - Object containing translated status messages
+ * @param errorMessages - Object containing translated error messages
  * @returns Promise<string> - URL to the translated file
  */
 export async function translateFileAsync(
@@ -386,15 +388,42 @@ export async function translateFileAsync(
   destLang: LanguageCode,
   isGuestUser: boolean,
   onProgress: (progress: number) => void,
-  onStatusUpdate?: (status: string) => void
+  onStatusUpdate?: (status: string) => void,
+  statusMessages?: {
+    starting: string;
+    inProgress: string;
+    processing: string;
+    downloading: string;
+    complete: string;
+    timeout: string;
+  },
+  errorMessages?: {
+    noDownloadUrl: string;
+    translationFailed: string;
+  }
 ): Promise<string> {
+  // Use provided messages or fallback to English
+  const messages = statusMessages || {
+    starting: 'Starting translation...',
+    inProgress: 'Translation in progress...',
+    processing: 'Processing...',
+    downloading: 'Downloading file...',
+    complete: 'Complete!',
+    timeout: 'Translation timeout - please try again'
+  };
+
+  const errors = errorMessages || {
+    noDownloadUrl: 'No download URL provided',
+    translationFailed: 'Translation failed'
+  };
+
   // Start the translation task
-  onStatusUpdate?.('Starting translation...');
+  onStatusUpdate?.(messages.starting);
   onProgress(10);
   
   const taskId = await startAsyncTranslation(file, srcLang, destLang, isGuestUser);
   
-  onStatusUpdate?.('Translation in progress...');
+  onStatusUpdate?.(messages.inProgress);
   onProgress(20);
   
   // Poll for completion
@@ -408,7 +437,7 @@ export async function translateFileAsync(
         attempts++;
         
         if (attempts > maxAttempts) {
-          reject(new Error('Translation timeout - please try again'));
+          reject(new Error(messages.timeout));
           return;
         }
         
@@ -418,30 +447,30 @@ export async function translateFileAsync(
         if (status.status === 'PENDING') {
           const progressValue = Math.min(20 + (attempts * 2), 80);
           onProgress(progressValue);
-          onStatusUpdate?.('Processing...');
+          onStatusUpdate?.(messages.processing);
         }
         
         if (status.status === 'SUCCESS') {
           onProgress(90);
-          onStatusUpdate?.('Downloading file...');
+          onStatusUpdate?.(messages.downloading);
           
           if (status.result?.download_url) {
             try {
               const fileUrl = await downloadTranslatedFile(status.result.download_url, file.name);
               onProgress(100);
-              onStatusUpdate?.('Complete!');
+              onStatusUpdate?.(messages.complete);
               resolve(fileUrl);
             } catch (downloadError) {
               reject(downloadError);
             }
           } else {
-            reject(new Error('No download URL provided'));
+            reject(new Error(errors.noDownloadUrl));
           }
           return;
         }
         
         if (status.status === 'FAILURE') {
-          reject(new Error(status.error || 'Translation failed'));
+          reject(new Error(status.error || errors.translationFailed));
           return;
         }
         
