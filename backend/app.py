@@ -35,7 +35,7 @@ def create_app():
         "https://translide-42ac7178fd60.herokuapp.com",  # Production frontend
         "http://localhost:9002",  # Local development frontend
         "http://127.0.0.1:9002",
-        # Add the new official domain
+        "https://translide.s3.amazonaws.com", # Added this for S3 presigned URL
         "https://translide.co"
     ]
     CORS(app, resources={r"/*": {"origins": cors_origins, "supports_credentials": True}})

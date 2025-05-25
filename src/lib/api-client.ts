@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { isCloudStorageUrl } from './cloud-storage-config';
 
 // API endpoint base URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -19,7 +20,8 @@ apiClient.interceptors.request.use(
   (config) => {
     if (isBrowser) {
       const token = localStorage.getItem('auth_token');
-      if (token) {
+      // Only add Authorization header if the URL is NOT a cloud storage URL
+      if (token && !isCloudStorageUrl(config.url || '')) {
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
