@@ -24,6 +24,22 @@ interface TranslationResponse {
   error?: string;
 }
 
+// New interfaces for async translation
+interface AsyncTranslationStartResponse {
+  task_id: string;
+  message: string;
+}
+
+interface AsyncTranslationStatusResponse {
+  task_id: string;
+  status: 'PENDING' | 'SUCCESS' | 'FAILURE' | 'RETRY' | 'REVOKED';
+  result?: {
+    translated_file_path?: string;
+    download_url?: string;
+  };
+  error?: string;
+}
+
 /**
  * Validates if the file has a valid extension for translation
  * @param fileName - The name of the file to validate
@@ -213,4 +229,230 @@ export async function fetchMaxFileSize(): Promise<number> {
     console.error("Failed to fetch max file size from backend:", error);
     return 50; // Default to 50MB
   }
+}
+
+/**
+ * Starts an async translation task
+ * @param file - The file to translate
+ * @param srcLang - The source language code
+ * @param destLang - The destination language code
+ * @param isGuestUser - Whether the user is a guest
+ * @returns Promise<string> - Task ID for polling
+ */
+export async function startAsyncTranslation(
+  file: File,
+  srcLang: LanguageCode,
+  destLang: LanguageCode,
+  isGuestUser: boolean
+): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('src_lang', srcLang);
+  formData.append('dest_lang', destLang);
+
+  try {
+    let response;
+    
+    if (isGuestUser) {
+      response = await apiClient.post('/guest-translate-async-start', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    } else {
+      response = await apiClient.post('/translate_async_start', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    }
+
+    const data: AsyncTranslationStartResponse = response.data;
+    return data.task_id;
+  } catch (error: any) {
+    // Handle specific error status codes
+    if (error.response) {
+      if (error.response.status === 401) {
+        throw new Error('authentication_error');
+      }
+      
+      if (error.response.status === 403) {
+        throw new Error('weekly_limit_reached');
+      }
+
+      if (error.response.status === 503) {
+        throw new Error('service_unavailable');
+      }
+      
+      // Try to parse error response
+      if (error.response.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+    }
+    
+    // Handle network errors
+    if (error.message === 'Network Error') {
+      throw new Error('service_unavailable');
+    }
+    
+    throw error;
+  }
+}
+
+/**
+ * Polls the status of an async translation task
+ * @param taskId - The task ID to check
+ * @param isGuestUser - Whether the user is a guest
+ * @returns Promise<AsyncTranslationStatusResponse> - Current task status
+ */
+export async function pollTranslationStatus(taskId: string, isGuestUser: boolean = false): Promise<AsyncTranslationStatusResponse> {
+  try {
+    const endpoint = isGuestUser ? `/guest-translate-status/${taskId}` : `/translate_status/${taskId}`;
+    const response = await apiClient.get(endpoint);
+    return response.data as AsyncTranslationStatusResponse;
+  } catch (error: any) {
+    if (error.response) {
+      if (error.response.status === 401) {
+        throw new Error('authentication_error');
+      }
+      
+      if (error.response.status === 404) {
+        throw new Error('task_not_found');
+      }
+
+      if (error.response.status === 503) {
+        throw new Error('service_unavailable');
+      }
+    }
+    
+    if (error.message === 'Network Error') {
+      throw new Error('service_unavailable');
+    }
+    
+    throw error;
+  }
+}
+
+/**
+ * Downloads the translated file from the server
+ * @param downloadUrl - The URL to download the file from
+ * @param fileName - The original file name for the download
+ * @returns Promise<string> - Blob URL for the downloaded file
+ */
+export async function downloadTranslatedFile(downloadUrl: string, fileName: string): Promise<string> {
+  try {
+    const response = await apiClient.get(downloadUrl, {
+      responseType: 'blob',
+    });
+    
+    const blob = response.data;
+    return URL.createObjectURL(blob);
+  } catch (error: any) {
+    if (error.response) {
+      if (error.response.status === 401) {
+        throw new Error('authentication_error');
+      }
+      
+      if (error.response.status === 404) {
+        throw new Error('file_not_found');
+      }
+
+      if (error.response.status === 503) {
+        throw new Error('service_unavailable');
+      }
+    }
+    
+    if (error.message === 'Network Error') {
+      throw new Error('service_unavailable');
+    }
+    
+    throw error;
+  }
+}
+
+/**
+ * Complete async translation workflow with polling
+ * @param file - The file to translate
+ * @param srcLang - The source language code
+ * @param destLang - The destination language code
+ * @param isGuestUser - Whether the user is a guest
+ * @param onProgress - Callback for progress updates
+ * @param onStatusUpdate - Callback for status updates
+ * @returns Promise<string> - URL to the translated file
+ */
+export async function translateFileAsync(
+  file: File,
+  srcLang: LanguageCode,
+  destLang: LanguageCode,
+  isGuestUser: boolean,
+  onProgress: (progress: number) => void,
+  onStatusUpdate?: (status: string) => void
+): Promise<string> {
+  // Start the translation task
+  onStatusUpdate?.('Starting translation...');
+  onProgress(10);
+  
+  const taskId = await startAsyncTranslation(file, srcLang, destLang, isGuestUser);
+  
+  onStatusUpdate?.('Translation in progress...');
+  onProgress(20);
+  
+  // Poll for completion
+  let attempts = 0;
+  const maxAttempts = 120; // 10 minutes with 5-second intervals
+  const pollInterval = 5000; // 5 seconds
+  
+  return new Promise((resolve, reject) => {
+    const poll = async () => {
+      try {
+        attempts++;
+        
+        if (attempts > maxAttempts) {
+          reject(new Error('Translation timeout - please try again'));
+          return;
+        }
+        
+        const status = await pollTranslationStatus(taskId, isGuestUser);
+        
+        // Update progress based on status
+        if (status.status === 'PENDING') {
+          const progressValue = Math.min(20 + (attempts * 2), 80);
+          onProgress(progressValue);
+          onStatusUpdate?.('Processing...');
+        }
+        
+        if (status.status === 'SUCCESS') {
+          onProgress(90);
+          onStatusUpdate?.('Downloading file...');
+          
+          if (status.result?.download_url) {
+            try {
+              const fileUrl = await downloadTranslatedFile(status.result.download_url, file.name);
+              onProgress(100);
+              onStatusUpdate?.('Complete!');
+              resolve(fileUrl);
+            } catch (downloadError) {
+              reject(downloadError);
+            }
+          } else {
+            reject(new Error('No download URL provided'));
+          }
+          return;
+        }
+        
+        if (status.status === 'FAILURE') {
+          reject(new Error(status.error || 'Translation failed'));
+          return;
+        }
+        
+        // Continue polling
+        setTimeout(poll, pollInterval);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    // Start polling
+    setTimeout(poll, pollInterval);
+  });
 } 

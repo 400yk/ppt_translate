@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { useRouter as useNavigationRouter } from 'next/navigation';
 import { clearGuestSession } from './guest-session';
 import apiClient from '@/lib/api-client';
+import { useTranslation } from '@/lib/i18n';
 
 // Check for browser environment
 const isBrowser = typeof window !== 'undefined';
@@ -53,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
   
   // We can't use the router hook directly here (only in client components)
   // So we'll update the logout function to take an optional callback
@@ -193,14 +195,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Import and execute the toast function directly
             import('@/hooks/use-toast').then(({ toast }) => {
               toast({
-                title: 'Session Expired',
-                description: 'Your session has expired. Please log in again.',
+                title: t('errors.session_expired_title'),
+                description: t('errors.session_expired_message'),
                 variant: 'destructive',
               });
             }).catch(err => {
               // Fallback to alert if toast doesn't work
               console.error('Failed to show toast:', err);
-              alert('Your session has expired. Please log in again.');
+              alert(t('errors.session_expired_message'));
             });
           }
           

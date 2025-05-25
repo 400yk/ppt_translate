@@ -45,37 +45,23 @@ apiClient.interceptors.response.use(
       error.response.data?.msg === 'Token has expired' &&
       !originalRequest._retry
     ) {
-      originalRequest._retry = true;
+      originalRequest._retry = true; // Prevent infinite loops
       
-      // Show a notification to the user
-      console.log('Token expired, logging out...');
-      
+      // Log the event, but the toast and logout are handled by AuthContext's fetchWithAuth
+      console.log('Token expired. AuthContext will handle logout and notification.');
+            
+      // Clear user data from localStorage here as a safeguard, though AuthContext also does it.
       if (isBrowser) {
-        // Display notification using toast
-        import('@/hooks/use-toast').then(({ toast }) => {
-          toast({
-            title: 'Session Expired',
-            description: 'Your session has expired. Please log in again.',
-            variant: 'destructive',
-          });
-        }).catch(err => {
-          console.error('Failed to show toast:', err);
-          alert('Your session has expired. Please log in again.');
-        });
-        
-        // Clear user data from localStorage
         localStorage.removeItem('auth_token');
         localStorage.removeItem('auth_user');
-        
-        // Redirect to home page after a short delay
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 2000);
+        // We don't redirect here, AuthContext will handle it after showing the toast.
       }
       
-      return Promise.reject(error);
+      // Reject the promise so that fetchWithAuth can also catch it and trigger its logic.
+      return Promise.reject(error); 
     }
     
+    // For other errors, just reject them
     return Promise.reject(error);
   }
 );

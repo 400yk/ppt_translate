@@ -15,7 +15,18 @@ def gemini_batch_translate(texts, src_lang, dest_lang):
         
     # Join texts as a JSON list to preserve order and mapping
     joined = json.dumps(texts, ensure_ascii=False)
-    prompt = f"Translate the following JSON list from {src_lang} to {dest_lang}. Only return the translated JSON list, no explanations.\n{joined}"
+    prompt = f"""Translate the following JSON array from {src_lang} to {dest_lang}. 
+
+IMPORTANT INSTRUCTIONS:
+1. Return ONLY a valid JSON array, no explanations or extra text
+2. Preserve the exact number of elements in the array
+3. Properly escape all quotes and special characters in the JSON strings
+4. Do not add any markdown formatting or code blocks
+
+Input JSON array:
+{joined}
+
+Output (valid JSON array only):"""
     headers = {
         'Content-Type': 'application/json',
     }
@@ -25,10 +36,15 @@ def gemini_batch_translate(texts, src_lang, dest_lang):
     data = {
         'contents': [{
             'parts': [{
-                # Instruct Gemini to return a strict JSON array
-                'text': prompt + "\nReturn the result strictly as a JSON array (not a Python list), no extra text."
+                'text': prompt
             }]
-        }]
+        }],
+        'generationConfig': {
+            'temperature': 0.1,  # Lower temperature for more consistent output
+            'maxOutputTokens': 8192,
+            'topP': 0.8,
+            'topK': 10
+        }
     }
     try:
         resp = requests.post(GEMINI_API_URL, headers=headers, params=params, json=data, timeout=60)
@@ -46,12 +62,60 @@ def gemini_batch_translate(texts, src_lang, dest_lang):
                 return json.loads(translated_json)
             except Exception as e:
                 print(f"Error parsing Gemini JSON: {e}\nRaw: {translated_json}")
-                # Try ast.literal_eval as a fallback for Python-style lists
+                
+                # Try to clean up common JSON issues
                 try:
-                    return ast.literal_eval(translated_json)
+                    # Remove any trailing commas and fix common issues
+                    cleaned_json = translated_json.strip()
+                    
+                    # Try to fix unescaped quotes in strings
+                    if cleaned_json.startswith('[') and cleaned_json.endswith(']'):
+                        # This is a more robust approach - try to parse each element individually
+                        import re
+                        
+                        # Extract individual string elements from the array
+                        # This regex looks for strings within the array, handling escaped quotes
+                        pattern = r'"([^"\\]*(\\.[^"\\]*)*)"'
+                        matches = re.findall(pattern, cleaned_json)
+                        
+                        if matches:
+                            # Extract just the string content (first group from each match)
+                            extracted_strings = [match[0] for match in matches]
+                            
+                            # If we got the expected number of strings, return them
+                            if len(extracted_strings) == len(texts):
+                                return extracted_strings
+                    
+                    # If regex approach didn't work, try basic JSON repair
+                    cleaned_json = re.sub(r'(?<!\\)"(?=.*")', '\\"', cleaned_json)
+                    return json.loads(cleaned_json)
+                    
                 except Exception as e2:
-                    print(f"Fallback ast.literal_eval failed: {e2}\nRaw: {translated_json}")
-                    return texts  # fallback
+                    print(f"JSON cleanup failed: {e2}")
+                    
+                    # Try ast.literal_eval as a fallback for Python-style lists
+                    try:
+                        return ast.literal_eval(translated_json)
+                    except Exception as e3:
+                        print(f"Fallback ast.literal_eval failed: {e3}\nRaw: {translated_json}")
+                        
+                        # Last resort: try to extract strings manually using a simple approach
+                        try:
+                            # Look for content between quotes, being more permissive
+                            import re
+                            # Find all quoted strings, allowing for escaped quotes
+                            strings = re.findall(r'"([^"]*(?:\\"[^"]*)*)"', translated_json)
+                            
+                            # Clean up escaped quotes in the extracted strings
+                            cleaned_strings = [s.replace('\\"', '"') for s in strings]
+                            
+                            if len(cleaned_strings) == len(texts):
+                                print(f"Successfully extracted {len(cleaned_strings)} strings using regex fallback")
+                                return cleaned_strings
+                        except Exception as e4:
+                            print(f"Manual string extraction failed: {e4}")
+                        
+                        return texts  # fallback to original
         elif 'error' in result:
             error_msg = result.get('error', {}).get('message', 'Unknown error')
             print(f"Gemini API error: {error_msg}")

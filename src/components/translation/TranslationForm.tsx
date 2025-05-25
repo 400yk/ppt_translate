@@ -17,7 +17,7 @@ import {
   languageCodes,
   validateFileExtension, 
   validateFileSize,
-  translateFile
+  translateFileAsync
 } from '@/lib/translation-service';
 import { consumeGuestUsage } from '@/lib/guest-session';
 
@@ -44,6 +44,7 @@ export function TranslationForm({
   const [progress, setProgress] = useState(0);
   const [translatedFileUrl, setTranslatedFileUrl] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string>('');
   const [srcLang, setSrcLang] = useState<LanguageCode>("zh"); // Default source language: Chinese
   const [destLang, setDestLang] = useState<LanguageCode>("en"); // Default target language: English
   const [invalidFileType, setInvalidFileType] = useState(false);
@@ -70,7 +71,7 @@ export function TranslationForm({
         // Show invalid file type warning
         setInvalidFileType(true);
         toast({
-          title: 'Warning',
+          title: t('errors.warning_title'),
           description: t('errors.invalid_file_type'),
           variant: 'destructive',
         });
@@ -97,6 +98,7 @@ export function TranslationForm({
       setFile(selectedFile);
       setTranslatedFileUrl(null); // Reset translation URL when new file is selected
       setProgress(0);
+      setStatusMessage('');
     }
   };
 
@@ -106,6 +108,7 @@ export function TranslationForm({
     setFile(null);
     setTranslatedFileUrl(null);
     setProgress(0);
+    setStatusMessage('');
     setInvalidFileType(false);
     setFileSizeExceeded(false);
     
@@ -118,7 +121,7 @@ export function TranslationForm({
   const handleTranslate = async () => {
     if (!file) {
       toast({
-        title: 'Error',
+        title: t('errors.generic_error_title'),
         description: t('errors.no_file'),
         variant: 'destructive',
       });
@@ -127,7 +130,7 @@ export function TranslationForm({
 
     if (srcLang === destLang) {
       toast({
-        title: 'Error',
+        title: t('errors.generic_error_title'),
         description: t('errors.same_language'),
         variant: 'destructive',
       });
@@ -146,16 +149,18 @@ export function TranslationForm({
 
     setIsTranslating(true);
     setProgress(0);
+    setStatusMessage('');
     setTranslatedFileUrl(null); // Reset any previous translated file URL
 
     try {
-      // Use the translation service
-      const url = await translateFile(
+      // Use the async translation service
+      const url = await translateFileAsync(
         file,
         srcLang,
         destLang,
         isGuestUser,
-        setProgress
+        setProgress,
+        setStatusMessage
       );
       
       // Store the translated file URL
@@ -169,6 +174,7 @@ export function TranslationForm({
     } catch (error) {
       // Don't log to console for expected errors
       setProgress(0);
+      setStatusMessage('');
       
       // Handle specific error cases
       if (error instanceof Error) {
@@ -184,27 +190,46 @@ export function TranslationForm({
 
         if (error.message === 'service_unavailable') {
           toast({
-            title: 'Service Unavailable',
-            description: 'The translation service is currently unavailable. Please try again later.',
+            title: t('errors.service_unavailable_title'),
+            description: t('errors.service_unavailable_message'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (error.message === 'task_not_found') {
+          toast({
+            title: t('errors.generic_error_title'),
+            description: t('errors.task_not_found_message'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (error.message === 'file_not_found') {
+          toast({
+            title: t('errors.generic_error_title'),
+            description: t('errors.file_not_found_message'),
             variant: 'destructive',
           });
           return;
         }
         
         toast({
-          title: 'Error',
+          title: t('errors.generic_error_title'),
           description: error.message,
           variant: 'destructive',
         });
       } else {
         toast({
-          title: 'Error',
+          title: t('errors.generic_error_title'),
           description: String(error),
           variant: 'destructive',
         });
       }
     } finally {
       setIsTranslating(false);
+      setStatusMessage('');
     }
   };
 
@@ -288,7 +313,7 @@ export function TranslationForm({
       if (!validateFileExtension(droppedFile.name)) {
         setInvalidFileType(true);
         toast({
-          title: 'Warning',
+          title: t('errors.warning_title'),
           description: t('errors.invalid_file_type'),
           variant: 'destructive',
         });
@@ -312,6 +337,7 @@ export function TranslationForm({
       setFile(droppedFile);
       setTranslatedFileUrl(null);
       setProgress(0);
+      setStatusMessage('');
     }
   };
 
@@ -435,7 +461,10 @@ export function TranslationForm({
       {(isTranslating || progress > 0) && (
         <div className="w-full mb-4">
           <Progress value={progress} className="h-2" />
-          <p className="text-xs text-center mt-2">{progress}%</p>
+          <div className="flex justify-between items-center mt-2">
+            <p className="text-xs text-gray-600">{statusMessage}</p>
+            <p className="text-xs text-gray-500">{progress}%</p>
+          </div>
         </div>
       )}
       

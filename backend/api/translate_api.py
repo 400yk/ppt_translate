@@ -97,8 +97,9 @@ def get_translation_status_endpoint(task_id):
     elif task.state == 'SUCCESS':
         response_data['message'] = 'Task completed successfully.'
         response_data['result'] = task.result 
-        # IMPORTANT: task.result['translated_file_path'] is a path on the WORKER.
-        # Client cannot directly download from this. You'll need a download mechanism.
+        # Add download URL for the translated file
+        if task.result and 'translated_file_path' in task.result:
+            response_data['result']['download_url'] = f'/download/{task_id}'
     elif task.state == 'FAILURE':
         response_data['message'] = 'Task failed.'
         # Provide a more generic error or log the details for privacy/security
@@ -107,6 +108,38 @@ def get_translation_status_endpoint(task_id):
         # print(f"Task {task_id} failed: {task.info}") 
     
     return jsonify(response_data)
+
+@translate_bp.route('/download/<task_id>', methods=['GET'])
+@jwt_required()
+def download_translated_file(task_id):
+    """Endpoint to download the translated file."""
+    username = get_jwt_identity()
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+        
+    task = process_translation_task.AsyncResult(task_id)
+    
+    if task.state != 'SUCCESS':
+        return jsonify({'error': 'Translation not completed or failed'}), 400
+        
+    if not task.result or 'translated_file_path' not in task.result:
+        return jsonify({'error': 'Translated file not found'}), 404
+        
+    file_path = task.result['translated_file_path']
+    original_filename = task.result.get('original_filename', 'translated_file.pptx')
+    
+    if not os.path.exists(file_path):
+        return jsonify({'error': 'File no longer exists'}), 404
+        
+    try:
+        response = make_response(send_file(file_path, as_attachment=True, 
+                                         download_name=f"translated_{original_filename}"))
+        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        return response
+    except Exception as e:
+        print(f"Error downloading file: {e}")
+        return jsonify({'error': 'Error downloading file'}), 500
 
 @translate_bp.route('/api/translations/history', methods=['GET'])
 @jwt_required()
