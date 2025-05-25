@@ -54,6 +54,13 @@ REDIS_URL = os.getenv('REDISCLOUD_URL') or os.getenv('REDIS_URL', 'redis://local
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
 
+# AWS S3 Configuration
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_S3_BUCKET_NAME = os.getenv('AWS_S3_BUCKET_NAME', 'translide-files')
+AWS_S3_REGION = os.getenv('AWS_S3_REGION', 'us-east-1')
+# Enable S3 storage if credentials are available
+USE_S3_STORAGE = bool(AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY)
 
 # Secret key for session management
 SECRET_KEY = os.getenv('SECRET_KEY', os.urandom(24).hex())

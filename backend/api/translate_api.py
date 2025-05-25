@@ -1,11 +1,12 @@
 """
 API endpoints for handling PowerPoint translation requests.
 """
-from flask import request, send_file, jsonify, make_response, Blueprint, current_app
+from flask import request, send_file, jsonify, make_response, Blueprint, current_app, redirect
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from db.models import User, db
 from services.user_service import check_user_permission
 from services.tasks import process_translation_task
+from services.s3_service import s3_service
 import os
 
 translate_bp = Blueprint('translate', __name__)
@@ -98,8 +99,13 @@ def get_translation_status_endpoint(task_id):
         response_data['message'] = 'Task completed successfully.'
         response_data['result'] = task.result 
         # Add download URL for the translated file
-        if task.result and 'translated_file_path' in task.result:
-            response_data['result']['download_url'] = f'/download/{task_id}'
+        if task.result:
+            if task.result.get('storage_type') == 's3' and task.result.get('download_url'):
+                # For S3 storage, use the presigned URL directly
+                response_data['result']['download_url'] = task.result['download_url']
+            elif 'translated_file_path' in task.result:
+                # For local storage, use the download endpoint
+                response_data['result']['download_url'] = f'/download/{task_id}'
     elif task.state == 'FAILURE':
         response_data['message'] = 'Task failed.'
         # Provide a more generic error or log the details for privacy/security
@@ -123,23 +129,42 @@ def download_translated_file(task_id):
     if task.state != 'SUCCESS':
         return jsonify({'error': 'Translation not completed or failed'}), 400
         
-    if not task.result or 'translated_file_path' not in task.result:
+    if not task.result:
         return jsonify({'error': 'Translated file not found'}), 404
-        
-    file_path = task.result['translated_file_path']
-    original_filename = task.result.get('original_filename', 'translated_file.pptx')
     
-    if not os.path.exists(file_path):
-        return jsonify({'error': 'File no longer exists'}), 404
+    # Handle S3 storage
+    if task.result.get('storage_type') == 's3':
+        if task.result.get('download_url'):
+            # Redirect to the S3 presigned URL
+            return redirect(task.result['download_url'])
+        elif task.result.get('s3_key'):
+            # Generate a new presigned URL if the old one expired
+            download_url = s3_service.generate_presigned_url(task.result['s3_key'], expiration=3600)
+            if download_url:
+                return redirect(download_url)
+            else:
+                return jsonify({'error': 'Could not generate download URL'}), 500
+        else:
+            return jsonify({'error': 'S3 file reference not found'}), 404
+    
+    # Handle local storage (fallback)
+    elif 'translated_file_path' in task.result:
+        file_path = task.result['translated_file_path']
+        original_filename = task.result.get('original_filename', 'translated_file.pptx')
         
-    try:
-        response = make_response(send_file(file_path, as_attachment=True, 
-                                         download_name=f"translated_{original_filename}"))
-        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-        return response
-    except Exception as e:
-        print(f"Error downloading file: {e}")
-        return jsonify({'error': 'Error downloading file'}), 500
+        if not os.path.exists(file_path):
+            return jsonify({'error': 'File no longer exists'}), 404
+            
+        try:
+            response = make_response(send_file(file_path, as_attachment=True, 
+                                             download_name=f"translated_{original_filename}"))
+            response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+            return response
+        except Exception as e:
+            print(f"Error downloading file: {e}")
+            return jsonify({'error': 'Error downloading file'}), 500
+    else:
+        return jsonify({'error': 'No file reference found'}), 404
 
 @translate_bp.route('/api/translations/history', methods=['GET'])
 @jwt_required()
