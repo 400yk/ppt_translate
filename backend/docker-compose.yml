@@ -17,6 +17,18 @@ services:
     networks:
       - ppt_translate_network
 
+  redis:
+    image: redis:7-alpine
+    container_name: ppt_translate_redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"  # Change to "6380:6379" if port 6379 is already in use
+    volumes:
+      - ./db/redis_data:/data
+    networks:
+      - ppt_translate_network
+    command: redis-server --appendonly yes
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: ppt_translate_pgadmin

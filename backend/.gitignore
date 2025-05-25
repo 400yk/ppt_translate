@@ -12,3 +12,4 @@ pgadmin_data/
 db/app.db
 db/postgres_data/
 db/pgadmin_data/
+db/redis_data/

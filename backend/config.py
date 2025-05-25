@@ -45,6 +45,14 @@ POSTGRES_URI = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST
 SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', POSTGRES_URI)
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+# Redis env
+REDIS_URL = os.getenv('REDIS_URL', '')
+
+# Celery env
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+
+
 # Secret key for session management
 SECRET_KEY = os.getenv('SECRET_KEY', os.urandom(24).hex())
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', os.urandom(24).hex())
