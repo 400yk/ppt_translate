@@ -46,7 +46,9 @@ SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', POSTGRES_URI)
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # Redis env
-REDIS_URL = os.getenv('REDIS_URL', '')
+# On Heroku with Redis Cloud, the URL is provided as REDISCLOUD_URL
+# For local development, use REDIS_URL
+REDIS_URL = os.getenv('REDISCLOUD_URL') or os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 
 # Celery env
 CELERY_BROKER_URL = REDIS_URL
