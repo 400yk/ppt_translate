@@ -20,6 +20,7 @@ import {
   translateFileAsync
 } from '@/lib/translation-service';
 import { consumeGuestUsage } from '@/lib/guest-session';
+import { getApiErrorMessage } from '@/lib/api-client';
 
 interface TranslationFormProps {
   isGuestUser: boolean;
@@ -253,13 +254,13 @@ export function TranslationForm({
         
         toast({
           title: t('errors.generic_error_title'),
-          description: error.message,
+          description: getApiErrorMessage(error),
           variant: 'destructive',
         });
       } else {
         toast({
           title: t('errors.generic_error_title'),
-          description: String(error),
+          description: getApiErrorMessage(error),
           variant: 'destructive',
         });
       }

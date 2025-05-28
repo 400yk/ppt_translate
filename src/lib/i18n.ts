@@ -103,6 +103,29 @@ export type TranslationKey =
   | 'errors.email_exists'
   | 'errors.no_download_url'
   | 'errors.translation_failed_fallback'
+  | 'errors.user_not_found'
+  | 'errors.invalid_request_format'
+  | 'errors.empty_request_data'
+  | 'errors.missing_plan_type'
+  | 'errors.invalid_plan_type'
+  | 'errors.no_subscription_found'
+  | 'errors.no_active_subscription'
+  | 'errors.failed_create_checkout'
+  | 'errors.failed_create_portal'
+  | 'errors.failed_create_payment_intent'
+  | 'errors.no_session_id'
+  | 'errors.invalid_session_metadata'
+  | 'errors.failed_process_payment'
+  | 'errors.missing_payment_intent_id'
+  | 'errors.invalid_payment_intent'
+  | 'errors.stripe_error'
+  | 'errors.failed_confirm_payment'
+  | 'errors.invalid_signature'
+  | 'errors.webhook_handling_failed'
+  | 'errors.plan_type_required'
+  | 'errors.plan_type_monthly_yearly'
+  | 'errors.request_must_be_json'
+  | 'errors.no_data_provided'
   | 'success.title'
   | 'success.translation_complete'
   | 'success.registration_complete'
@@ -265,6 +288,30 @@ export type LocaleCode = keyof typeof locales;
 const getNestedTranslation = (locale: any, key: string): string => {
   const keys = key.split('.');
   return keys.reduce((obj, k) => (obj && obj[k] !== undefined ? obj[k] : key), locale);
+};
+
+// Utility function to get translations outside of React components
+export const getTranslation = (key: TranslationKey, params?: Record<string, any>): string => {
+  // Only run in browser environment
+  if (!isBrowser) {
+    return key; // Fallback to key if not in browser
+  }
+  
+  // Get current locale from localStorage or default to English
+  const savedLocale = localStorage.getItem('app_locale') as LocaleCode;
+  const currentLocale = (savedLocale && savedLocale in locales) ? savedLocale : 'en';
+  
+  // Get the translation
+  let translation = getNestedTranslation(locales[currentLocale], key);
+  
+  // Replace parameters if provided
+  if (params) {
+    Object.entries(params).forEach(([paramKey, paramValue]) => {
+      translation = translation.replace(new RegExp(`{${paramKey}}`, 'g'), String(paramValue));
+    });
+  }
+  
+  return translation;
 };
 
 // The event name for locale changes

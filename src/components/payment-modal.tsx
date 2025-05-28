@@ -14,7 +14,7 @@ import { useMembership } from '@/lib/membership-service';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import apiClient from '@/lib/api-client';
+import apiClient, { getApiErrorMessage } from '@/lib/api-client';
 
 // Initialize Stripe with your publishable key
 // Replace with your actual publishable key
@@ -107,7 +107,7 @@ function CheckoutForm({
         setClientSecret(response.data.clientSecret);
       } catch (error) {
         console.error('Error creating payment intent:', error);
-        setErrorMessage(error instanceof Error ? error.message : 'Failed to set up payment');
+        setErrorMessage(getApiErrorMessage(error));
       }
     };
     
@@ -160,10 +160,11 @@ function CheckoutForm({
       }
     } catch (error) {
       console.error('Payment error:', error);
-      setErrorMessage(error instanceof Error ? error.message : t('payment.error_description'));
+      const errorMessage = getApiErrorMessage(error);
+      setErrorMessage(errorMessage);
       toast({
         title: t('payment.error'),
-        description: error instanceof Error ? error.message : t('payment.error_description'),
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -243,13 +244,7 @@ function CheckoutRedirect({
     } catch (error: any) {
       console.error('Checkout error:', error);
       
-      let errorMessage = t('payment.error_description');
-      // Handle axios error
-      if (error.response && error.response.data) {
-        errorMessage = error.response.data.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      const errorMessage = getApiErrorMessage(error);
       
       setErrorMessage(errorMessage);
       toast({

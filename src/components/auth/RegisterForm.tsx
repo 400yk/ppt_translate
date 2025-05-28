@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslation, LOCALE_CHANGE_EVENT } from '@/lib/i18n';
 import { Icons } from '@/components/icons';
 import { useRouter } from 'next/navigation';
+import { getApiErrorMessage } from '@/lib/api-client';
 
 export default function RegisterForm() {
   const [email, setEmail] = useState('');
@@ -132,25 +133,10 @@ export default function RegisterForm() {
       // Redirect to translate page after successful registration
       router.push('/translate');
     } catch (error: any) {
-      // Get the error data
-      let errorTitle: any = 'errors.registration_failed';
-      let errorMessage = '';
-      
-      // Check if error has response data with translation keys
-      if (error.errorKey) {
-        errorTitle = error.errorKey;
-      }
-      
-      if (error.messageKey) {
-        errorMessage = t(error.messageKey as any);
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      } else {
-        errorMessage = t('errors.unknown_error');
-      }
+      const errorMessage = getApiErrorMessage(error);
       
       toast({
-        title: t(errorTitle),
+        title: t('errors.registration_failed'),
         description: errorMessage,
         variant: 'destructive',
       });

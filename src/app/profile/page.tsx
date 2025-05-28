@@ -15,7 +15,7 @@ import { DynamicHead } from '@/components/dynamic-head';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { PaymentModal } from '@/components/payment-modal';
-import apiClient from '@/lib/api-client';
+import apiClient, { getApiErrorMessage } from '@/lib/api-client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -151,9 +151,10 @@ export default function ProfilePage() {
       window.location.href = response.data.url;
     } catch (error) {
       console.error('Error opening portal:', error);
+      const errorMessage = getApiErrorMessage(error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to open subscription management',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

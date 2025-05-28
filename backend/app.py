@@ -43,6 +43,7 @@ def create_app():
     # Configure the Flask app from config.py
     app.config['SECRET_KEY'] = config.SECRET_KEY
     app.config['JWT_SECRET_KEY'] = config.JWT_SECRET_KEY
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = config.JWT_ACCESS_TOKEN_EXPIRES
     app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = config.SQLALCHEMY_TRACK_MODIFICATIONS
     

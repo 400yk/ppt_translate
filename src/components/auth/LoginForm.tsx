@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation, LOCALE_CHANGE_EVENT } from '@/lib/i18n';
 import { useRouter } from 'next/navigation';
+import { getApiErrorMessage } from '@/lib/api-client';
 
 export default function LoginForm() {
   const [username, setUsername] = useState('');
@@ -56,7 +57,7 @@ export default function LoginForm() {
       // Redirect to translate page after successful login
       router.push('/translate');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('errors.unknown_error');
+      const errorMessage = getApiErrorMessage(error);
       toast({
         title: t('errors.login_failed'),
         description: errorMessage,

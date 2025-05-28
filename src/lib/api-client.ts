@@ -1,11 +1,43 @@
 import axios from 'axios';
 import { isCloudStorageUrl } from './cloud-storage-config';
+import { getTranslation } from './i18n';
 
 // API endpoint base URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 // Check for browser environment
 const isBrowser = typeof window !== 'undefined';
+
+// Utility function to extract translated error message from API response
+export const getApiErrorMessage = (error: any): string => {
+  // If it's an axios error with response data
+  if (error.response && error.response.data) {
+    const data = error.response.data;
+    
+    // If there's an errorKey, use it to get the translated message
+    if (data.errorKey) {
+      return getTranslation(data.errorKey as any);
+    }
+    
+    // If there's an error message, use it
+    if (data.error) {
+      return data.error;
+    }
+    
+    // If there's a message field, use it
+    if (data.message) {
+      return data.message;
+    }
+  }
+  
+  // If it's a regular Error object
+  if (error instanceof Error) {
+    return error.message;
+  }
+  
+  // Fallback to a generic error message
+  return getTranslation('errors.unknown_error');
+};
 
 // Create axios instance
 const apiClient = axios.create({
@@ -49,17 +81,36 @@ apiClient.interceptors.response.use(
     ) {
       originalRequest._retry = true; // Prevent infinite loops
       
-      // Log the event, but the toast and logout are handled by AuthContext's fetchWithAuth
-      console.log('Token expired. AuthContext will handle logout and notification.');
+      // Log the event
+      console.log('Token expired. Handling logout and notification.');
             
-      // Clear user data from localStorage here as a safeguard, though AuthContext also does it.
+      // Clear user data from localStorage
       if (isBrowser) {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('auth_user');
-        // We don't redirect here, AuthContext will handle it after showing the toast.
+        
+        // Show a toast notification using translations
+        try {
+          const { toast } = await import('@/hooks/use-toast');
+          
+          toast({
+            title: getTranslation('errors.session_expired_title'),
+            description: getTranslation('errors.session_expired_message'),
+            variant: 'destructive',
+          });
+        } catch (toastError) {
+          // Fallback to translated alert if toast doesn't work
+          console.error('Failed to show toast:', toastError);
+          alert(getTranslation('errors.session_expired_message'));
+        }
+        
+        // Redirect to home page after a short delay to allow the notification to be seen
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
       }
       
-      // Reject the promise so that fetchWithAuth can also catch it and trigger its logic.
+      // Reject the promise so that the calling code can also handle it if needed
       return Promise.reject(error); 
     }
     

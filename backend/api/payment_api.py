@@ -11,6 +11,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from db.models import User, db
 from services.user_service import get_membership_status, process_membership_purchase
 from config import PRICING, CURRENCY_RATES, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, FLASK_API_URL
+from utils.api_utils import error_response, success_response
 
 payment_bp = Blueprint('payment', __name__)
 
@@ -34,6 +35,20 @@ CANCEL_URL = STRIPE_CANCEL_URL
 # Stripe Price lookup keys
 MONTHLY_PRICE_LOOKUP_KEY = 'Translide-monthly'
 YEARLY_PRICE_LOOKUP_KEY = 'Translide-yearly'
+
+# Get Flask API URL from environment
+FLASK_API_URL = os.getenv('FLASK_API_URL', 'http://localhost:5000')
+
+# Import pricing configuration
+try:
+    from config import PRICING, CURRENCY_RATES
+except ImportError:
+    # Fallback pricing if config is not available
+    PRICING = {
+        'monthly': {'usd': 9.99},
+        'yearly': {'usd': 99.99}
+    }
+    CURRENCY_RATES = {'usd': 1.0}
 
 @payment_bp.route('/api/payment/test', methods=['GET'])
 def test_endpoint():
@@ -79,25 +94,27 @@ def create_checkout_session():
         
         if not user:
             print(f"User not found: {username}")
-            return jsonify({'error': 'User not found'}), 404
+            return error_response('User not found', 'errors.user_not_found', 404)
         
         # Get request data
         if not request.is_json:
             print("Error: Request data is not JSON")
-            return jsonify({
-                'error': 'Invalid request format', 
-                'message': 'Request must be in JSON format'
-            }), 400
+            return error_response(
+                'Request must be in JSON format',
+                'errors.request_must_be_json',
+                400
+            )
             
         data = request.get_json()
         print(f"Request data: {data}")
         
         if not data:
             print("Error: Empty request data")
-            return jsonify({
-                'error': 'Empty request data', 
-                'message': 'No data provided in request'
-            }), 400
+            return error_response(
+                'No data provided in request',
+                'errors.no_data_provided',
+                400
+            )
             
         plan_type = data.get('plan_type')
         currency = data.get('currency', 'usd').lower()
@@ -114,17 +131,19 @@ def create_checkout_session():
         
         if not plan_type:
             print("Error: Missing plan_type")
-            return jsonify({
-                'error': 'Missing plan type', 
-                'message': 'Plan type must be specified'
-            }), 400
+            return error_response(
+                'Plan type must be specified',
+                'errors.plan_type_required',
+                400
+            )
             
         if plan_type not in ['monthly', 'yearly']:
             print(f"Error: Invalid plan type: {plan_type}")
-            return jsonify({
-                'error': 'Invalid plan type', 
-                'message': 'Plan type must be either "monthly" or "yearly"'
-            }), 400
+            return error_response(
+                'Plan type must be either "monthly" or "yearly"',
+                'errors.plan_type_monthly_yearly',
+                400
+            )
         
         if currency not in CURRENCY_RATES:
             print(f"Error: Invalid currency: {currency}")
@@ -217,10 +236,11 @@ def create_checkout_session():
         
     except Exception as e:
         print(f"Error creating checkout session: {str(e)}")
-        return jsonify({
-            'error': 'Failed to create checkout session',
-            'message': str(e)
-        }), 500
+        return error_response(
+            'Failed to create checkout session',
+            'errors.failed_create_checkout',
+            500
+        )
 
 @payment_bp.route('/api/payment/create-portal-session', methods=['POST'])
 @jwt_required()
@@ -247,7 +267,7 @@ def create_portal_session():
         
         if not user:
             print(f"User not found: {username}")
-            return jsonify({'error': 'User not found'}), 404
+            return error_response('User not found', 'errors.user_not_found', 404)
         
         # Get return URL from request data, or use default
         data = request.get_json() or {}
@@ -259,10 +279,11 @@ def create_portal_session():
         
         if not customer_id:
             print(f"No Stripe customer ID found for user: {username}")
-            return jsonify({
-                'error': 'No subscription found',
-                'message': 'You do not have an active subscription to manage'
-            }), 400
+            return error_response(
+                'You do not have an active subscription to manage',
+                'errors.no_active_subscription',
+                400
+            )
         
         # Create the portal session
         portal_session = stripe.billing_portal.Session.create(
@@ -279,10 +300,11 @@ def create_portal_session():
         
     except Exception as e:
         print(f"Error creating portal session: {str(e)}")
-        return jsonify({
-            'error': 'Failed to create portal session',
-            'message': str(e)
-        }), 500
+        return error_response(
+            'Failed to create portal session',
+            'errors.failed_create_portal',
+            500
+        )
 
 @payment_bp.route('/api/payment/create-payment-intent', methods=['POST'])
 @jwt_required()
@@ -310,25 +332,27 @@ def create_payment_intent():
         
         if not user:
             print(f"User not found: {username}")
-            return jsonify({'error': 'User not found'}), 404
+            return error_response('User not found', 'errors.user_not_found', 404)
         
         # Get request data
         if not request.is_json:
             print("Error: Request data is not JSON")
-            return jsonify({
-                'error': 'Invalid request format', 
-                'message': 'Request must be in JSON format'
-            }), 400
+            return error_response(
+                'Request must be in JSON format',
+                'errors.request_must_be_json',
+                400
+            )
             
         data = request.get_json()
         print(f"Request data: {data}")
         
         if not data:
             print("Error: Empty request data")
-            return jsonify({
-                'error': 'Empty request data', 
-                'message': 'No data provided in request'
-            }), 400
+            return error_response(
+                'No data provided in request',
+                'errors.no_data_provided',
+                400
+            )
             
         plan_type = data.get('plan_type')
         currency = data.get('currency', 'usd').lower()
@@ -341,17 +365,19 @@ def create_payment_intent():
         
         if not plan_type:
             print("Error: Missing plan_type")
-            return jsonify({
-                'error': 'Missing plan type', 
-                'message': 'Plan type must be specified'
-            }), 400
+            return error_response(
+                'Plan type must be specified',
+                'errors.plan_type_required',
+                400
+            )
             
         if plan_type not in ['monthly', 'yearly']:
             print(f"Error: Invalid plan type: {plan_type}")
-            return jsonify({
-                'error': 'Invalid plan type', 
-                'message': 'Plan type must be either "monthly" or "yearly"'
-            }), 400
+            return error_response(
+                'Plan type must be either "monthly" or "yearly"',
+                'errors.plan_type_monthly_yearly',
+                400
+            )
         
         if currency not in CURRENCY_RATES:
             print(f"Error: Invalid currency: {currency}")
@@ -394,10 +420,11 @@ def create_payment_intent():
         
     except Exception as e:
         print(f"Error creating payment intent: {str(e)}")
-        return jsonify({
-            'error': 'Failed to create payment intent',
-            'message': str(e)
-        }), 500
+        return error_response(
+            'Failed to create payment intent',
+            'errors.failed_create_payment_intent',
+            500
+        )
 
 @payment_bp.route('/api/payment/success', methods=['GET'])
 def payment_success():
@@ -406,7 +433,7 @@ def payment_success():
     """
     session_id = request.args.get('session_id')
     if not session_id:
-        return jsonify({'error': 'No session ID provided'}), 400
+        return error_response('No session ID provided', 'errors.no_session_id', 400)
     
     try:
         # Retrieve the session to get customer information
@@ -417,12 +444,12 @@ def payment_success():
         plan_type = checkout_session.metadata.get('plan_type')
         
         if not username:
-            return jsonify({'error': 'Invalid session metadata'}), 400
+            return error_response('Invalid session metadata', 'errors.invalid_session_metadata', 400)
         
         # Find the user
         user = User.query.filter_by(username=username).first()
         if not user:
-            return jsonify({'error': 'User not found'}), 404
+            return error_response('User not found', 'errors.user_not_found', 404)
         
         # Store the Stripe customer ID if not already stored
         if checkout_session.customer and not user.stripe_customer_id:
@@ -443,10 +470,11 @@ def payment_success():
         
     except Exception as e:
         print(f"Error handling payment success: {str(e)}")
-        return jsonify({
-            'error': 'Failed to process successful payment',
-            'message': str(e)
-        }), 500
+        return error_response(
+            'Failed to process successful payment',
+            'errors.failed_process_payment',
+            500
+        )
 
 @payment_bp.route('/api/membership/confirm', methods=['POST'])
 @jwt_required()
@@ -471,60 +499,66 @@ def confirm_payment():
         
         if not user:
             print(f"User not found: {username}")
-            return jsonify({'error': 'User not found'}), 404
+            return error_response('User not found', 'errors.user_not_found', 404)
         
         # Get request data
         if not request.is_json:
             print("Error: Request data is not JSON")
-            return jsonify({
-                'error': 'Invalid request format', 
-                'message': 'Request must be in JSON format'
-            }), 400
+            return error_response(
+                'Request must be in JSON format',
+                'errors.request_must_be_json',
+                400
+            )
             
         data = request.get_json()
         print(f"Request data: {data}")
         
         if not data:
             print("Error: Empty request data")
-            return jsonify({
-                'error': 'Empty request data', 
-                'message': 'No data provided in request'
-            }), 400
+            return error_response(
+                'No data provided in request',
+                'errors.no_data_provided',
+                400
+            )
             
         payment_intent_id = data.get('payment_intent_id')
         plan_type = data.get('plan_type')
         
         if not payment_intent_id:
             print("Error: Missing payment_intent_id")
-            return jsonify({
-                'error': 'Missing payment intent ID', 
-                'message': 'Payment intent ID must be specified'
-            }), 400
+            return error_response(
+                'Payment intent ID must be specified',
+                'errors.missing_payment_intent_id',
+                400
+            )
             
         if not plan_type:
             print("Error: Missing plan_type")
-            return jsonify({
-                'error': 'Missing plan type', 
-                'message': 'Plan type must be specified'
-            }), 400
+            return error_response(
+                'Plan type must be specified',
+                'errors.plan_type_required',
+                400
+            )
         
         # Verify the payment intent with Stripe
         payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
         
         if payment_intent.status != 'succeeded':
             print(f"Payment intent not succeeded: {payment_intent.status}")
-            return jsonify({
-                'error': 'Invalid payment intent', 
-                'message': 'Payment has not been completed'
-            }), 400
+            return error_response(
+                'Payment has not been completed',
+                'errors.invalid_payment_intent',
+                400
+            )
         
         # Ensure the payment is for the correct user
         if payment_intent.metadata.get('user_id') != username:
             print(f"Payment intent user mismatch: {payment_intent.metadata.get('user_id')} != {username}")
-            return jsonify({
-                'error': 'Invalid payment intent', 
-                'message': 'Payment does not belong to this user'
-            }), 403
+            return error_response(
+                'Payment does not belong to this user',
+                'errors.invalid_payment_intent',
+                403
+            )
         
         # Update user membership status
         result = process_membership_purchase(username, plan_type)
@@ -540,16 +574,18 @@ def confirm_payment():
         
     except stripe.error.StripeError as e:
         print(f"Stripe error: {str(e)}")
-        return jsonify({
-            'error': 'Stripe error',
-            'message': str(e)
-        }), 500
+        return error_response(
+            'Stripe error',
+            'errors.stripe_error',
+            500
+        )
     except Exception as e:
         print(f"Error confirming payment: {str(e)}")
-        return jsonify({
-            'error': 'Failed to confirm payment',
-            'message': str(e)
-        }), 500
+        return error_response(
+            'Failed to confirm payment',
+            'errors.failed_confirm_payment',
+            500
+        )
 
 @payment_bp.route('/api/payment/webhook', methods=['POST'])
 def webhook():
@@ -684,7 +720,7 @@ def webhook():
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
         print(f"Webhook signature verification failed: {str(e)}")
-        return jsonify({'error': 'Invalid signature'}), 400
+        return error_response('Invalid signature', 'errors.invalid_signature', 400)
     except Exception as e:
         print(f"Webhook error: {str(e)}")
-        return jsonify({'error': 'Webhook handling failed'}), 500 
+        return error_response('Webhook handling failed', 'errors.webhook_handling_failed', 500) 

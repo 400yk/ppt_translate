@@ -65,7 +65,7 @@ USE_S3_STORAGE = bool(AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY)
 # Secret key for session management
 SECRET_KEY = os.getenv('SECRET_KEY', os.urandom(24).hex())
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', os.urandom(24).hex())
-JWT_ACCESS_TOKEN_EXPIRES = 86400  # 24 hours
+JWT_ACCESS_TOKEN_EXPIRES = 43200  # 12 hours
 
 # Default font settings
 DEFAULT_FONT_NAME = "Arial"

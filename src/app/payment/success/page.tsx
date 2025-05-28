@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
 import { Icons } from '@/components/icons';
 import { DynamicHead } from '@/components/dynamic-head';
-import apiClient from '@/lib/api-client';
+import apiClient, { getApiErrorMessage } from '@/lib/api-client';
 
 function PaymentSuccessContent() {
   const { t } = useTranslation();
@@ -41,13 +41,7 @@ function PaymentSuccessContent() {
         setSuccess(true);
       } catch (error: any) {
         console.error('Error verifying payment:', error);
-        let errorMessage = 'An unknown error occurred';
-        
-        if (error.response && error.response.data && error.response.data.message) {
-          errorMessage = error.response.data.message;
-        } else if (error instanceof Error) {
-          errorMessage = error.message;
-        }
+        const errorMessage = getApiErrorMessage(error);
         
         setError(errorMessage);
         setSuccess(false);
