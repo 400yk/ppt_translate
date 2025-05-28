@@ -55,3 +55,5 @@ backend/db/pgadmin_data/
 .env.dev
 .env.prod
 .env.local
+
+deploy/
