@@ -58,14 +58,14 @@ The frontend has been updated to use the new async translation endpoints:
 ### API Endpoints
 
 #### Authenticated Users:
-- `POST /translate_async_start` - Start translation
-- `GET /translate_status/<task_id>` - Check status
-- `GET /download/<task_id>` - Download file
+- `POST /api/translate_async_start` - Start translation
+- `GET /api/translate_status/<task_id>` - Check status
+- `GET /api/download/<task_id>` - Download file
 
 #### Guest Users:
-- `POST /guest-translate-async-start` - Start translation
-- `GET /guest-translate-status/<task_id>` - Check status
-- `GET /guest-download/<task_id>` - Download file
+- `POST /api/guest-translate-async-start` - Start translation
+- `GET /api/guest-translate-status/<task_id>` - Check status
+- `GET /api/guest-download/<task_id>` - Download file
 
 ## Testing the System
 
@@ -75,16 +75,16 @@ You can test the backend endpoints using curl or Postman:
 
 ```bash
 # Start a translation (replace with actual file)
-curl -X POST http://localhost:5000/guest-translate-async-start \
+curl -X POST http://localhost:5000/api/guest-translate-async-start \
   -F "file=@test.pptx" \
   -F "src_lang=zh" \
   -F "dest_lang=en"
 
 # Check status (replace TASK_ID with actual task ID)
-curl http://localhost:5000/guest-translate-status/TASK_ID
+curl http://localhost:5000/api/guest-translate-status/TASK_ID
 
 # Download file when ready
-curl http://localhost:5000/guest-download/TASK_ID -o translated_file.pptx
+curl http://localhost:5000/api/guest-download/TASK_ID -o translated_file.pptx
 ```
 
 ### 2. Test Frontend Integration

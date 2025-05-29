@@ -11,7 +11,7 @@ import os
 
 translate_bp = Blueprint('translate', __name__)
 
-@translate_bp.route('/translate_async_start', methods=['POST'])
+@translate_bp.route('/api/translate_async_start', methods=['POST'])
 @jwt_required()
 def translate_async_start_endpoint():
     """Endpoint to start asynchronous translation of PowerPoint files."""
@@ -72,7 +72,7 @@ def translate_async_start_endpoint():
         traceback.print_exc()
         return jsonify({'error': 'Could not start translation task', 'details': str(e)}), 500
 
-@translate_bp.route('/translate_status/<task_id>', methods=['GET'])
+@translate_bp.route('/api/translate_status/<task_id>', methods=['GET'])
 @jwt_required() # Or remove if status can be public, or implement different auth
 def get_translation_status_endpoint(task_id):
     """Endpoint to check the status of a translation task."""
@@ -105,7 +105,7 @@ def get_translation_status_endpoint(task_id):
                 response_data['result']['download_url'] = task.result['download_url']
             elif 'translated_file_path' in task.result:
                 # For local storage, use the download endpoint
-                response_data['result']['download_url'] = f'/download/{task_id}'
+                response_data['result']['download_url'] = f'/api/download/{task_id}'
     elif task.state == 'FAILURE':
         response_data['message'] = 'Task failed.'
         # Provide a more generic error or log the details for privacy/security
@@ -115,7 +115,7 @@ def get_translation_status_endpoint(task_id):
     
     return jsonify(response_data)
 
-@translate_bp.route('/download/<task_id>', methods=['GET'])
+@translate_bp.route('/api/download/<task_id>', methods=['GET'])
 @jwt_required()
 def download_translated_file(task_id):
     """Endpoint to download the translated file."""

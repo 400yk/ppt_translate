@@ -113,7 +113,7 @@ def purchase_membership():
             'message': str(e)
         }), 500
 
-@membership_bp.route('/config/file-size-limit', methods=['GET'])
+@membership_bp.route('/api/config/file-size-limit', methods=['GET'])
 def get_file_size_limit():
     """
     Returns the maximum file size allowed for free/guest users.

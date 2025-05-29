@@ -107,7 +107,7 @@ export async function translateFile(
     if (isGuestUser) {
       // Use guest endpoint for guest users with apiClient
       try {
-        response = await apiClient.post('/guest-translate', formData, {
+        response = await apiClient.post('/api/guest-translate', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -155,7 +155,7 @@ export async function translateFile(
       // Use apiClient for authenticated users
       try {
         // We need to use raw axios for file uploads with progress
-        response = await apiClient.post('/translate', formData, {
+        response = await apiClient.post('/api/translate', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -220,7 +220,7 @@ export async function translateFile(
  */
 export async function fetchMaxFileSize(): Promise<number> {
   try {
-    const response = await apiClient.get('/config/file-size-limit');
+    const response = await apiClient.get('/api/config/file-size-limit');
     if (response.data.maxFileSizeMB) {
       return response.data.maxFileSizeMB;
     }
@@ -254,13 +254,13 @@ export async function startAsyncTranslation(
     let response;
     
     if (isGuestUser) {
-      response = await apiClient.post('/guest-translate-async-start', formData, {
+      response = await apiClient.post('/api/guest-translate-async-start', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
     } else {
-      response = await apiClient.post('/translate_async_start', formData, {
+      response = await apiClient.post('/api/translate_async_start', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -307,7 +307,7 @@ export async function startAsyncTranslation(
  */
 export async function pollTranslationStatus(taskId: string, isGuestUser: boolean = false): Promise<AsyncTranslationStatusResponse> {
   try {
-    const endpoint = isGuestUser ? `/guest-translate-status/${taskId}` : `/translate_status/${taskId}`;
+    const endpoint = isGuestUser ? `/api/guest-translate-status/${taskId}` : `/api/translate_status/${taskId}`;
     const response = await apiClient.get(endpoint);
     return response.data as AsyncTranslationStatusResponse;
   } catch (error: any) {

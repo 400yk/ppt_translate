@@ -39,7 +39,7 @@ export function useConfigLimits() {
         setIsLoading(true);
         
         // Fetch file size limit
-        const fileSizeResponse = await apiClient.get('/config/file-size-limit');
+        const fileSizeResponse = await apiClient.get('/api/config/file-size-limit');
         const fileSizeData = fileSizeResponse.data;
         
         // Fetch character limit

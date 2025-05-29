@@ -22,7 +22,7 @@ def guest_status():
     status = get_guest_status(client_ip)
     return jsonify(status), 200
 
-@guest_bp.route('/guest-translate', methods=['POST'])
+@guest_bp.route('/api/guest-translate', methods=['POST'])
 def guest_translate_pptx_endpoint():
     """
     Endpoint for guest users to translate a PowerPoint file without authentication.
@@ -121,7 +121,7 @@ def guest_translate_pptx_endpoint():
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
-@guest_bp.route('/guest-translate-async-start', methods=['POST'])
+@guest_bp.route('/api/guest-translate-async-start', methods=['POST'])
 def guest_translate_async_start_endpoint():
     """Endpoint to start asynchronous translation for guest users."""
     if 'file' not in request.files:
@@ -213,7 +213,7 @@ def guest_translate_async_start_endpoint():
         traceback.print_exc()
         return jsonify({'error': 'Could not start translation task', 'details': str(e)}), 500
 
-@guest_bp.route('/guest-translate-status/<task_id>', methods=['GET'])
+@guest_bp.route('/api/guest-translate-status/<task_id>', methods=['GET'])
 def get_guest_translation_status_endpoint(task_id):
     """Endpoint to check the status of a guest translation task."""
     task = process_guest_translation_task.AsyncResult(task_id)
@@ -238,14 +238,14 @@ def get_guest_translation_status_endpoint(task_id):
                 response_data['result']['download_url'] = task.result['download_url']
             elif 'translated_file_path' in task.result:
                 # For local storage, use the download endpoint
-                response_data['result']['download_url'] = f'/guest-download/{task_id}'
+                response_data['result']['download_url'] = f'/api/guest-download/{task_id}'
     elif task.state == 'FAILURE':
         response_data['message'] = 'Task failed.'
         response_data['error'] = 'An error occurred during translation processing.' 
     
     return jsonify(response_data)
 
-@guest_bp.route('/guest-download/<task_id>', methods=['GET'])
+@guest_bp.route('/api/guest-download/<task_id>', methods=['GET'])
 def download_guest_translated_file(task_id):
     """Endpoint to download the translated file for guest users."""
     task = process_guest_translation_task.AsyncResult(task_id)

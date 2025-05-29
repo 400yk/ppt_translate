@@ -5,8 +5,8 @@ celery -A app.celery_app worker --loglevel=info --pool=solo
 # Testing:
 (Navigate to your backend directory first if app.py is there).
 Test: Use a tool like Postman or curl (or your frontend if you adapt it quickly) to:
-POST a file to /translate_async_start. You should get a task_id.
-GET from /translate_status/<task_id>. Observe the status changing from PENDING to SUCCESS (or FAILURE).
+POST a file to /api/translate_async_start. You should get a task_id.
+GET from /api/translate_status/<task_id>. Observe the status changing from PENDING to SUCCESS (or FAILURE).
 Check the Celery worker logs for output from the process_translation_task.
 
 Heroku Setup:
@@ -15,18 +15,18 @@ Scale Worker Dyno: After deploying, go to your Heroku dashboard ("Resources" tab
 
 Frontend Adaptation:
 Your frontend (src/lib/translation-service.ts and src/components/translation/TranslationForm.tsx) needs to be updated:
-Change the translateFile function in translation-service.ts to call /translate_async_start.
+Change the translateFile function in translation-service.ts to call /api/translate_async_start.
 
 It should then store the task_id.
 
-Implement a polling mechanism (e.g., using setInterval) to call /translate_status/<task_id> every few seconds.
+Implement a polling mechanism (e.g., using setInterval) to call /api/translate_status/<task_id> every few seconds.
 Update the progress bar based on the task status.
 
 When the task is SUCCESS, the result will contain translated_file_path. This is the part that needs further work for actual file download. For now, the frontend will get this path, but it won't be a downloadable URL.
 File Download Mechanism (Post-Celery Setup):
 
 This is a critical piece. Once the Celery task completes and the file is saved on the worker dyno (or ideally to S3):
-If using S3: The Celery task should save the file to S3 and return a pre-signed S3 URL for download, or an S3 key that the web app can use to generate a pre-signed URL. The /translate_status endpoint would then provide this URL to the client.
+If using S3: The Celery task should save the file to S3 and return a pre-signed S3 URL for download, or an S3 key that the web app can use to generate a pre-signed URL. The /api/translate_status endpoint would then provide this URL to the client.
 
 If using worker's ephemeral storage (less ideal): This is much harder. The web dyno can't directly access files on another worker dyno. You'd need a more complex setup, perhaps having the worker notify the web app via another Redis message when a file is ready, and then the web app would somehow stream it (not straightforward). S3 is strongly recommended.
 
