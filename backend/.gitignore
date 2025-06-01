@@ -2,6 +2,7 @@
 # Add .env and other sensitive files here if not already present.
 
 .env.local
+.env.prod
 __pycache__
 app.db
 *.db.backup
