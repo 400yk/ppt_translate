@@ -57,3 +57,4 @@ backend/db/pgadmin_data/
 .env.local
 
 deploy/
+Self-instructions.md
