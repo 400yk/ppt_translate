@@ -6,8 +6,14 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 import datetime
 from db.models import db, User, InvitationCode
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+import os # For accessing environment variables
 
 auth_bp = Blueprint('auth', __name__)
+
+# Your Google Client ID from environment variable
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
 
 @auth_bp.route('/api/register', methods=['POST'])
 def register():
@@ -120,6 +126,112 @@ def login():
         'has_invitation': has_invitation,
         'access_token': access_token
     }), 200
+
+@auth_bp.route('/api/auth/google', methods=['POST'])
+def google_auth():
+    data = request.get_json()
+    token = data.get('token')
+
+    if not token:
+        return jsonify({'error': 'Missing token', 'errorKey': 'errors.missing_google_token'}), 400
+
+    if not GOOGLE_CLIENT_ID:
+        print("ERROR: GOOGLE_OAUTH_CLIENT_ID environment variable not set on backend.")
+        return jsonify({'error': 'Server configuration error', 'errorKey': 'errors.server_error'}), 500
+
+    try:
+        # Verify the ID token
+        idinfo = id_token.verify_oauth2_token(token, google_requests.Request(), GOOGLE_CLIENT_ID)
+
+        # Extract user information
+        google_user_id = idinfo['sub']
+        email = idinfo.get('email')
+        # name = idinfo.get('name') # You can also get name, picture, etc.
+        # username_from_email = email.split('@')[0] if email else f"google_user_{google_user_id[:8]}"
+
+
+        # Check if user already exists with this Google ID
+        user = User.query.filter_by(google_id=google_user_id).first()
+
+        if not user:
+            # If user doesn't exist by google_id, check by email as a fallback or to link accounts
+            # This part depends on your desired behavior for existing email accounts
+            if email:
+                user = User.query.filter_by(email=email).first()
+                if user:
+                    # User with this email exists, link Google ID to this account
+                    if not user.google_id:
+                        user.google_id = google_user_id
+                        # Potentially clear password if they will now only use Google to sign in
+                        # user.password_hash = None 
+                    elif user.google_id != google_user_id:
+                        # Email is associated with a DIFFERENT Google account. This is an edge case to handle.
+                        return jsonify({
+                            'error': 'Email associated with a different Google account',
+                            'errorKey': 'errors.google_email_conflict'
+                        }), 409 # Conflict
+                else:
+                    # No user with this email, create a new one
+                    username = email.split('@')[0] if email else f"user_{google_user_id[:6]}"
+                    # Ensure username is unique
+                    temp_username = username
+                    counter = 1
+                    while User.query.filter_by(username=temp_username).first():
+                        temp_username = f"{username}_{counter}"
+                        counter += 1
+                    username = temp_username
+                    
+                    user = User(
+                        google_id=google_user_id,
+                        email=email,
+                        username=username
+                        # Password is not set as they authenticate via Google
+                    )
+                    db.session.add(user)
+            else:
+                # No email from Google, rare case, but need to handle
+                # Create user with a generated username based on google_id
+                username = f"user_{google_user_id[:6]}"
+                # Ensure username is unique
+                temp_username = username
+                counter = 1
+                while User.query.filter_by(username=temp_username).first():
+                    temp_username = f"{username}_{counter}"
+                    counter += 1
+                username = temp_username
+
+                user = User(
+                    google_id=google_user_id,
+                    username=username
+                    # Password is not set, email is not available
+                )
+                db.session.add(user)
+        
+        # Update last login time for the user (either existing or newly created/linked)
+        user.last_login = datetime.datetime.utcnow()
+        db.session.commit()
+
+        # Generate access token for your application
+        # Use user.username or user.id as identity, consistent with your regular login
+        access_token = create_access_token(identity=user.username) 
+        
+        return jsonify({
+            'message': 'Google Sign-In successful',
+            'access_token': access_token,
+            'user': { # Return some user info to the frontend
+                'username': user.username,
+                'email': user.email,
+                # Add other relevant user fields if needed
+            }
+        }), 200
+
+    except ValueError as e:
+        # Invalid token
+        print(f"Google Auth Error: Invalid token - {str(e)}")
+        return jsonify({'error': 'Invalid Google token', 'errorKey': 'errors.invalid_google_token'}), 401
+    except Exception as e:
+        print(f"Google Auth Error: {str(e)}")
+        return jsonify({'error': 'An error occurred during Google authentication', 'errorKey': 'errors.google_auth_failed'}), 500
 
 @auth_bp.route('/api/invitation-codes', methods=['POST'])
 @jwt_required()

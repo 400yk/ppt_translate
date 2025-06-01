@@ -73,7 +73,9 @@
     "plan_type_required": "プランタイプを指定する必要があります",
     "plan_type_monthly_yearly": "プランタイプは\"monthly\"または\"yearly\"である必要があります",
     "request_must_be_json": "リクエストはJSON形式である必要があります",
-    "no_data_provided": "リクエストにデータが提供されていません"
+    "no_data_provided": "リクエストにデータが提供されていません",
+    "google_signin_failed": "Googleサインインに失敗しました",
+    "google_no_credential": "Google認証情報を受信できませんでした"
   },
   "success": {
     "title": "成功",
@@ -124,7 +126,9 @@
     "use_without_code": "招待コードなしで登録",
     "register_success": "登録成功",
     "welcome": "スライドトランスへようこそ！",
-    "no_code_warning": "招待コードなしでは、週に1回の翻訳に制限されます。"
+    "no_code_warning": "招待コードなしでは、週に1回の翻訳に制限されます。",
+    "or_continue_with": "または以下で続行",
+    "google_signin": "Googleでサインイン"
   },
   "languages": {
     "zh": "中国語",
@@ -183,9 +187,10 @@
     "tables": "表",
     "tables_desc": "表のレイアウトを保持したまま、表からテキストを抽出して翻訳します。",
     "styles": "スタイル",
-    "styles_desc": "PowerPointスライドのスタイルを元のまま保持します。",
+    "styles_desc": "PowerPointスライドのスタイルをオリジナルと同じに保ちます。",
     "view_pricing": "料金プランを見る",
-    "copyright": "スライドトランス。全著作権所有。"
+    "copyright": "Translide. 無断複写・転載を禁じます。",
+    "privacy_policy": "Privacy Policy"
   },
   "guest": {
     "free_trial": "無料トライアル",
@@ -267,5 +272,47 @@
     "processing": "処理中...",
     "downloading_file": "ファイルをダウンロード中...",
     "timeout_error": "翻訳タイムアウト - もう一度お試しください"
+  },
+  "privacy": {
+    "last_updated": "最終更新日：{date}",
+    "intro": "このプライバシーポリシーは、{site}（「サイト」）を訪問、フィードバックの送信、またはドキュメントのアップロード時に、お客様の個人情報がどのように収集、使用、共有されるかを説明します。",
+    "personal_info_collect": "収集する個人情報",
+    "device_info_desc": "サイトを訪問すると、ウェブブラウザ、IPアドレス、タイムゾーン、およびデバイスにインストールされているCookieの一部に関する情報を含む、デバイスに関する特定の情報を自動的に収集します。",
+    "collect_tech_intro": "以下の技術を使用してデバイス情報を収集します：",
+    "cookies_desc": "「Cookie」は、デバイスまたはコンピュータに配置されるデータファイルで、しばしば匿名の一意の識別子を含みます。",
+    "log_files_desc": "「ログファイル」は、サイトで発生するアクションを追跡し、IPアドレス、ブラウザタイプ、インターネットサービスプロバイダー、参照/離脱ページ、日付/タイムスタンプを含むデータを収集します。",
+    "web_beacons_desc": "「ウェブビーコン」、「タグ」、「ピクセル」は、サイトの閲覧方法に関する情報を記録するために使用される電子ファイルです。",
+    "provided_info_desc": "また、サイトからコンタクトフォームを送信する際には、お名前、メールアドレス、IPアドレスを含む特定の情報を収集します。",
+    "personal_info_definition": "このプライバシーポリシーで「個人情報」について言及する場合、デバイス情報と提供情報の両方について言及しています。",
+    "how_we_use": "個人情報の使用方法",
+    "how_we_use_desc": "収集した提供情報は、一般的にフィードバックやサポートリクエストに応じるために使用します。",
+    "sharing_info": "個人情報の共有",
+    "google_analytics_desc": "Google Analyticsを使用してお客様のサイト利用方法を理解しています。",
+    "third_party_policies": "このサイトで個人データを収集・使用する可能性のある第三者のプライバシーポリシー：",
+    "longway_services": "Longwayサービス",
+    "longway_contract_desc": "このウェブサイトは、Longway Inc.（「Longway」）と独占的な広告契約を結んでいます。",
+    "cookie_definition": "Cookieは、ウェブサーバーによってデバイスに送信される小さなテキストファイルです。",
+    "cookie_info_collected": "IPアドレス;オペレーティングシステムのタイプとバージョン;デバイスタイプ;言語設定;ウェブブラウザタイプ;メール（ハッシュ化または暗号化された形式）",
+    "longway_data_usage": "Longwayとそのパートナーは、このデータを独立して収集された情報と組み合わせて使用する場合があります。",
+    "longway_privacy_links": "Longwayのプライバシーポリシーはこちらで確認できます。",
+    "legal_sharing": "最後に、適用される法律や規制に準拠するため、お客様の個人情報を共有する場合があります。",
+    "behavioral_advertising": "行動ターゲティング広告",
+    "behavioral_desc": "上記のように、お客様に関心があると思われるターゲット広告やマーケティング通信を提供するために個人情報を使用します。",
+    "opt_out_intro": "ターゲット広告をオプトアウトできます：GOOGLE - https://www.google.com/settings/ads/anonymous",
+    "opt_out_additional": "さらに、Digital Advertising Allianceのオプトアウトポータルを訪問してこれらのサービスの一部をオプトアウトできます。",
+    "do_not_track": "トラッキング拒否",
+    "do_not_track_desc": "ブラウザからDo Not Trackシグナルを受信しても、サイトのデータ収集と使用の実践は変更しないことにご注意ください。",
+    "your_rights": "お客様の権利",
+    "eu_rights_desc": "欧州居住者の場合、当社が保有するお客様の個人情報にアクセスし、個人情報の修正、更新、削除を求める権利があります。",
+    "eu_processing_desc": "さらに、欧州居住者の場合、お客様との要求を満たすため、または上記の正当なビジネス利益を追求するために情報を処理していることに注意してください。",
+    "data_retention": "データ保持",
+    "data_deletion_desc": "サイトを通じてデータ送信を行うと、アップロードされたドキュメントは1時間以内にサイトサーバーから削除されます。",
+    "google_services_desc": "このサービスは、ドキュメントを処理するためにGoogle翻訳とアップロードされたデータ送信に含まれる情報も共有します。",
+    "minors": "未成年者",
+    "minors_desc": "サイトは18歳未満の個人を対象としていません。",
+    "changes": "変更",
+    "changes_desc": "このプライバシーポリシーは、当社の実践の変更やその他の運用上、法的、または規制上の理由を反映するために随時更新される場合があります。",
+    "contact_us": "お問い合わせ",
+    "contact_desc": "当社のプライバシー慣行について詳しく知りたい場合、ご質問がある場合、または苦情を申し立てたい場合は、contact@long-agi.comまでメールでお問い合わせください。"
   }
 } 

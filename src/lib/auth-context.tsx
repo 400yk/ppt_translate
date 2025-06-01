@@ -23,6 +23,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string, invitationCode: string) => Promise<void>;
   logout: (navigateCallback?: () => void) => void;
+  signInWithGoogle: (googleToken: string) => Promise<void>;
   verifyInvitationCode: (code: string) => Promise<{
     valid: boolean;
     remaining?: number;
@@ -43,6 +44,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   register: async () => {},
   logout: () => {},
+  signInWithGoogle: async () => {},
   verifyInvitationCode: async () => ({ valid: false }),
   fetchWithAuth: async () => new Response(),
 });
@@ -236,6 +238,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Sign in with Google function
+  const signInWithGoogle = async (googleToken: string) => {
+    try {
+      const response = await apiClient.post('/api/auth/google', { token: googleToken });
+      const data = response.data;
+      
+      // Save auth data
+      setToken(data.access_token);
+      setUser(data.user); // Assuming backend returns user object { username, email, ... }
+      
+      // Store in localStorage for persistence (only in browser)
+      if (isBrowser) {
+        localStorage.setItem('auth_token', data.access_token);
+        localStorage.setItem('auth_user', JSON.stringify(data.user));
+      }
+      
+      // Potentially clear guest session or perform other post-login actions
+      // clearGuestSession(); // If you want to clear guest data after Google sign-in
+
+    } catch (error) {
+      console.error('Google Sign-In error:', error);
+      // The error object might have a response.data with errorKey for translation
+      throw error; 
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -246,6 +274,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        signInWithGoogle,
         verifyInvitationCode,
         fetchWithAuth
       }}

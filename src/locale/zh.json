@@ -73,7 +73,9 @@
     "plan_type_required": "必须指定套餐类型",
     "plan_type_monthly_yearly": "套餐类型必须是\"monthly\"或\"yearly\"",
     "request_must_be_json": "请求必须是JSON格式",
-    "no_data_provided": "请求中未提供数据"
+    "no_data_provided": "请求中未提供数据",
+    "google_signin_failed": "Google登录失败",
+    "google_no_credential": "未收到Google凭据"
   },
   "success": {
     "title": "成功",
@@ -124,7 +126,9 @@
     "use_without_code": "不使用邀请码注册",
     "register_success": "注册成功",
     "welcome": "欢迎使用幻翻！",
-    "no_code_warning": "不使用邀请码注册的用户每周仅能使用一次翻译服务。"
+    "no_code_warning": "不使用邀请码注册的用户每周仅能使用一次翻译服务。",
+    "or_continue_with": "或者使用以下方式继续",
+    "google_signin": "使用Google登录"
   },
   "languages": {
     "zh": "中文",
@@ -185,7 +189,8 @@
     "styles": "样式",
     "styles_desc": "保持PowerPoint幻灯片的原始样式不变。",
     "view_pricing": "查看定价",
-    "copyright": "幻翻。保留所有权利。"
+    "copyright": "幻翻。保留所有权利。",
+    "privacy_policy": "隐私政策"
   },
   "guest": {
     "free_trial": "免费试用",
@@ -267,5 +272,47 @@
     "processing": "处理中...",
     "downloading_file": "下载文件中...",
     "timeout_error": "翻译超时 - 请重试"
+  },
+  "privacy": {
+    "last_updated": "最后更新：{date}",
+    "intro": "本隐私政策描述了您访问、提交反馈或上传文档到{site}（“网站”）时，您的个人信息是如何被收集、使用和共享的。",
+    "personal_info_collect": "我们收集的个人信息",
+    "device_info_desc": "当您访问网站时，我们会自动收集有关您设备的某些信息，包括有关您的网络浏览器、IP地址、时区以及安装在您设备上的一些cookie的信息。此外，当您浏览网站时，我们会收集有关您查看的个别网页或产品、推荐您访问网站的网站或搜索词，以及您与网站互动方式的信息。我们将这些自动收集的信息称为“设备信息”。",
+    "collect_tech_intro": "我们使用以下技术收集设备信息：",
+    "cookies_desc": "“Cookie”是放置在您的设备或计算机上的数据文件，通常包含匿名唯一标识符。有关Cookie的更多信息以及如何禁用Cookie，请访问 http://www.allaboutcookies.org。",
+    "log_files_desc": "“日志文件”跟踪网站上发生的操作，并收集包括您的IP地址、浏览器类型、互联网服务提供商、引用/退出页面和日期/时间戳在内的数据。",
+    "web_beacons_desc": "“网络信标”、“标签”和“像素”是用于记录您如何浏览网站信息的电子文件。",
+    "provided_info_desc": "此外，当您从网站提交联系表单时，我们会收集您的某些信息，包括您的姓名、电子邮件地址和IP地址。此外，当您向网站上传文档时，我们会收集您的某些信息，包括文档中可能包含的任何个人信息。我们将此信息称为“提供的信息”。",
+    "personal_info_definition": "当我们在本隐私政策中谈论“个人信息”时，我们指的是设备信息和提供的信息。",
+    "how_we_use": "我们如何使用您的个人信息？",
+    "how_we_use_desc": "我们使用收集到的提供信息通常是为了满足任何反馈或支持请求。此外，我们使用这些提供的信息来：与您沟通；筛查我们的用户是否存在潜在风险或欺诈；以及根据您与我们分享的偏好，为您提供与我们产品或服务相关的信息或广告。我们使用收集到的设备信息来帮助我们筛查潜在的风险和欺诈行为（特别是您的IP地址），以及更普遍地改进和优化我们的网站（例如，通过生成关于我们客户如何浏览和与网站互动的分析，以及评估我们营销和广告活动的成功）。",
+    "sharing_info": "共享您的个人信息",
+    "google_analytics_desc": "我们使用Google Analytics来帮助我们了解客户如何使用网站——您可以在此处了解更多关于Google如何使用您个人信息的信息：https://www.google.com/intl/en/policies/privacy/。您也可以在此处选择退出Google Analytics：https://tools.google.com/dlpage/gaoptout。",
+    "third_party_policies": "可能在本网站收集和使用您个人数据的第三方隐私政策：",
+    "longway_services": "Longway服务",
+    "longway_contract_desc": "本网站与Longway Inc.（“Longway”）签订了独家广告合同，Longway是网站优化、增强用户体验、优化广告性能和通过先进AI技术创收的知名领导者。本网站使用Longway Inc.（“Longway”）的服务，包括管理第三方基于兴趣的广告。Longway可能在本网站上采用各种技术，包括提供内容、显示广告和为访问本网站的访问者启用广告的工具，这些工具可能使用第一方和第三方cookie。",
+    "cookie_definition": "Cookie是由网络服务器发送到您设备的小文本文件，使网站能够记住有关您浏览活动的信息。第一方cookie由您正在访问的网站创建，而第三方cookie由您正在访问的域以外的域设置。Longway和我们的合作伙伴可能会放置第三方cookie、标签、信标、像素和类似技术来监控与广告的互动并优化广告定位。请注意，禁用cookie可能会限制对网站某些内容和功能的访问，拒绝cookie不会消除广告，但会导致非个性化广告。您可以在此处找到有关cookie以及如何管理它们的更多信息。在提供个性化广告时，可能会收集、使用和存储在cookie中的以下信息：",
+    "cookie_info_collected": "IP地址；操作系统类型和版本；设备类型；语言偏好；网络浏览器类型；电子邮件（以哈希或加密形式）",
+    "longway_data_usage": "Longway及其合作伙伴可能会将这些数据与独立收集的信息结合使用，在各种平台和网站上提供定向广告。Longway的合作伙伴还可能收集其他数据，如唯一ID、广告ID、地理位置数据、使用数据、设备信息、流量数据、推荐来源以及用户与网站或广告之间的互动，以创建受众群体，在不同设备、浏览器和应用程序中进行定向广告。您可以在此处找到有关基于兴趣的广告以及如何管理它们的更多信息。",
+    "longway_privacy_links": "您可以在此处查看Longway的隐私政策，或者有关Longway广告和其他合作伙伴的更多信息，您可以在此处查看Longway的广告合作伙伴。",
+    "legal_sharing": "最后，我们也可能会分享您的个人信息以遵守适用的法律法规，回应传票、搜查令或我们收到的其他合法信息请求，或以其他方式保护我们的权利。",
+    "behavioral_advertising": "行为广告",
+    "behavioral_desc": "如上所述，我们使用您的个人信息为您提供我们认为您可能感兴趣的定向广告或营销通信。有关定向广告如何工作的更多信息，您可以访问网络广告倡议（“NAI”）的教育页面：http://www.networkadvertising.org/understanding-online-advertising/how-does-it-work。",
+    "opt_out_intro": "您可以选择退出定向广告：GOOGLE - https://www.google.com/settings/ads/anonymous",
+    "opt_out_additional": "此外，您可以通过访问数字广告联盟的退出门户网站来选择退出其中一些服务：http://optout.aboutads.info/。",
+    "do_not_track": "请勿跟踪",
+    "do_not_track_desc": "请注意，当我们从您的浏览器看到请勿跟踪信号时，我们不会改变我们网站的数据收集和使用做法。",
+    "your_rights": "您的权利",
+    "eu_rights_desc": "如果您是欧洲居民，您有权访问我们持有的关于您的个人信息，并要求更正、更新或删除您的个人信息。如果您想行使这项权利，请通过下面的联系信息与我们联系。",
+    "eu_processing_desc": "此外，如果您是欧洲居民，我们注意到我们处理您的信息是为了履行我们可能与您的请求（例如，如果您通过网站提出翻译请求），或以其他方式追求上述我们的合法商业利益。此外，请注意您的信息将被转移到欧洲以外，包括加拿大和美国。",
+    "data_retention": "数据保留",
+    "data_deletion_desc": "当您通过网站提交数据时，上传的文档会在1小时内从网站服务器中删除。除非您要求我们删除这些信息，否则我们可能会保留您的其他提供信息用于我们的记录。",
+    "google_services_desc": "此服务还与Google翻译共享任何上传数据提交中包含的信息，以便处理文档。为了使用此服务，您必须同意Google服务隐私政策的所有条款和Google服务条款的所有条款。否则，您不得使用此服务。",
+    "minors": "未成年人",
+    "minors_desc": "本网站不适用于18岁以下的个人。",
+    "changes": "变更",
+    "changes_desc": "我们可能会不时更新此隐私政策，以反映例如我们做法的变化或其他运营、法律或监管原因。",
+    "contact_us": "联系我们",
+    "contact_desc": "有关我们隐私做法的更多信息，如果您有疑问，或者如果您想投诉，请通过电子邮件与我们联系：contact@long-agi.com。"
   }
 } 

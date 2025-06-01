@@ -10,6 +10,7 @@ import { useTranslation, LOCALE_CHANGE_EVENT } from '@/lib/i18n';
 import { Icons } from '@/components/icons';
 import { useRouter } from 'next/navigation';
 import { getApiErrorMessage } from '@/lib/api-client';
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function RegisterForm() {
   const [email, setEmail] = useState('');
@@ -22,7 +23,7 @@ export default function RegisterForm() {
   const [forceRender, setForceRender] = useState(0);
   const [lastVerifiedCode, setLastVerifiedCode] = useState('');
   
-  const { register, verifyInvitationCode } = useAuth();
+  const { register, verifyInvitationCode, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const { t, locale } = useTranslation();
   const router = useRouter();
@@ -145,6 +146,14 @@ export default function RegisterForm() {
     }
   };
 
+  const mapToGoogleLocale = (appLocale: string): string => {
+    if (appLocale === 'zh') {
+      return 'zh-CN';
+    }
+    // Add other mappings if necessary
+    return appLocale;
+  };
+
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
       <form onSubmit={handleSubmit} className="space-y-4">        
@@ -212,6 +221,58 @@ export default function RegisterForm() {
         >
           {isLoading ? t('common.loading') : t('auth.register')}
         </Button>
+
+        {/* <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-2 text-muted-foreground dark:bg-gray-800">
+              {t('auth.or_continue_with')}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex justify-center w-full">
+          <GoogleLogin
+            locale={mapToGoogleLocale(locale)}
+            onSuccess={async (credentialResponse) => {
+              if (credentialResponse.credential) {
+                try {
+                  await signInWithGoogle(credentialResponse.credential);
+                  toast({
+                    title: t('auth.register_success'),
+                    description: t('auth.welcome'),
+                  });
+                  router.push('/translate');
+                } catch (error) {
+                  const errorMessage = getApiErrorMessage(error);
+                  toast({
+                    title: t('errors.google_signin_failed'),
+                    description: errorMessage,
+                    variant: 'destructive',
+                  });
+                }
+              } else {
+                toast({
+                  title: t('errors.google_signin_failed'),
+                  description: t('errors.google_no_credential'),
+                  variant: 'destructive',
+                });
+              }
+            }}
+            onError={() => {
+              console.error('Google login error');
+              toast({
+                title: t('errors.google_signin_failed'),
+                variant: 'destructive',
+              });
+            }}
+            useOneTap
+            containerProps={{ style: { width: '100%' } }}
+            theme="outline"
+          />
+        </div> */}
       </form>
     </div>
   );

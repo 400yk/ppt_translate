@@ -73,7 +73,9 @@
     "plan_type_required": "Le type de plan doit être spécifié",
     "plan_type_monthly_yearly": "Le type de plan doit être \"monthly\" ou \"yearly\"",
     "request_must_be_json": "La demande doit être au format JSON",
-    "no_data_provided": "Aucune donnée fournie dans la demande"
+    "no_data_provided": "Aucune donnée fournie dans la demande",
+    "google_signin_failed": "Échec de la connexion Google",
+    "google_no_credential": "Aucune credential Google reçue"
   },
   "success": {
     "title": "Succès",
@@ -124,7 +126,9 @@
     "use_without_code": "S'inscrire sans code d'invitation",
     "register_success": "Inscription réussie",
     "welcome": "Bienvenue sur DiaporamaTraduction !",
-    "no_code_warning": "Sans code d'invitation, vous serez limité à une traduction par semaine."
+    "no_code_warning": "Sans code d'invitation, vous serez limité à une traduction par semaine.",
+    "or_continue_with": "Ou continuer avec",
+    "google_signin": "Se connecter avec Google"
   },
   "languages": {
     "zh": "Chinois",
@@ -183,9 +187,10 @@
     "tables": "Tableaux",
     "tables_desc": "Extrait et traduit le texte des tableaux tout en conservant leur mise en page.",
     "styles": "Styles",
-    "styles_desc": "Conservez le style de vos diapositives PowerPoint identique à l'original.",
-    "view_pricing": "Voir les forfaits",
-    "copyright": "DiaporamaTraduction. Tous droits réservés."
+    "styles_desc": "Conservez le style original de vos diapositives PowerPoint.",
+    "view_pricing": "Voir les Plans Tarifaires",
+    "copyright": "Translide. Tous droits réservés.",
+    "privacy_policy": "Privacy Policy"
   },
   "guest": {
     "free_trial": "Essai gratuit",
@@ -266,6 +271,48 @@
     "translation_in_progress": "Traduction en cours...",
     "processing": "Traitement...",
     "downloading_file": "Téléchargement du fichier...",
-    "timeout_error": "Délai de traduction dépassé - veuillez réessayer"
+    "timeout_error": "Délai de traduction expiré - veuillez réessayer"
+  },
+  "privacy": {
+    "last_updated": "Dernière mise à jour : {date}",
+    "intro": "Cette Politique de Confidentialité décrit comment vos informations personnelles sont collectées, utilisées et partagées lorsque vous visitez, soumettez des commentaires ou téléchargez un document sur {site} (le \"Site\").",
+    "personal_info_collect": "INFORMATIONS PERSONNELLES QUE NOUS COLLECTONS",
+    "device_info_desc": "Lorsque vous visitez le Site, nous collectons automatiquement certaines informations sur votre appareil, y compris des informations sur votre navigateur web, votre adresse IP, votre fuseau horaire et certains des cookies installés sur votre appareil. De plus, lorsque vous naviguez sur le Site, nous collectons des informations sur les pages web individuelles ou les produits que vous consultez, les sites web ou les termes de recherche qui vous ont référé au Site, et des informations sur la façon dont vous interagissez avec le Site. Nous appelons ces informations collectées automatiquement \"Informations sur l'Appareil.\"",
+    "collect_tech_intro": "Nous collectons les Informations sur l'Appareil en utilisant les technologies suivantes :",
+    "cookies_desc": "Les \"Cookies\" sont des fichiers de données placés sur votre appareil ou ordinateur et incluent souvent un identifiant unique anonyme. Pour plus d'informations sur les cookies et comment les désactiver, visitez http://www.allaboutcookies.org.",
+    "log_files_desc": "Les \"Fichiers de log\" suivent les actions qui se produisent sur le Site et collectent des données incluant votre adresse IP, le type de navigateur, le fournisseur de services Internet, les pages de référence/sortie et les horodatages.",
+    "web_beacons_desc": "Les \"Balises web,\" \"tags\" et \"pixels\" sont des fichiers électroniques utilisés pour enregistrer des informations sur la façon dont vous naviguez sur le Site.",
+    "provided_info_desc": "De plus, lorsque vous soumettez un formulaire de contact depuis le Site, nous collectons certaines informations vous concernant, incluant votre nom, votre adresse e-mail et votre adresse IP. De plus, lorsque vous téléchargez un document sur le Site, nous collectons certaines informations vous concernant, incluant toute information personnelle qui pourrait être contenue dans le document. Nous appelons ces informations \"Informations Fournies.\"",
+    "personal_info_definition": "Quand nous parlons d'\"Informations Personnelles\" dans cette Politique de Confidentialité, nous parlons à la fois des Informations sur l'Appareil et des Informations Fournies.",
+    "how_we_use": "COMMENT UTILISONS-NOUS VOS INFORMATIONS PERSONNELLES ?",
+    "how_we_use_desc": "Nous utilisons les Informations Fournies que nous collectons généralement pour répondre à toute demande de commentaires ou de support. De plus, nous utilisons ces Informations Fournies pour : Communiquer avec vous ; Examiner nos utilisateurs pour les risques potentiels ou la fraude ; et Lorsque c'est en accord avec les préférences que vous avez partagées avec nous, vous fournir des informations ou de la publicité relative à nos produits ou services. Nous utilisons les Informations sur l'Appareil que nous collectons pour nous aider à examiner les risques potentiels et la fraude (en particulier, votre adresse IP), et plus généralement pour améliorer et optimiser notre Site (par exemple, en générant des analyses sur la façon dont nos clients naviguent et interagissent avec le Site, et pour évaluer le succès de nos campagnes de marketing et de publicité).",
+    "sharing_info": "PARTAGE DE VOS INFORMATIONS PERSONNELLES",
+    "google_analytics_desc": "Nous utilisons Google Analytics pour nous aider à comprendre comment nos clients utilisent le Site - vous pouvez en savoir plus sur la façon dont Google utilise vos Informations Personnelles ici : https://www.google.com/intl/en/policies/privacy/. Vous pouvez également refuser Google Analytics ici : https://tools.google.com/dlpage/gaoptout.",
+    "third_party_policies": "Politiques de confidentialité supplémentaires de tiers qui peuvent collecter et utiliser vos données personnelles sur ce site :",
+    "longway_services": "Services Longway",
+    "longway_contract_desc": "Ce site web a un contrat publicitaire exclusif avec Longway Inc. (\"Longway\"), un leader reconnu dans l'optimisation de sites web, l'amélioration des expériences utilisateur, l'optimisation des performances publicitaires et la génération de revenus grâce à une technologie avancée alimentée par l'IA. Ce site web utilise les services de Longway Inc. (\"Longway\"), notamment pour gérer la publicité basée sur les intérêts de tiers. Longway peut employer diverses technologies sur ce site web, y compris des outils pour servir du contenu, afficher des publicités et permettre la publicité aux visiteurs de ce site web, qui peuvent utiliser des cookies de première et de tierce partie.",
+    "cookie_definition": "Un cookie est un petit fichier texte envoyé à votre appareil par un serveur web qui permet au site web de se souvenir d'informations sur votre activité de navigation. Les cookies de première partie sont créés par le site que vous visitez, tandis que les cookies de tierce partie sont définis par des domaines autres que celui que vous visitez. Longway et nos partenaires peuvent placer des cookies de tiers, des tags, des balises, des pixels et des technologies similaires pour surveiller les interactions avec les publicités et optimiser le ciblage publicitaire. Veuillez noter que la désactivation des cookies peut limiter l'accès à certains contenus et fonctionnalités du site web, et le rejet des cookies n'élimine pas les publicités mais résultera en une publicité non personnalisée. Vous pouvez trouver plus d'informations sur les cookies et comment les gérer ici. Les informations suivantes peuvent être collectées, utilisées et stockées dans un cookie lors de la diffusion de publicités personnalisées :",
+    "cookie_info_collected": "Adresse IP;Type et version du système d'exploitation;Type d'appareil;Préférences linguistiques;Type de navigateur web;E-mail (sous forme hachée ou cryptée)",
+    "longway_data_usage": "Longway et ses partenaires peuvent utiliser ces données en combinaison avec des informations qui ont été collectées indépendamment pour livrer des publicités ciblées sur diverses plateformes et sites web. Les partenaires de Longway peuvent également rassembler des données supplémentaires, telles que des IDs uniques, des IDs publicitaires, des données de géolocalisation, des données d'utilisation, des informations sur l'appareil, des données de trafic, des sources de référence et des interactions entre les utilisateurs et les sites web ou publicités, pour créer des segments d'audience pour la publicité ciblée sur différents appareils, navigateurs et applications. Vous pouvez trouver plus d'informations sur la publicité basée sur les intérêts et comment la gérer ici.",
+    "longway_privacy_links": "Vous pouvez consulter la politique de confidentialité de Longway ici, ou pour des informations supplémentaires sur la publicité de Longway et d'autres partenaires, vous pouvez consulter les partenaires publicitaires de Longway ici.",
+    "legal_sharing": "Enfin, nous pouvons également partager vos Informations Personnelles pour nous conformer aux lois et réglementations applicables, pour répondre à une assignation, un mandat de perquisition ou autre demande légale d'informations que nous recevons, ou pour protéger nos droits d'une autre manière.",
+    "behavioral_advertising": "PUBLICITÉ COMPORTEMENTALE",
+    "behavioral_desc": "Comme décrit ci-dessus, nous utilisons vos Informations Personnelles pour vous fournir des publicités ciblées ou des communications marketing que nous pensons pouvoir vous intéresser. Pour plus d'informations sur le fonctionnement de la publicité ciblée, vous pouvez visiter la page éducative de la Network Advertising Initiative (\"NAI\") à http://www.networkadvertising.org/understanding-online-advertising/how-does-it-work.",
+    "opt_out_intro": "Vous pouvez refuser la publicité ciblée par : GOOGLE - https://www.google.com/settings/ads/anonymous",
+    "opt_out_additional": "De plus, vous pouvez refuser certains de ces services en visitant le portail de désinscription de la Digital Advertising Alliance à : http://optout.aboutads.info/.",
+    "do_not_track": "NE PAS SUIVRE",
+    "do_not_track_desc": "Veuillez noter que nous ne modifions pas les pratiques de collecte et d'utilisation des données de notre Site lorsque nous voyons un signal Ne Pas Suivre de votre navigateur.",
+    "your_rights": "VOS DROITS",
+    "eu_rights_desc": "Si vous êtes un résident européen, vous avez le droit d'accéder aux informations personnelles que nous détenons sur vous et de demander que vos informations personnelles soient corrigées, mises à jour ou supprimées. Si vous souhaitez exercer ce droit, veuillez nous contacter via les informations de contact ci-dessous.",
+    "eu_processing_desc": "De plus, si vous êtes un résident européen, nous notons que nous traitons vos informations afin de répondre aux demandes que nous pourrions avoir avec vous (par exemple si vous faites une demande de traduction via le Site), ou autrement pour poursuivre nos intérêts commerciaux légitimes listés ci-dessus. De plus, veuillez noter que vos informations seront transférées en dehors de l'Europe, y compris au Canada et aux États-Unis.",
+    "data_retention": "RÉTENTION DES DONNÉES",
+    "data_deletion_desc": "Lorsque vous placez une soumission de données via le Site, les documents téléchargés sont supprimés des serveurs du Site dans l'heure. Nous pouvons maintenir vos autres Informations Fournies pour nos dossiers sauf si et jusqu'à ce que vous nous demandiez de supprimer ces informations.",
+    "google_services_desc": "Ce service partage également les informations contenues dans toute soumission de données téléchargée avec Google Translate afin de traiter les documents. Pour utiliser ce service, vous devez accepter tous les termes de la Politique de Confidentialité des Services Google et tous les termes des Conditions de Service de Google. Sinon, vous ne devez pas utiliser ce service.",
+    "minors": "MINEURS",
+    "minors_desc": "Le Site n'est pas destiné aux personnes de moins de 18 ans.",
+    "changes": "CHANGEMENTS",
+    "changes_desc": "Nous pouvons mettre à jour cette politique de confidentialité de temps en temps afin de refléter, par exemple, des changements dans nos pratiques ou pour d'autres raisons opérationnelles, légales ou réglementaires.",
+    "contact_us": "NOUS CONTACTER",
+    "contact_desc": "Pour plus d'informations sur nos pratiques de confidentialité, si vous avez des questions, ou si vous souhaitez faire une réclamation, veuillez nous contacter par e-mail à contact@long-agi.com."
   }
 } 

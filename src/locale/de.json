@@ -73,7 +73,9 @@
     "plan_type_required": "Plantyp muss angegeben werden",
     "plan_type_monthly_yearly": "Plantyp muss \"monthly\" oder \"yearly\" sein",
     "request_must_be_json": "Anforderung muss im JSON-Format sein",
-    "no_data_provided": "Keine Daten in der Anforderung bereitgestellt"
+    "no_data_provided": "Keine Daten in der Anforderung bereitgestellt",
+    "google_signin_failed": "Google-Anmeldung fehlgeschlagen",
+    "google_no_credential": "Keine Google-Anmeldedaten erhalten"
   },
   "success": {
     "title": "Erfolg",
@@ -124,7 +126,9 @@
     "use_without_code": "Ohne Einladungscode registrieren",
     "register_success": "Registrierung erfolgreich",
     "welcome": "Willkommen bei FolieTrans!",
-    "no_code_warning": "Ohne Einladungscode sind Sie auf eine Übersetzung pro Woche beschränkt."
+    "no_code_warning": "Ohne Einladungscode sind Sie auf eine Übersetzung pro Woche beschränkt.",
+    "or_continue_with": "Oder fortfahren mit",
+    "google_signin": "Mit Google anmelden"
   },
   "languages": {
     "zh": "Chinesisch",
@@ -183,9 +187,10 @@
     "tables": "Tabellen",
     "tables_desc": "Extrahiert und übersetzt Text aus Tabellen unter Beibehaltung des Tabellenlayouts.",
     "styles": "Stile",
-    "styles_desc": "Behalten Sie den Stil Ihrer PowerPoint-Folien wie im Original bei.",
-    "view_pricing": "Preispläne anzeigen",
-    "copyright": "FolieTrans. Alle Rechte vorbehalten."
+    "styles_desc": "Behalten Sie den Stil Ihrer PowerPoint-Folien bei, wie im Original.",
+    "view_pricing": "Preise Anzeigen",
+    "copyright": "Translide. Alle Rechte vorbehalten.",
+    "privacy_policy": "Privacy Policy"
   },
   "guest": {
     "free_trial": "Kostenlose Testversion",
@@ -266,6 +271,48 @@
     "translation_in_progress": "Übersetzung läuft...",
     "processing": "Verarbeitung...",
     "downloading_file": "Datei wird heruntergeladen...",
-    "timeout_error": "Übersetzungs-Timeout - bitte versuchen Sie es erneut"
+    "timeout_error": "Übersetzungszeitlimit überschritten - bitte erneut versuchen"
+  },
+  "privacy": {
+    "last_updated": "Zuletzt aktualisiert: {date}",
+    "intro": "Diese Datenschutzrichtlinie beschreibt, wie Ihre persönlichen Informationen gesammelt, verwendet und geteilt werden, wenn Sie {site} (die \"Website\") besuchen, Feedback einreichen oder ein Dokument hochladen.",
+    "personal_info_collect": "PERSÖNLICHE INFORMATIONEN, DIE WIR SAMMELN",
+    "device_info_desc": "Wenn Sie die Website besuchen, sammeln wir automatisch bestimmte Informationen über Ihr Gerät, einschließlich Informationen über Ihren Webbrowser, IP-Adresse, Zeitzone und einige der Cookies, die auf Ihrem Gerät installiert sind. Zusätzlich sammeln wir beim Durchsuchen der Website Informationen über die einzelnen Webseiten oder Produkte, die Sie anzeigen, welche Websites oder Suchbegriffe Sie zur Website verwiesen haben, und Informationen darüber, wie Sie mit der Website interagieren. Wir bezeichnen diese automatisch gesammelten Informationen als \"Geräteinformationen.\"",
+    "collect_tech_intro": "Wir sammeln Geräteinformationen mit den folgenden Technologien:",
+    "cookies_desc": "\"Cookies\" sind Datendateien, die auf Ihrem Gerät oder Computer platziert werden und oft einen anonymen eindeutigen Identifikator enthalten. Weitere Informationen über Cookies und wie Sie Cookies deaktivieren können, finden Sie unter http://www.allaboutcookies.org.",
+    "log_files_desc": "\"Log-Dateien\" verfolgen Aktionen, die auf der Website auftreten, und sammeln Daten einschließlich Ihrer IP-Adresse, Browsertyp, Internetdienstanbieter, Verweis-/Ausstiegsseiten und Datum/Zeitstempel.",
+    "web_beacons_desc": "\"Web-Beacons,\" \"Tags\" und \"Pixel\" sind elektronische Dateien, die verwendet werden, um Informationen darüber aufzuzeichnen, wie Sie die Website durchsuchen.",
+    "provided_info_desc": "Zusätzlich sammeln wir bestimmte Informationen von Ihnen, wenn Sie ein Kontaktformular von der Website einreichen, einschließlich Ihres Namens, Ihrer E-Mail-Adresse und Ihrer IP-Adresse. Zusätzlich sammeln wir bestimmte Informationen von Ihnen, wenn Sie ein Dokument auf die Website hochladen, einschließlich aller persönlichen Informationen, die im Dokument enthalten sein könnten. Wir bezeichnen diese Informationen als \"Bereitgestellte Informationen.\"",
+    "personal_info_definition": "Wenn wir in dieser Datenschutzrichtlinie über \"Persönliche Informationen\" sprechen, sprechen wir sowohl über Geräteinformationen als auch über Bereitgestellte Informationen.",
+    "how_we_use": "WIE VERWENDEN WIR IHRE PERSÖNLICHEN INFORMATIONEN?",
+    "how_we_use_desc": "Wir verwenden die von uns gesammelten Bereitgestellten Informationen im Allgemeinen, um Feedback- oder Support-Anfragen zu erfüllen. Zusätzlich verwenden wir diese Bereitgestellten Informationen, um: Mit Ihnen zu kommunizieren; Unsere Benutzer auf potenzielle Risiken oder Betrug zu überprüfen; und Wenn es mit den Präferenzen übereinstimmt, die Sie mit uns geteilt haben, Ihnen Informationen oder Werbung in Bezug auf unsere Produkte oder Dienstleistungen bereitzustellen. Wir verwenden die von uns gesammelten Geräteinformationen, um uns bei der Überprüfung auf potenzielle Risiken und Betrug zu helfen (insbesondere Ihre IP-Adresse) und allgemeiner, um unsere Website zu verbessern und zu optimieren (zum Beispiel durch Generierung von Analysen darüber, wie unsere Kunden die Website durchsuchen und mit ihr interagieren, und um den Erfolg unserer Marketing- und Werbekampagnen zu bewerten).",
+    "sharing_info": "TEILEN IHRER PERSÖNLICHEN INFORMATIONEN",
+    "google_analytics_desc": "Wir verwenden Google Analytics, um uns zu helfen zu verstehen, wie unsere Kunden die Website nutzen - Sie können mehr darüber lesen, wie Google Ihre persönlichen Informationen verwendet hier: https://www.google.com/intl/en/policies/privacy/. Sie können Google Analytics auch hier deaktivieren: https://tools.google.com/dlpage/gaoptout.",
+    "third_party_policies": "Zusätzliche Datenschutzrichtlinien von Drittanbietern, die Ihre persönlichen Daten auf dieser Website sammeln und verwenden können:",
+    "longway_services": "Longway Services",
+    "longway_contract_desc": "Diese Website hat einen exklusiven Werbungsvertrag mit Longway Inc. (\"Longway\"), einem anerkannten Marktführer in der Website-Optimierung, der Verbesserung von Benutzererfahrungen, der Optimierung von Anzeigenleistung und der Umsatzgenerierung durch fortschrittliche KI-gestützte Technologie.",
+    "cookie_definition": "Ein Cookie ist eine kleine Textdatei, die von einem Webserver an Ihr Gerät gesendet wird und es der Website ermöglicht, sich an Informationen über Ihre Browsing-Aktivität zu erinnern.",
+    "cookie_info_collected": "IP-Adresse;Betriebssystemtyp und -version;Gerätetyp;Sprachpräferenzen;Webbrowser-Typ;E-Mail (in gehashter oder verschlüsselter Form)",
+    "longway_data_usage": "Longway und seine Partner können diese Daten in Kombination mit Informationen verwenden, die unabhängig gesammelt wurden, um gezielte Werbung über verschiedene Plattformen und Websites zu liefern.",
+    "longway_privacy_links": "Sie können Longways Datenschutzrichtlinie hier einsehen oder für zusätzliche Informationen über Longways Werbung und andere Partner können Sie Longways Werbepartner hier einsehen.",
+    "legal_sharing": "Schließlich können wir auch Ihre persönlichen Informationen teilen, um geltende Gesetze und Vorschriften einzuhalten, um auf eine Vorladung, einen Durchsuchungsbefehl oder andere rechtmäßige Informationsanfragen zu antworten, die wir erhalten, oder um unsere Rechte anderweitig zu schützen.",
+    "behavioral_advertising": "VERHALTENSBASIERTE WERBUNG",
+    "behavioral_desc": "Wie oben beschrieben, verwenden wir Ihre persönlichen Informationen, um Ihnen gezielte Werbung oder Marketing-Kommunikation zu bieten, von der wir glauben, dass sie für Sie von Interesse sein könnte.",
+    "opt_out_intro": "Sie können gezielte Werbung ablehnen durch: GOOGLE - https://www.google.com/settings/ads/anonymous",
+    "opt_out_additional": "Zusätzlich können Sie einige dieser Dienste ablehnen, indem Sie das Opt-out-Portal der Digital Advertising Alliance besuchen unter: http://optout.aboutads.info/.",
+    "do_not_track": "NICHT VERFOLGEN",
+    "do_not_track_desc": "Bitte beachten Sie, dass wir die Datensammlung und -nutzungspraktiken unserer Website nicht ändern, wenn wir ein Do Not Track-Signal von Ihrem Browser sehen.",
+    "your_rights": "IHRE RECHTE",
+    "eu_rights_desc": "Wenn Sie ein europäischer Einwohner sind, haben Sie das Recht, auf persönliche Informationen zuzugreifen, die wir über Sie haben, und zu verlangen, dass Ihre persönlichen Informationen korrigiert, aktualisiert oder gelöscht werden.",
+    "eu_processing_desc": "Zusätzlich bemerken wir, wenn Sie ein europäischer Einwohner sind, dass wir Ihre Informationen verarbeiten, um Anfragen zu erfüllen, die wir möglicherweise mit Ihnen haben, oder anderweitig unsere legitimen Geschäftsinteressen zu verfolgen.",
+    "data_retention": "DATENAUFBEWAHRUNG",
+    "data_deletion_desc": "Wenn Sie eine Datenübermittlung über die Website vornehmen, werden hochgeladene Dokumente innerhalb von 1 Stunde von den Website-Servern gelöscht.",
+    "google_services_desc": "Dieser Service teilt auch die Informationen, die in jeder hochgeladenen Datenübermittlung enthalten sind, mit Google Translate, um Dokumente zu verarbeiten.",
+    "minors": "MINDERJÄHRIGE",
+    "minors_desc": "Die Website ist nicht für Personen unter 18 Jahren bestimmt.",
+    "changes": "ÄNDERUNGEN",
+    "changes_desc": "Wir können diese Datenschutzrichtlinie von Zeit zu Zeit aktualisieren, um beispielsweise Änderungen in unseren Praktiken oder aus anderen betrieblichen, rechtlichen oder regulatorischen Gründen zu reflektieren.",
+    "contact_us": "KONTAKTIEREN SIE UNS",
+    "contact_desc": "Für weitere Informationen über unsere Datenschutzpraktiken, wenn Sie Fragen haben oder wenn Sie eine Beschwerde einreichen möchten, kontaktieren Sie uns bitte per E-Mail unter contact@long-agi.com."
   }
 } 

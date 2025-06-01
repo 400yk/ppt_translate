@@ -62,7 +62,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False)
+    password_hash = db.Column(db.String(256), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     last_login = db.Column(db.DateTime)
     invitation_code_id = db.Column(db.Integer, db.ForeignKey('invitation_code.id'))
@@ -77,6 +77,9 @@ class User(db.Model):
     # Character usage tracking
     monthly_characters_used = db.Column(db.Integer, default=0)
     last_character_reset = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    # Google OAuth fields
+    google_id = db.Column(db.String(255), nullable=True, unique=True)
+    google_access_token = db.Column(db.String(1024), nullable=True)
     
     def set_password(self, password):
         """Hash the password and store it."""

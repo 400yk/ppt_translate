@@ -331,8 +331,11 @@ export default function LandingPage() {
               <Image src={LogoImage} alt={t('title')} width={30} height={30} className="mr-2" />
               <span className="font-medium">{t('title')}</span>
             </div>
-            <div className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} {t('landing.copyright')}
+            <div className="text-sm text-muted-foreground flex flex-col md:flex-row items-center">
+              <span className="mb-2 md:mb-0 md:mr-4">&copy; {new Date().getFullYear()} {t('landing.copyright')}</span>
+              <Link href="/privacy-policy" className="hover:text-primary transition">
+                {t('landing.privacy_policy')}
+              </Link>
             </div>
           </div>
         </div>
