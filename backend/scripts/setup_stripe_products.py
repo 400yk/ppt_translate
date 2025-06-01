@@ -6,6 +6,7 @@ Run this script to create the necessary Stripe products and prices for multiple 
 import os
 import sys
 import stripe
+import uuid
 
 # Add the parent directory to the path so we can import the models
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -84,15 +85,43 @@ for currency in SUPPORTED_CURRENCIES:
         }
     })
 
+def fetch_all_stripe_products():
+    """
+    Fetch all active products from Stripe using pagination.
+    
+    Returns:
+        list: A list of all active Stripe products
+    """
+    print("Fetching existing products from Stripe...")
+    existing_products = []
+    starting_after = None
+    
+    while True:
+        if starting_after:
+            products_page = stripe.Product.list(active=True, limit=100, starting_after=starting_after)
+        else:
+            products_page = stripe.Product.list(active=True, limit=100)
+        
+        existing_products.extend(products_page.data)
+        
+        if not products_page.has_more:
+            break
+        
+        starting_after = products_page.data[-1].id
+    
+    print(f"Found {len(existing_products)} total products in Stripe")
+    return existing_products
+
 def setup_products():
     """Set up the products and prices in Stripe."""
     print("Setting up Stripe products and prices...")
     
+    # Fetch all existing products once, outside the loop
+    existing_products = fetch_all_stripe_products()
+    
     for product_config in PRODUCTS_CONFIG:
-        # Check if the product with this lookup key already exists
-        existing_products = stripe.Product.list(active=True)
+        # Search for existing product with this lookup key in the already-fetched list
         existing_product = None
-        
         for product in existing_products:
             if product.get('metadata', {}).get('lookup_key') == product_config['lookup_key']:
                 existing_product = product
@@ -100,7 +129,34 @@ def setup_products():
         
         if existing_product:
             print(f"Product with lookup key '{product_config['lookup_key']}' already exists (ID: {existing_product.id})")
-            product_id = existing_product.id
+            
+            # Check if the existing product matches our configuration
+            product_matches = (
+                existing_product.name == product_config['name'] and
+                existing_product.description == product_config['description']
+            )
+            
+            if product_matches:
+                print(f"Product '{product_config['name']}' already matches configuration (ID: {existing_product.id})")
+                product_id = existing_product.id
+            else:
+                print(f"Product '{product_config['name']}' exists but doesn't match configuration.")
+                print(f"  Existing name: '{existing_product.name}'")
+                print(f"  Expected name: '{product_config['name']}'")
+                print(f"  Existing description: '{existing_product.description}'")
+                print(f"  Expected description: '{product_config['description']}'")
+                
+                # Update the existing product to ensure name and description are current
+                updated_product = stripe.Product.modify(
+                    existing_product.id,
+                    name=product_config['name'],
+                    description=product_config['description'],
+                    metadata={
+                        'lookup_key': product_config['lookup_key']
+                    }
+                )
+                product_id = updated_product.id
+                print(f"Updated existing product: {product_config['name']} (ID: {product_id})")
         else:
             # Create a new product
             product = stripe.Product.create(
@@ -112,30 +168,77 @@ def setup_products():
             )
             product_id = product.id
             print(f"Created new product: {product_config['name']} (ID: {product_id})")
+            
+            # Add the newly created product to our existing_products list for future iterations
+            existing_products.append(product)
         
         # Check if a price with this lookup key already exists
-        existing_prices = stripe.Price.list(
+        active_prices = stripe.Price.list(
             active=True,
             lookup_keys=[product_config['lookup_key']],
             limit=1
         )
-        
-        if existing_prices.data:
-            price = existing_prices.data[0]
-            print(f"Price with lookup key '{product_config['lookup_key']}' already exists (ID: {price.id})")
+
+        config_price_details = product_config['price']
+        expected_amount = config_price_details['amount']
+        expected_currency = config_price_details['currency']
+        expected_interval = config_price_details['interval']
+        expected_interval_count = config_price_details['interval_count']
+
+        if active_prices.data:
+            existing_price = active_prices.data[0]
+            price_matches_config = (
+                existing_price.unit_amount == expected_amount and
+                existing_price.currency == expected_currency and
+                existing_price.recurring.interval == expected_interval and
+                existing_price.recurring.interval_count == expected_interval_count
+            )
+
+            if price_matches_config:
+                print(f"Active price with lookup key '{product_config['lookup_key']}' already exists and matches configuration (ID: {existing_price.id})")
+            else:
+                print(f"Active price with lookup key '{product_config['lookup_key']}' exists but doesn't match configuration.")
+                # To free up the lookup_key, first assign a temporary unique lookup_key to the old price, then deactivate it.
+                temp_lookup_key = f"old_price_{existing_price.id}_{uuid.uuid4().hex}"
+                stripe.Price.modify(existing_price.id, lookup_key=temp_lookup_key, active=False)
+                print(f"Assigned temporary lookup_key '{temp_lookup_key}' to old price and archived it (ID: {existing_price.id})")
+
+                # Now create the new price with the original lookup_key
+                new_price = stripe.Price.create(
+                    product=product_id,
+                    unit_amount=expected_amount,
+                    currency=expected_currency,
+                    recurring={
+                        'interval': expected_interval,
+                        'interval_count': expected_interval_count,
+                    },
+                    lookup_key=product_config['lookup_key']
+                )
+                print(f"Created new price for '{product_config['name']}': {new_price.unit_amount/100} {new_price.currency}/{new_price.recurring.interval} (ID: {new_price.id})")
         else:
-            # Create a new price
-            price = stripe.Price.create(
+            # No active price found with the lookup_key. Check for inactive ones that might be using it.
+            inactive_prices = stripe.Price.list(
+                active=False,
+                lookup_keys=[product_config['lookup_key']]
+            )
+            for inactive_price in inactive_prices.auto_paging_iter():
+                print(f"Found inactive price (ID: {inactive_price.id}) using lookup key '{product_config['lookup_key']}'. Updating its lookup key.")
+                temp_lookup_key = f"old_price_{inactive_price.id}_{uuid.uuid4().hex}"
+                stripe.Price.modify(inactive_price.id, lookup_key=temp_lookup_key)
+                print(f"Assigned temporary lookup_key '{temp_lookup_key}' to inactive price (ID: {inactive_price.id})")
+
+            # Create the new price
+            new_price = stripe.Price.create(
                 product=product_id,
-                unit_amount=product_config['price']['amount'],
-                currency=product_config['price']['currency'],
+                unit_amount=expected_amount,
+                currency=expected_currency,
                 recurring={
-                    'interval': product_config['price']['interval'],
-                    'interval_count': product_config['price']['interval_count'],
+                    'interval': expected_interval,
+                    'interval_count': expected_interval_count,
                 },
                 lookup_key=product_config['lookup_key']
             )
-            print(f"Created new price for '{product_config['name']}': {price.unit_amount/100} {price.currency}/{price.recurring.interval} (ID: {price.id})")
+            print(f"Created new price for '{product_config['name']}': {new_price.unit_amount/100} {new_price.currency}/{new_price.recurring.interval} (ID: {new_price.id})")
     
     print("Stripe products and prices setup complete!")
 

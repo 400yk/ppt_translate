@@ -96,10 +96,6 @@ def purchase_membership():
         result = process_membership_purchase(user_id, plan_type)
         print(f"Membership purchase result: {result}")
         
-        # Check if an error occurred
-        if isinstance(result, tuple) and len(result) > 1 and isinstance(result[0], dict) and 'error' in result[0]:
-            return jsonify(result[0]), result[1]
-        
         return jsonify({
             'success': True,
             'message': f'Successfully purchased {plan_type} membership',

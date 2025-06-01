@@ -258,10 +258,10 @@ def process_membership_purchase(user_id, plan_type):
     
     Args:
         user_id: The ID or username of the user purchasing the membership
-        plan_type: The type of membership plan ('monthly', 'annual', 'lifetime')
+        plan_type: The type of membership plan ('monthly', 'yearly')
         
     Returns:
-        A tuple containing (success, message, user)
+        The updated membership status dictionary
     """
     # Look up the user by ID or username
     if isinstance(user_id, int) or user_id.isdigit():
@@ -270,14 +270,27 @@ def process_membership_purchase(user_id, plan_type):
         user = User.query.filter_by(username=user_id).first()
     
     if not user:
-        return False, f"User with ID/username '{user_id}' not found", None
+        # Return error status if user not found
+        return {
+            'user_type': 'free',
+            'is_active': False,
+            'error': 'User not found'
+        }
     
-    # Update the user's membership status
-    success = user.activate_paid_membership(plan_type=plan_type)
+    # Map plan_type to the correct parameters for activate_paid_membership
+    if plan_type == 'yearly':
+        success = user.activate_paid_membership(is_yearly=True)
+    elif plan_type == 'monthly':
+        success = user.activate_paid_membership(is_yearly=False)
+    else:
+        # Invalid plan type, return current status
+        return get_membership_status(user)
     
     if success:
         # Save the changes to the database
         db.session.commit()
-        return True, f"Membership activated for {user.username} ({plan_type} plan)", user
+        # Return the updated membership status
+        return get_membership_status(user)
     else:
-        return False, f"Failed to activate membership for {user.username}", user 
+        # Return current status if activation failed
+        return get_membership_status(user) 
