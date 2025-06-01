@@ -297,7 +297,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
     const fetchCharacterLimit = async () => {
       try {
         const response = await apiClient.get('/api/config/character-limit');
-        setCharacterLimit(response.data.character_limit);
+        setCharacterLimit(response.data.limit);
       } catch (error) {
         console.error('Error fetching character limit:', error);
       }
