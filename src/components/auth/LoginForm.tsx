@@ -110,7 +110,7 @@ export default function LoginForm() {
           {isLoading ? t('common.loading') : t('auth.login')}
         </Button>
 
-        {/* <div className="relative my-4">
+        <div className="relative my-4">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
           </div>
@@ -160,7 +160,7 @@ export default function LoginForm() {
             containerProps={{ style: { width: '100%' } }}
             theme="outline"
           />
-        </div> */}
+        </div>
       </form>
     </div>
   );

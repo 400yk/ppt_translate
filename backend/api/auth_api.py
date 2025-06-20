@@ -131,6 +131,7 @@ def login():
 def google_auth():
     data = request.get_json()
     token = data.get('token')
+    invitation_code_str = data.get('invitation_code')  # Get invitation code from request
 
     if not token:
         return jsonify({'error': 'Missing token', 'errorKey': 'errors.missing_google_token'}), 400
@@ -207,6 +208,33 @@ def google_auth():
                 )
                 db.session.add(user)
         
+        # Handle invitation code if provided
+        has_valid_invitation = False
+        invitation_code = None
+        
+        if invitation_code_str:
+            invitation_code = InvitationCode.query.filter_by(code=invitation_code_str).first()
+            if invitation_code and invitation_code.is_valid():
+                has_valid_invitation = True
+                # Only assign invitation code if user doesn't already have one
+                if not user.invitation_code:
+                    user.invitation_code = invitation_code
+                    invitation_code.mark_as_used()
+                    # Activate membership for the user with invitation code
+                    user.activate_paid_membership(is_invitation=True)
+                    print(f"Activated invitation-based membership for Google user {user.username} until {user.membership_end}")
+            elif invitation_code_str:  # Code was provided but is invalid
+                if not invitation_code:
+                    return jsonify({
+                        'error': 'Invalid invitation code',
+                        'errorKey': 'errors.code_invalid'
+                    }), 400
+                else:
+                    return jsonify({
+                        'error': 'Invitation code has already been used',
+                        'errorKey': 'errors.code_already_used'
+                    }), 400
+
         # Update last login time for the user (either existing or newly created/linked)
         user.last_login = datetime.datetime.utcnow()
         db.session.commit()
@@ -218,6 +246,7 @@ def google_auth():
         return jsonify({
             'message': 'Google Sign-In successful',
             'access_token': access_token,
+            'has_invitation': has_valid_invitation,
             'user': { # Return some user info to the frontend
                 'username': user.username,
                 'email': user.email,

@@ -222,7 +222,7 @@ export default function RegisterForm() {
           {isLoading ? t('common.loading') : t('auth.register')}
         </Button>
 
-        {/* <div className="relative my-4">
+        <div className="relative my-4">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
           </div>
@@ -239,10 +239,19 @@ export default function RegisterForm() {
             onSuccess={async (credentialResponse) => {
               if (credentialResponse.credential) {
                 try {
-                  await signInWithGoogle(credentialResponse.credential);
+                  // Pass the invitation code if it's valid
+                  const invitationCodeToPass = (codeValid === true && invitationCode) ? invitationCode : undefined;
+                  const result = await signInWithGoogle(credentialResponse.credential, invitationCodeToPass);
+                  
+                  // Show appropriate success message based on whether invitation was applied
+                  let description = t('auth.welcome');
+                  if (result && result.has_invitation) {
+                    description = 'Welcome to Translide! Your invitation code has been applied and membership activated!';
+                  }
+                  
                   toast({
                     title: t('auth.register_success'),
-                    description: t('auth.welcome'),
+                    description: description,
                   });
                   router.push('/translate');
                 } catch (error) {
@@ -272,7 +281,7 @@ export default function RegisterForm() {
             containerProps={{ style: { width: '100%' } }}
             theme="outline"
           />
-        </div> */}
+        </div>
       </form>
     </div>
   );

@@ -126,6 +126,7 @@
     "use_without_code": "Register without an invitation code",
     "register_success": "Registration Successful",
     "welcome": "Welcome to Translide!",
+    "invitation_code_applied": "Your invitation code has been applied and membership activated!",
     "no_code_warning": "Without an invitation code, you'll be limited to one translation per week.",
     "or_continue_with": "Or continue with",
     "google_signin": "Sign in with Google"
