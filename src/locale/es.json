@@ -127,6 +127,7 @@
     "register_success": "Registro exitoso",
     "welcome": "¡Bienvenido a PresentaTrad!",
     "invitation_code_applied": "¡Su código de invitación ha sido aplicado y la membresía activada!",
+    "welcome_with_invitation": "¡Bienvenido a PresentaTrad! ¡Su código de invitación ha sido aplicado y la membresía activada!",
     "no_code_warning": "Sin un código de invitación, estará limitado a una traducción por semana.",
     "or_continue_with": "O continuar con",
     "google_signin": "Iniciar sesión con Google"

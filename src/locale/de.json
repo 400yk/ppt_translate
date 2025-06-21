@@ -126,6 +126,7 @@
     "use_without_code": "Ohne Einladungscode registrieren",
     "register_success": "Registrierung erfolgreich",
     "welcome": "Willkommen bei FolieTrans!",
+    "welcome_with_invitation": "Willkommen bei FolieTrans! Ihr Einladungscode wurde angewendet und die Mitgliedschaft aktiviert!",
     "no_code_warning": "Ohne Einladungscode sind Sie auf eine Übersetzung pro Woche beschränkt.",
     "or_continue_with": "Oder fortfahren mit",
     "google_signin": "Mit Google anmelden"

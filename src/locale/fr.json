@@ -127,6 +127,7 @@
     "register_success": "Inscription réussie",
     "welcome": "Bienvenue sur DiaporamaTraduction !",
     "invitation_code_applied": "Votre code d'invitation a été appliqué et l'adhésion activée!",
+    "welcome_with_invitation": "Bienvenue sur DiaporamaTraduction ! Votre code d'invitation a été appliqué et l'adhésion activée!",
     "no_code_warning": "Sans code d'invitation, vous serez limité à une traduction par semaine.",
     "or_continue_with": "Ou continuer avec",
     "google_signin": "Se connecter avec Google"

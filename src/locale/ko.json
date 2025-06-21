@@ -126,6 +126,7 @@
     "use_without_code": "초대 코드 없이 등록",
     "register_success": "등록 성공",
     "welcome": "슬라이드번역에 오신 것을 환영합니다!",
+    "welcome_with_invitation": "슬라이드번역에 오신 것을 환영합니다! 초대 코드가 적용되어 멤버십이 활성화되었습니다!",
     "no_code_warning": "초대 코드 없이는 주 1회 번역으로 제한됩니다.",
     "or_continue_with": "또는 다음으로 계속",
     "google_signin": "Google로 로그인"

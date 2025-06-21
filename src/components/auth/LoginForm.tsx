@@ -9,30 +9,24 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslation, LOCALE_CHANGE_EVENT } from '@/lib/i18n';
 import { useRouter } from 'next/navigation';
 import { getApiErrorMessage } from '@/lib/api-client';
-import { GoogleLogin } from '@react-oauth/google';
+import GoogleSignInButton from './GoogleSignInButton';
 
 export default function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, signInWithGoogle } = useAuth();
+  const { login } = useAuth();
   const { toast } = useToast();
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const router = useRouter();
   
-  // Force component re-render on locale change
-  const [forceRender, setForceRender] = useState(0);
+  // Force component re-render on locale change (used to refresh button)
+  const [, setForceRender] = useState(0);
   
   useEffect(() => {
-    const handleLocaleChange = () => {
-      // Increment to force a re-render
-      setForceRender(prev => prev + 1);
-    };
-    
+    const handleLocaleChange = () => setForceRender(prev => prev + 1);
     window.addEventListener(LOCALE_CHANGE_EVENT, handleLocaleChange);
-    return () => {
-      window.removeEventListener(LOCALE_CHANGE_EVENT, handleLocaleChange);
-    };
+    return () => window.removeEventListener(LOCALE_CHANGE_EVENT, handleLocaleChange);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,14 +61,6 @@ export default function LoginForm() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const mapToGoogleLocale = (appLocale: string): string => {
-    if (appLocale === 'zh') {
-      return 'zh-CN';
-    }
-    // Add other mappings if necessary, e.g. 'pt' to 'pt-BR'
-    return appLocale;
   };
 
   return (
@@ -122,44 +108,7 @@ export default function LoginForm() {
         </div>
 
         <div className="flex justify-center w-full">
-          <GoogleLogin
-            locale={mapToGoogleLocale(locale)}
-            onSuccess={async (credentialResponse) => {
-              if (credentialResponse.credential) {
-                try {
-                  await signInWithGoogle(credentialResponse.credential);
-                  toast({
-                    title: t('auth.login_success'),
-                    description: t('auth.welcome_back'),
-                  });
-                  router.push('/translate');
-                } catch (error) {
-                  const errorMessage = getApiErrorMessage(error);
-                  toast({
-                    title: t('errors.google_signin_failed'),
-                    description: errorMessage,
-                    variant: 'destructive',
-                  });
-                }
-              } else {
-                toast({
-                  title: t('errors.google_signin_failed'),
-                  description: t('errors.google_no_credential'),
-                  variant: 'destructive',
-                });
-              }
-            }}
-            onError={() => {
-              console.error('Google login error');
-              toast({
-                title: t('errors.google_signin_failed'),
-                variant: 'destructive',
-              });
-            }}
-            useOneTap
-            containerProps={{ style: { width: '100%' } }}
-            theme="outline"
-          />
+          <GoogleSignInButton width={300} />
         </div>
       </form>
     </div>

@@ -126,6 +126,7 @@
     "use_without_code": "招待コードなしで登録",
     "register_success": "登録成功",
     "welcome": "スライドトランスへようこそ！",
+    "welcome_with_invitation": "スライドトランスへようこそ！招待コードが適用され、メンバーシップが有効化されました！",
     "no_code_warning": "招待コードなしでは、週に1回の翻訳に制限されます。",
     "or_continue_with": "または以下で続行",
     "google_signin": "Googleでサインイン"

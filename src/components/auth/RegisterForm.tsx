@@ -10,7 +10,7 @@ import { useTranslation, LOCALE_CHANGE_EVENT } from '@/lib/i18n';
 import { Icons } from '@/components/icons';
 import { useRouter } from 'next/navigation';
 import { getApiErrorMessage } from '@/lib/api-client';
-import { GoogleLogin } from '@react-oauth/google';
+import GoogleSignInButton from './GoogleSignInButton';
 
 export default function RegisterForm() {
   const [email, setEmail] = useState('');
@@ -23,9 +23,9 @@ export default function RegisterForm() {
   const [forceRender, setForceRender] = useState(0);
   const [lastVerifiedCode, setLastVerifiedCode] = useState('');
   
-  const { register, verifyInvitationCode, signInWithGoogle } = useAuth();
+  const { register, verifyInvitationCode } = useAuth();
   const { toast } = useToast();
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
   const router = useRouter();
 
   // Memoize the checkInvitationCode function to prevent recreation on each render
@@ -146,14 +146,6 @@ export default function RegisterForm() {
     }
   };
 
-  const mapToGoogleLocale = (appLocale: string): string => {
-    if (appLocale === 'zh') {
-      return 'zh-CN';
-    }
-    // Add other mappings if necessary
-    return appLocale;
-  };
-
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
       <form onSubmit={handleSubmit} className="space-y-4">        
@@ -234,53 +226,7 @@ export default function RegisterForm() {
         </div>
 
         <div className="flex justify-center w-full">
-          <GoogleLogin
-            locale={mapToGoogleLocale(locale)}
-            onSuccess={async (credentialResponse) => {
-              if (credentialResponse.credential) {
-                try {
-                  // Pass the invitation code if it's valid
-                  const invitationCodeToPass = (codeValid === true && invitationCode) ? invitationCode : undefined;
-                  const result = await signInWithGoogle(credentialResponse.credential, invitationCodeToPass);
-                  
-                  // Show appropriate success message based on whether invitation was applied
-                  let description = t('auth.welcome');
-                  if (result && result.has_invitation) {
-                    description = 'Welcome to Translide! Your invitation code has been applied and membership activated!';
-                  }
-                  
-                  toast({
-                    title: t('auth.register_success'),
-                    description: description,
-                  });
-                  router.push('/translate');
-                } catch (error) {
-                  const errorMessage = getApiErrorMessage(error);
-                  toast({
-                    title: t('errors.google_signin_failed'),
-                    description: errorMessage,
-                    variant: 'destructive',
-                  });
-                }
-              } else {
-                toast({
-                  title: t('errors.google_signin_failed'),
-                  description: t('errors.google_no_credential'),
-                  variant: 'destructive',
-                });
-              }
-            }}
-            onError={() => {
-              console.error('Google login error');
-              toast({
-                title: t('errors.google_signin_failed'),
-                variant: 'destructive',
-              });
-            }}
-            useOneTap
-            containerProps={{ style: { width: '100%' } }}
-            theme="outline"
-          />
+          <GoogleSignInButton width={300} invitationCode={invitationCode} />
         </div>
       </form>
     </div>

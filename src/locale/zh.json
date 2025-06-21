@@ -126,6 +126,7 @@
     "use_without_code": "不使用邀请码注册",
     "register_success": "注册成功",
     "welcome": "欢迎使用幻翻！",
+    "welcome_with_invitation": "欢迎使用幻翻！您的邀请码已应用，会员已激活！",
     "no_code_warning": "不使用邀请码注册的用户每周仅能使用一次翻译服务。",
     "or_continue_with": "或者使用以下方式继续",
     "google_signin": "使用Google登录"

@@ -261,6 +261,7 @@ export type TranslationKey =
   | LanguageKey
   | 'auth.register_success'
   | 'auth.welcome'
+  | 'auth.welcome_with_invitation'
   | 'auth.use_without_code'
   | 'auth.no_code_warning'
   | 'profile.title'
