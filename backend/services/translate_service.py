@@ -9,6 +9,33 @@ from config import (
     DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, DEFAULT_TITLE_FONT_SIZE
 )
 
+def apply_font_color(run, font_color=None, font_color_type=None, theme_color=None):
+    """
+    Apply font color to a run, handling both RGB and theme colors.
+    
+    Args:
+        run: The text run to apply color to
+        font_color: RGB color object (if available)
+        font_color_type: Type of color ('rgb' or 'theme')
+        theme_color: Theme color enum (if available)
+    """
+    try:
+        if font_color_type == 'rgb' and font_color is not None:
+            # Apply RGB color
+            run.font.color.rgb = font_color
+            print(f"Applied RGB color: {font_color}")
+        elif font_color_type == 'theme' and theme_color is not None:
+            # Apply theme color
+            run.font.color.theme_color = theme_color
+            print(f"Applied theme color: {theme_color}")
+        else:
+            # No color information available - leave as default
+            # This preserves any inherited theme colors
+            print("No explicit color found - using inherited/default color")
+    except Exception as e:
+        print(f"Warning: Could not apply font color: {e}")
+        # If color application fails, continue without color to avoid breaking the translation
+
 def register_routes(app):
     """
     Register translation routes with the Flask app.
@@ -70,6 +97,7 @@ def translate_pptx(input_stream, src_lang, dest_lang):
     print(f"Sample original: {all_texts[:3]}")
     print(f"Sample translated: {all_translated_texts[:3]}")
     print(f"Total characters: {total_characters}")
+    print(f"Starting text formatting preservation process...")
     
     # Update regular text shapes
     for shape, translated in zip(text_shapes, translated_texts):
@@ -107,26 +135,40 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                 
                 # Enhanced font color extraction: run -> paragraph -> text_frame
                 font_color = None
+                font_color_type = None
+                theme_color = None
+                
                 # 1. Try run-level color
                 if original_run.font.color is not None:
+                    color_obj = original_run.font.color
                     try:
-                        font_color = original_run.font.color.rgb
+                        # First try RGB color
+                        font_color = color_obj.rgb
+                        font_color_type = 'rgb'
                     except AttributeError:
-                        font_color = None
-                # 2. Try paragraph-level color
-                if not font_color:
+                        try:
+                            # Try theme color
+                            if hasattr(color_obj, 'theme_color') and color_obj.theme_color is not None:
+                                theme_color = color_obj.theme_color
+                                font_color_type = 'theme'
+                        except AttributeError:
+                            pass
+                
+                # 2. Try paragraph-level color if we haven't found one yet
+                if not font_color and not theme_color:
                     para = text_frame.paragraphs[0]
                     if para.font and para.font.color is not None:
+                        color_obj = para.font.color
                         try:
-                            font_color = para.font.color.rgb
+                            font_color = color_obj.rgb
+                            font_color_type = 'rgb'
                         except AttributeError:
-                            font_color = None
-                # 3. Try text_frame-level color
-                if not font_color and hasattr(text_frame, 'font') and text_frame.font is not None:
-                    try:
-                        font_color = text_frame.font.color.rgb
-                    except AttributeError:
-                        font_color = None
+                            try:
+                                if hasattr(color_obj, 'theme_color') and color_obj.theme_color is not None:
+                                    theme_color = color_obj.theme_color
+                                    font_color_type = 'theme'
+                            except AttributeError:
+                                pass
             else:
                 font_name = DEFAULT_FONT_NAME
                 style_scale_factor = 1.0  # Default for no formatting
@@ -196,8 +238,9 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                     run.font.italic = original_run_info['italic']
                 if original_run_info['underline'] is not None:
                     run.font.underline = original_run_info['underline']
-                if font_color:
-                    run.font.color.rgb = font_color
+                
+                # Apply color using the improved color handling
+                apply_font_color(run, font_color, font_color_type, theme_color)
             else:
                 # For more complex text, preserve the structure using paragraph count
                 # This is a simplification as we can't perfectly map formatting from source to translated text
@@ -216,8 +259,8 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                 run.font.italic = has_italic
                 run.font.underline = has_underline
                 
-                if font_color:
-                    run.font.color.rgb = font_color
+                # Apply color using the improved color handling
+                apply_font_color(run, font_color, font_color_type, theme_color)
         else:
             shape.text = translated
     
@@ -251,12 +294,21 @@ def translate_pptx(input_stream, src_lang, dest_lang):
             if original_run.font.size:
                 original_font_size = int(original_run.font.size.pt)
             
-            # Get original font color
+            # Get original font color with enhanced detection
+            font_color_type = None
+            theme_color = None
             if original_run.font.color is not None:
+                color_obj = original_run.font.color
                 try:
-                    font_color = original_run.font.color.rgb
+                    font_color = color_obj.rgb
+                    font_color_type = 'rgb'
                 except AttributeError:
-                    font_color = None
+                    try:
+                        if hasattr(color_obj, 'theme_color') and color_obj.theme_color is not None:
+                            theme_color = color_obj.theme_color
+                            font_color_type = 'theme'
+                    except AttributeError:
+                        pass
             
             # Store original formatting
             for para in text_frame.paragraphs:
@@ -306,8 +358,9 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                 run.font.italic = original_run_info['italic']
             if original_run_info['underline'] is not None:
                 run.font.underline = original_run_info['underline']
-            if font_color:
-                run.font.color.rgb = font_color
+            
+            # Apply color using the improved color handling
+            apply_font_color(run, font_color, font_color_type, theme_color)
         else:
             # Complex case: use dominant formatting
             p = text_frame.paragraphs[0]
@@ -325,8 +378,8 @@ def translate_pptx(input_stream, src_lang, dest_lang):
             run.font.italic = has_italic
             run.font.underline = has_underline
             
-            if font_color:
-                run.font.color.rgb = font_color
+            # Apply color using the improved color handling
+            apply_font_color(run, font_color, font_color_type, theme_color)
     
     # Save the translated presentation to a temporary file
     output_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx')

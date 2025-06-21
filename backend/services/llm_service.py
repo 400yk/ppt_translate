@@ -220,10 +220,24 @@ Output (valid JSON array with exactly {original_count} elements):"""
                 # Clean the JSON response to handle common issues
                 cleaned_json = clean_json_response(translated_json)
                 
-                # Try to parse the cleaned JSON
+                                    # Try to parse the cleaned JSON
                 try:
                     parsed_result = json.loads(cleaned_json)
                     final_result = build_position_mapped_result(parsed_result, texts)
+                    
+                    # Check if the translation actually did anything (not just returned original texts due to API issues)
+                    translation_success_count = sum(1 for orig, trans in zip(texts, final_result) if orig != trans)
+                    translation_success_rate = translation_success_count / len(texts) if texts else 0
+                    
+                    # If translation success rate is extremely low (< 5%), it might be an API issue
+                    # But only retry if we haven't exhausted retries and we're getting a response
+                    if translation_success_rate < 0.05 and len(texts) > 10 and attempt < max_retries:
+                        print(f"Very low translation success rate ({translation_success_rate:.1%}) on attempt {attempt + 1}, might be API issues")
+                        delay = 2 ** attempt
+                        print(f"Retrying in {delay}s due to suspected API issues...")
+                        time.sleep(delay)
+                        continue
+                    
                     return final_result
                 except Exception as e:
                     print(f"Error parsing cleaned Gemini JSON: {e}")
@@ -301,8 +315,15 @@ Output (valid JSON array with exactly {original_count} elements):"""
             
             # Retry on temporary server errors (5xx) and rate limiting (429)
             if status_code in [429, 502, 503, 504] and attempt < max_retries:
-                delay = 2 ** attempt  # Exponential backoff: 1s, 2s, 4s
-                print(f"HTTP {status_code} error on attempt {attempt + 1}/{max_retries + 1}, retrying in {delay}s...")
+                # Use longer delays for rate limiting (429) vs other server errors
+                if status_code == 429:
+                    # For rate limiting, use longer delays: 5s, 15s, 45s
+                    delay = 5 * (3 ** attempt)
+                    print(f"Rate limiting (HTTP {status_code}) on attempt {attempt + 1}/{max_retries + 1}, retrying in {delay}s...")
+                else:
+                    # For other server errors, use shorter delays: 1s, 2s, 4s
+                    delay = 2 ** attempt
+                    print(f"Server error (HTTP {status_code}) on attempt {attempt + 1}/{max_retries + 1}, retrying in {delay}s...")
                 time.sleep(delay)
                 continue
             else:
