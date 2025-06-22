@@ -104,6 +104,12 @@ def translate_pptx(input_stream, src_lang, dest_lang):
     for shape, translated in zip(text_shapes, translated_texts):
         if hasattr(shape, "text_frame") and hasattr(shape.text_frame, "text"):
             text_frame = shape.text_frame
+            
+            # Initialize color variables at the proper scope
+            font_color = None
+            font_color_type = None
+            theme_color = None
+            
             # Get original font properties from the first run (if available)
             if text_frame.paragraphs and text_frame.paragraphs[0].runs:
                 original_run = text_frame.paragraphs[0].runs[0]
@@ -135,9 +141,6 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                     original_font_size = DEFAULT_TITLE_FONT_SIZE if is_title else DEFAULT_FONT_SIZE
                 
                 # Enhanced font color extraction: run -> paragraph -> text_frame
-                font_color = None
-                font_color_type = None
-                theme_color = None
                 
                 # 1. Try run-level color
                 if original_run.font.color is not None:
@@ -182,7 +185,6 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                         is_title = True
                 
                 original_font_size = DEFAULT_TITLE_FONT_SIZE if is_title else DEFAULT_FONT_SIZE
-                font_color = None
                 
             # Measure the bounding box of the original text
             original_text = shape.text
@@ -273,6 +275,8 @@ def translate_pptx(input_stream, src_lang, dest_lang):
         original_paragraphs = []
         font_name = DEFAULT_FONT_NAME
         font_color = None
+        font_color_type = None
+        theme_color = None
         original_font_size = DEFAULT_FONT_SIZE
         style_scale_factor = 1.0
         
@@ -296,8 +300,6 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                 original_font_size = int(original_run.font.size.pt)
             
             # Get original font color with enhanced detection
-            font_color_type = None
-            theme_color = None
             if original_run.font.color is not None:
                 color_obj = original_run.font.color
                 try:
