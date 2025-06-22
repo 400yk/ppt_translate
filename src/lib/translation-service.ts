@@ -5,11 +5,12 @@ import apiClient from '@/lib/api-client';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 // Define available languages (codes only)
-export const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
+export const languageCodes = ["zh", "zh_hk", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
 export type LanguageCode = typeof languageCodes[number];
 
 export const nativeLanguageNames = {
   zh: "中文",
+  zh_hk: "繁體中文",
   en: "English",
   es: "Español",
   fr: "Français",

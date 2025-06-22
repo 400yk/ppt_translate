@@ -126,12 +126,14 @@ CURRENCY_RATES = {
     "mxn": 17.05,   # Mexican Peso (for Spanish/Latin America option)
     "ars": 882.90,  # Argentine Peso (alternative for Spanish)
     "esp": 0.93,    # Euro (for Spain - using Euro)
+    "hkd": 7.80,    # Hong Kong Dollar
 }
 
 # Default currency by locale
 LOCALE_TO_CURRENCY = {
     "en": "usd",  # English - US Dollar
     "zh": "cny",  # Chinese - Yuan
+    "zh_hk": "hkd", # Chinese Traditional - Hong Kong Dollar
     "es": "eur",  # Spanish - Euro
     "fr": "eur",  # French - Euro
     "de": "eur",  # German - Euro

@@ -10,11 +10,12 @@ import {
 } from '@/components/ui/select';
 
 // Define available languages (codes only)
-const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
+const languageCodes = ["zh", "zh_hk", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
 
 // Helper to display language names in their native language
 const nativeLanguageNames = {
   zh: "中文",
+  zh_hk: "繁體中文",
   en: "English",
   es: "Español",
   fr: "Français",

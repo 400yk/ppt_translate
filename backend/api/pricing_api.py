@@ -46,6 +46,7 @@ def get_pricing():
         'rub': '₽',
         'mxn': '$',
         'ars': '$',
+        'hkd': 'HK$',
         'esp': '€'
     }
     symbol = currency_symbols.get(currency, '$')

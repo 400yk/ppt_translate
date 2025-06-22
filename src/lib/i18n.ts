@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 // Import all locale files
 import en from '@/locale/en.json';
 import zh from '@/locale/zh.json';
+import zh_hk from '@/locale/zh_hk.json';
 import es from '@/locale/es.json';
 import fr from '@/locale/fr.json';
 import de from '@/locale/de.json';
@@ -11,7 +12,7 @@ import ko from '@/locale/ko.json';
 import ru from '@/locale/ru.json';
 
 // Define language codes
-const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
+const languageCodes = ["zh", "zh_hk", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
 type LanguageCode = typeof languageCodes[number];
 
 // Helper to check if we're in a browser environment
@@ -320,6 +321,7 @@ export type TranslationKey =
 export const locales = {
   en,
   zh,
+  zh_hk,
   es,
   fr,
   de,

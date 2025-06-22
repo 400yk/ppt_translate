@@ -20,6 +20,7 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  registeredWithInvitation: boolean | null;
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string, invitationCode: string) => Promise<void>;
   logout: (navigateCallback?: () => void) => void;
@@ -33,6 +34,7 @@ interface AuthContextType {
     messageKey?: string;
   }>;
   fetchWithAuth: (url: string, options?: RequestInit) => Promise<Response>;
+  clearRegistrationFlag: () => void;
 }
 
 // Create context with default values
@@ -41,12 +43,14 @@ const AuthContext = createContext<AuthContextType>({
   token: null,
   isLoading: true,
   isAuthenticated: false,
+  registeredWithInvitation: null,
   login: async () => {},
   register: async () => {},
   logout: () => {},
   signInWithGoogle: async () => {},
   verifyInvitationCode: async () => ({ valid: false }),
   fetchWithAuth: async () => new Response(),
+  clearRegistrationFlag: () => {},
 });
 
 // API endpoint base URL
@@ -56,6 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [registeredWithInvitation, setRegisteredWithInvitation] = useState<boolean | null>(null);
   const { t } = useTranslation();
   
   // We can't use the router hook directly here (only in client components)
@@ -131,6 +136,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(data.access_token);
       setUser({ username, email });
       
+      // Store invitation code usage flag
+      setRegisteredWithInvitation(data.has_invitation || false);
+      
       // Store in localStorage for persistence (only in browser)
       if (isBrowser) {
         localStorage.setItem('auth_token', data.access_token);
@@ -150,6 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = (navigateCallback?: () => void) => {
     setUser(null);
     setToken(null);
+    setRegisteredWithInvitation(null);
     
     // Remove from localStorage (only in browser)
     if (isBrowser) {
@@ -165,6 +174,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         window.location.href = '/';
       }
     }
+  };
+
+  // Clear registration with invitation flag (to reset after showing welcome message)
+  const clearRegistrationFlag = () => {
+    setRegisteredWithInvitation(null);
   };
 
   // Fetch with auth token and automatic logout on token expiration
@@ -251,6 +265,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(data.access_token);
         setUser(data.user); // Assuming backend returns user object { username, email, ... }
         
+        // Store invitation code usage flag for Google sign-in
+        setRegisteredWithInvitation(data.has_invitation || false);
+        
         // Store in localStorage for persistence (only in browser)
         if (isBrowser) {
           localStorage.setItem('auth_token', data.access_token);
@@ -282,12 +299,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token,
         isLoading,
         isAuthenticated: !!token,
+        registeredWithInvitation,
         login,
         register,
         logout,
         signInWithGoogle,
         verifyInvitationCode,
-        fetchWithAuth
+        fetchWithAuth,
+        clearRegistrationFlag
       }}
     >
       {children}

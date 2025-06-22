@@ -21,7 +21,7 @@ export default function AuthTabs({ defaultTab = 'login', onAuthSuccess, onTabCha
   const { t } = useTranslation();
   const { toast } = useToast();
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, registeredWithInvitation, clearRegistrationFlag } = useAuth();
   
   // Use a ref to track if auth success was already handled
   const authSuccessHandled = useRef(false);
@@ -41,11 +41,20 @@ export default function AuthTabs({ defaultTab = 'login', onAuthSuccess, onTabCha
     if (activeTab === 'register') {
       resetGuestUsageAfterRegistration();
       
-      // Show registration success message
-      toast({
-        title: t('auth.register'),
-        description: t('success.registration_complete'),
-      });
+      // Show appropriate message based on whether invitation code was used
+      if (registeredWithInvitation) {
+        toast({
+          title: t('auth.register_success'),
+          description: t('auth.welcome_with_invitation'),
+        });
+        // Clear the flag after showing the message
+        clearRegistrationFlag();
+      } else {
+        toast({
+          title: t('auth.register_success'),
+          description: t('success.registration_complete'),
+        });
+      }
     }
     
     // Call the onAuthSuccess callback if provided
@@ -55,7 +64,7 @@ export default function AuthTabs({ defaultTab = 'login', onAuthSuccess, onTabCha
     
     // Redirect to translate page
     router.push('/translate');
-  }, [isAuthenticated, router, toast, t, onAuthSuccess, activeTab]);
+  }, [isAuthenticated, router, toast, t, onAuthSuccess, activeTab, registeredWithInvitation, clearRegistrationFlag]);
 
   // Call onTabChange when activeTab changes
   useEffect(() => {

@@ -45,7 +45,8 @@ const currencyOptions = {
   rub: { label: 'RUB (₽)', symbol: '₽' },
   gbp: { label: 'GBP (£)', symbol: '£' },
   mxn: { label: 'MXN ($)', symbol: 'Mex$' },
-  ars: { label: 'ARS ($)', symbol: 'AR$' }
+  ars: { label: 'ARS ($)', symbol: 'AR$' },
+  hkd: { label: 'HKD (HK$)', symbol: 'HK$' }
 };
 
 interface PaymentModalProps {
@@ -325,6 +326,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
       // Map locale to default currency
       switch (locale) {
         case 'zh': defaultCurrency = 'cny'; break;
+        case 'zh_hk': defaultCurrency = 'hkd'; break;
         case 'es': defaultCurrency = 'eur'; break;
         case 'fr': defaultCurrency = 'eur'; break;
         case 'de': defaultCurrency = 'eur'; break;

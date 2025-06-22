@@ -85,6 +85,7 @@ def translate_pptx(input_stream, src_lang, dest_lang):
     # Batch translate all text content together using the new batched approach
     all_texts = texts + table_texts
     print(f"Total texts to translate: {len(all_texts)}")
+    print(f"Translating from {src_lang} to {dest_lang}")
     all_translated_texts, total_characters = gemini_batch_translate_with_size(all_texts, src_lang, dest_lang, batch_size=200)
     
     # Split the translated texts back into shape texts and table texts

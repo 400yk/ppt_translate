@@ -127,12 +127,8 @@ export default function RegisterForm() {
     try {
       // Use email as username since we removed the username field
       await register(email, email, password, invitationCode);
-      toast({
-        title: t('auth.register_success'),
-        description: t('auth.welcome'),
-      });
-      // Redirect to translate page after successful registration
-      router.push('/translate');
+      // Toast message will be handled by AuthTabs component to show correct message
+      // based on whether invitation code was used or not
     } catch (error: any) {
       const errorMessage = getApiErrorMessage(error);
       
