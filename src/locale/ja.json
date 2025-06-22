@@ -87,7 +87,8 @@
     "download": "ダウンロード",
     "translating": "翻訳中...",
     "select_file": "ファイルを選択",
-    "upgrade": "今すぐアップグレード"
+    "upgrade": "今すぐアップグレード",
+    "swap_languages": "言語を入れ替える"
   },
   "upload": {
     "title": "プレゼンテーションをアップロード",

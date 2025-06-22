@@ -87,7 +87,8 @@
     "download": "下载",
     "translating": "翻译中...",
     "select_file": "选择文件",
-    "upgrade": "立即升级"
+    "upgrade": "立即升级",
+    "swap_languages": "切换语言"
   },
   "upload": {
     "title": "上传您的演示文稿",

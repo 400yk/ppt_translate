@@ -87,7 +87,8 @@
     "download": "Download",
     "translating": "Translating...",
     "select_file": "Select File",
-    "upgrade": "Upgrade Now"
+    "upgrade": "Upgrade Now",
+    "swap_languages": "Swap languages"
   },
   "upload": {
     "title": "Upload Your Presentation",

@@ -1,5 +1,6 @@
 import {
   ArrowRight, 
+  ArrowLeftRight,
   Check, 
   ChevronsUpDown, 
   Circle, 
@@ -35,6 +36,7 @@ import {
 
 const Icons = {
   arrowRight: ArrowRight,
+  arrowLeftRight: ArrowLeftRight,
   check: Check,
   chevronDown: ChevronsUpDown,
   circle: Circle,

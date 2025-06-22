@@ -137,6 +137,7 @@ export type TranslationKey =
   | 'buttons.translating'
   | 'buttons.select_file'
   | 'buttons.upgrade'
+  | 'buttons.swap_languages'
   | 'upload.title'
   | 'upload.description'
   | 'upload.release'

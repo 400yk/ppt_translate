@@ -87,7 +87,8 @@
     "download": "下載",
     "translating": "翻譯中...",
     "select_file": "選擇文件",
-    "upgrade": "立即升級"
+    "upgrade": "立即升級",
+    "swap_languages": "切換語言"
   },
   "upload": {
     "title": "上傳您的演示文稿",

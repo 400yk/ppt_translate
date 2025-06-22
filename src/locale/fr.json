@@ -87,7 +87,8 @@
     "download": "Télécharger",
     "translating": "Traduction en cours...",
     "select_file": "Sélectionner un fichier",
-    "upgrade": "Mettre à niveau maintenant"
+    "upgrade": "Mettre à niveau maintenant",
+    "swap_languages": "Échanger les langues"
   },
   "upload": {
     "title": "Téléchargez votre présentation",

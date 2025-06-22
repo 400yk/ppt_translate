@@ -81,6 +81,15 @@ export function TranslationForm({
     return t(key);
   };
 
+  // Function to swap source and destination languages
+  const handleSwapLanguages = () => {
+    if (isTranslating) return; // Don't allow swapping while translating
+    
+    const tempSrcLang = srcLang;
+    setSrcLang(destLang);
+    setDestLang(tempSrcLang);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -425,8 +434,11 @@ export function TranslationForm({
                 </Button>
               </div>
               
-              <div className="w-full flex items-center space-x-4">
+              <div className="w-full flex items-end space-x-4">
                 <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('from_label')}
+                  </label>
                   <Select value={srcLang} onValueChange={(value) => setSrcLang(value as LanguageCode)}>
                     <SelectTrigger>
                       <SelectValue placeholder={getLanguageName(srcLang)} />
@@ -441,9 +453,22 @@ export function TranslationForm({
                   </Select>
                 </div>
                 
-                <Icons.arrowRight className="h-4 w-4 flex-shrink-0" />
+                <button
+                  type="button"
+                  onClick={handleSwapLanguages}
+                  disabled={isTranslating}
+                  className={`p-2 rounded-full transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 ${
+                    isTranslating ? '' : 'hover:bg-primary/10'
+                  } mb-1`}
+                  title={t('buttons.swap_languages')}
+                >
+                  <Icons.arrowLeftRight className="h-4 w-4 flex-shrink-0" />
+                </button>
                 
                 <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {t('to_label')}
+                  </label>
                   <Select value={destLang} onValueChange={(value) => setDestLang(value as LanguageCode)}>
                     <SelectTrigger>
                       <SelectValue placeholder={getLanguageName(destLang)} />
