@@ -23,15 +23,16 @@ def apply_font_color(run, font_color=None, font_color_type=None, theme_color=Non
         if font_color_type == 'rgb' and font_color is not None:
             # Apply RGB color
             run.font.color.rgb = font_color
-            print(f"Applied RGB color: {font_color}")
+            # print(f"Applied RGB color: {font_color}")
         elif font_color_type == 'theme' and theme_color is not None:
             # Apply theme color
             run.font.color.theme_color = theme_color
-            print(f"Applied theme color: {theme_color}")
+            # print(f"Applied theme color: {theme_color}")
         else:
             # No color information available - leave as default
             # This preserves any inherited theme colors
-            print("No explicit color found - using inherited/default color")
+            # print("No explicit color found - using inherited/default color")
+            pass
     except Exception as e:
         print(f"Warning: Could not apply font color: {e}")
         # If color application fails, continue without color to avoid breaking the translation
