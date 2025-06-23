@@ -53,8 +53,10 @@ Implement a referral system that allows users to recommend Translide to friends 
 - [ ] Add `referral_code` column to users table (unique personal referral code)
 - [ ] Add `referred_by_code` column to users table (track who referred them)
 - [ ] Add `bonus_membership_days` column to track extra days earned
-- [ ] Add `is_paid_member` column or update existing membership status logic
-- [ ] Users with invitation codes or referral codes are considered paid members
+- [ ] Update existing membership expiry logic to handle different membership sources:
+  - [ ] Membership from payment (existing)
+  - [ ] Membership from invitation codes
+  - [ ] Membership from referral codes
 
 ### 1.3 Database Migration
 - [ ] Create Alembic migration script for referral tables
@@ -68,8 +70,8 @@ Implement a referral system that allows users to recommend Translide to friends 
 ### 2.1 Referral API Endpoints
 - [ ] `POST /api/referrals/generate` - Generate referral link for user
   - [ ] Require authentication
-  - [ ] Check if user is paid member (has active membership OR used invitation/referral code)
-  - [ ] Return 403 error if user is not eligible (guest or unpaid member)
+  - [ ] Check if user has active (non-expired) membership
+  - [ ] Return 403 error if user is not eligible (guest, unpaid, or expired membership)
   - [ ] Generate unique referral code
   - [ ] Return shareable link pointing to registration page with referral code
   
@@ -93,11 +95,11 @@ Implement a referral system that allows users to recommend Translide to friends 
     - [ ] Validate referral code exists and is active
     - [ ] Link referee to referrer in database
     - [ ] Award `REFERRAL_REWARD_DAYS` to BOTH referrer and referee
-    - [ ] Mark new user as paid member (used referral code)
+    - [ ] Set membership expiry date for new user (today + REFERRAL_REWARD_DAYS)
   - [ ] For invitation codes (existing system):
     - [ ] Validate invitation code as before
     - [ ] Award `INVITATION_CODE_REWARD_DAYS` to current user only
-    - [ ] Mark new user as paid member (used invitation code)
+    - [ ] Set membership expiry date for new user (today + INVITATION_CODE_REWARD_DAYS)
   - [ ] Add code type detection logic (by format or database lookup)
   
 ### 2.3 Feedback API Endpoints
@@ -114,10 +116,10 @@ Implement a referral system that allows users to recommend Translide to friends 
 - [ ] Add referral code generation service
 - [ ] Add membership bonus calculation service
 - [ ] Update user permission checks to include bonus days
-- [ ] Add paid member eligibility service:
-  - [ ] Check if user has active paid subscription
-  - [ ] Check if user registered with invitation/referral code
-  - [ ] Return eligibility for referral code generation
+- [ ] Add membership status service:
+  - [ ] Check if user has active (non-expired) membership
+  - [ ] Membership sources: payment, invitation codes, referral codes
+  - [ ] Return eligibility for referral code generation and popup display
 
 ---
 
@@ -131,7 +133,7 @@ Implement a referral system that allows users to recommend Translide to friends 
   - [ ] Cookie-based "don't show again" option
   - [ ] Persist visibility regardless of translation result
   - [ ] Show during translation progress (40%+ progress trigger)
-  - [ ] **Paid members only** - check eligibility before showing popup
+  - [ ] **Active membership only** - check membership expiry before showing popup
   
 - [ ] Popup content sections:
   - [ ] Main message about referral program
@@ -170,7 +172,7 @@ Implement a referral system that allows users to recommend Translide to friends 
 - [ ] Add popup trigger logic to translation page
   - [ ] Show during translation process (around 40% progress)
   - [ ] Trigger after user clicks translate button and translation is in progress
-  - [ ] **Only show to paid members** (guests and unpaid users won't see referral popup)
+  - [ ] **Only show to users with active membership** (guests, unpaid, and expired users won't see popup)
   - [ ] Implement smart timing (when user is waiting and has time to engage)
   - [ ] Respect user preferences (don't show again)
   - [ ] Keep popup visible regardless of translation result
@@ -189,7 +191,7 @@ Implement a referral system that allows users to recommend Translide to friends 
   - [ ] Referral codes: "You and your friend will both get 3 days free!"
   - [ ] Invitation codes: "You will get 7 days free!" (existing behavior)
 - [ ] Validate code and detect type (referral vs invitation)
-- [ ] Mark users as paid members when they use any valid code
+- [ ] Set membership expiry date when users use any valid code
 
 ### 4.3 Profile Page Integration
 - [ ] Add referral section to user profile
@@ -218,11 +220,11 @@ Implement a referral system that allows users to recommend Translide to friends 
   - [ ] Referral codes: Award `REFERRAL_REWARD_DAYS` (3 days) to BOTH users
   - [ ] Invitation codes: Award `INVITATION_CODE_REWARD_DAYS` (7 days) to current user only
 - [ ] Add code type detection service (distinguish referral vs invitation codes)
-- [ ] Implement paid member status logic:
-  - [ ] Users with active subscriptions = paid members
-  - [ ] Users who registered with invitation codes = paid members
-  - [ ] Users who registered with referral codes = paid members
-- [ ] Handle edge cases (user already has premium, etc.)
+- [ ] Implement dynamic membership status logic:
+  - [ ] Check membership expiry date (not expired = active member)
+  - [ ] Membership can come from: payment, invitation codes, referral codes
+  - [ ] Once membership expires, user loses eligibility for referral features
+- [ ] Handle edge cases (user already has premium, extending existing membership, etc.)
 
 ### 5.3 Expiration Logic
 - [ ] Set referral link expiration (e.g., 30 days)
@@ -270,9 +272,10 @@ Implement a referral system that allows users to recommend Translide to friends 
 - [ ] Database transaction testing
 - [ ] Code type detection testing (referral vs invitation codes)
 - [ ] Dual reward system testing (3 days vs 7 days rewards)
-- [ ] Paid member eligibility testing (can/cannot generate referral codes)
-- [ ] Membership status assignment testing (invitation/referral code users become paid)
-- [ ] Edge case testing (expired codes, invalid referrals, code conflicts, unpaid users)
+- [ ] Active membership eligibility testing (can/cannot generate referral codes)
+- [ ] Membership expiry testing (users lose eligibility when membership expires)
+- [ ] Membership date calculation testing (proper expiry dates set)
+- [ ] Edge case testing (expired codes, invalid referrals, code conflicts, expired memberships)
 
 ### 7.2 Frontend Testing
 - [ ] Component unit tests
