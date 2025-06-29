@@ -92,7 +92,7 @@
   },
   "upload": {
     "title": "プレゼンテーションをアップロード",
-    "description": "PowerPointファイル（.pptまたは.pptx）を選択またはドラッグ＆ドロップ",
+    "description": "PowerPointファイル（pptx形式のみサポート）を選択またはドラッグ＆ドロップ",
     "release": "ドロップしてアップロード"
   },
   "footer": {

@@ -92,7 +92,7 @@
   },
   "upload": {
     "title": "Téléchargez votre présentation",
-    "description": "Sélectionnez ou glissez-déposez votre fichier PowerPoint (.ppt ou .pptx)",
+    "description": "Sélectionnez ou glissez-déposez votre fichier PowerPoint (seul le format pptx est pris en charge)",
     "release": "Relâchez pour télécharger"
   },
   "footer": {

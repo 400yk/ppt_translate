@@ -92,7 +92,7 @@
   },
   "upload": {
     "title": "Suba su presentación",
-    "description": "Seleccione o arrastre y suelte su archivo PowerPoint (.ppt o .pptx)",
+    "description": "Seleccione o arrastre y suelte su archivo PowerPoint (solo se admite formato pptx)",
     "release": "Suelte para cargar"
   },
   "footer": {

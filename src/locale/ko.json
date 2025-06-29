@@ -92,7 +92,7 @@
   },
   "upload": {
     "title": "프레젠테이션 업로드",
-    "description": "PowerPoint 파일(.ppt 또는 .pptx)을 선택하거나 드래그 앤 드롭하세요",
+    "description": "PowerPoint 파일(pptx 형식만 지원)을 선택하거나 드래그 앤 드롭하세요",
     "release": "놓아서 업로드"
   },
   "footer": {

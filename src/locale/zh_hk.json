@@ -92,7 +92,7 @@
   },
   "upload": {
     "title": "上傳您的演示文稿",
-    "description": "選擇或拖放您的PowerPoint文件（.ppt或.pptx）",
+    "description": "選擇或拖放您的PowerPoint文件（僅支持pptx格式）",
     "release": "鬆開鼠標上傳"
   },
   "footer": {

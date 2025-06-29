@@ -92,7 +92,7 @@
   },
   "upload": {
     "title": "Ihre Präsentation hochladen",
-    "description": "Wählen Sie Ihre PowerPoint-Datei aus oder ziehen Sie sie per Drag & Drop (.ppt oder .pptx)",
+    "description": "Wählen Sie Ihre PowerPoint-Datei aus oder ziehen Sie sie per Drag & Drop (nur pptx-Format wird unterstützt)",
     "release": "Loslassen zum Hochladen"
   },
   "footer": {
