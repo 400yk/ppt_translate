@@ -75,7 +75,24 @@
     "request_must_be_json": "Request must be in JSON format",
     "no_data_provided": "No data provided in request",
     "google_signin_failed": "Google sign-in failed",
-    "google_no_credential": "No Google credential received"
+    "google_no_credential": "No Google credential received",
+    "referral_membership_required": "Only users with active membership can generate referral codes",
+    "referral_not_eligible": "You are not eligible to generate referral codes",
+    "referral_limit_reached": "You have reached the maximum referral limit",
+    "missing_referee_email": "Referee email is required",
+    "invalid_email_format": "Please provide a valid email address",
+    "referral_already_exists": "This email has already been referred and the referral has expired or been used",
+    "referral_generation_failed": "Failed to generate referral link",
+    "referral_code_not_found": "Referral code not found",
+    "referral_code_expired": "Referral code has expired or been used",
+    "referrer_not_found": "Referrer not found",
+    "referral_tracking_failed": "Failed to track referral code",
+    "referrals_fetch_failed": "Failed to get referrals",
+    "referral_not_found": "Referral not found",
+    "referral_not_completed": "Referral is not completed yet",
+    "reward_already_claimed": "Reward already claimed for this referral",
+    "no_rewards_available": "No rewards available to claim",
+    "reward_claim_failed": "Failed to claim rewards"
   },
   "success": {
     "title": "Success",
@@ -318,5 +335,11 @@
     "changes_desc": "We may update this privacy policy from time to time in order to reflect, for example, changes to our practices or for other operational, legal or regulatory reasons.",
     "contact_us": "CONTACT US",
     "contact_desc": "For more information about our privacy practices, if you have questions, or if you would like to make a complaint, please contact us by e-mail at contact@long-agi.com."
+  },
+  "referral": {
+    "using_existing": "Using existing referral for this email",
+    "link_generated": "Referral link generated successfully",
+    "code_valid": "Valid referral code",
+    "rewards_claimed": "Successfully claimed referral rewards"
   }
 } 

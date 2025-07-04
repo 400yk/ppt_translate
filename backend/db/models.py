@@ -2,7 +2,15 @@ from flask_sqlalchemy import SQLAlchemy
 import datetime
 import secrets
 import string
-from config import PAID_MEMBERSHIP_MONTHLY, PAID_MEMBERSHIP_YEARLY, INVITATION_MEMBERSHIP_MONTHS, FREE_USER_CHARACTER_MONTHLY_LIMIT, PAID_USER_CHARACTER_MONTHLY_LIMIT
+from config import (
+    PAID_MEMBERSHIP_MONTHLY, 
+    PAID_MEMBERSHIP_YEARLY, 
+    INVITATION_MEMBERSHIP_MONTHS, 
+    FREE_USER_CHARACTER_MONTHLY_LIMIT, 
+    PAID_USER_CHARACTER_MONTHLY_LIMIT,
+    REFERRAL_CODE_LENGTH,
+    REFERRAL_EXPIRY_DAYS
+)
 
 db = SQLAlchemy()
 
@@ -80,6 +88,10 @@ class User(db.Model):
     # Google OAuth fields
     google_id = db.Column(db.String(255), nullable=True, unique=True)
     google_access_token = db.Column(db.String(1024), nullable=True)
+    # Referral system fields
+    referral_code = db.Column(db.String(20), unique=True, nullable=True, index=True)  # User's personal referral code
+    referred_by_code = db.Column(db.String(20), nullable=True, index=True)  # Code that referred this user
+    bonus_membership_days = db.Column(db.Integer, default=0)  # Extra days earned from referrals
     
     def set_password(self, password):
         """Hash the password and store it."""
@@ -218,6 +230,83 @@ class User(db.Model):
             
         delta = self.membership_end - now
         return delta.days
+    
+    def add_bonus_membership_days(self, days):
+        """Add bonus membership days to the user's account."""
+        now = datetime.datetime.utcnow()
+        
+        # Track bonus days
+        self.bonus_membership_days = (self.bonus_membership_days or 0) + days
+        
+        # If user has an active membership, extend it
+        if self.is_paid_user and self.membership_end and self.membership_end > now:
+            self.membership_end = self.membership_end + datetime.timedelta(days=days)
+        else:
+            # Give user new membership starting now
+            self.membership_start = now
+            self.membership_end = now + datetime.timedelta(days=days)
+            self.is_paid_user = True
+        
+        db.session.commit()
+        return True
+    
+    def get_or_create_referral_code(self):
+        """Get the user's personal referral code, creating one if it doesn't exist."""
+        if not self.referral_code:
+            self.referral_code = self._generate_unique_referral_code()
+            db.session.commit()
+        return self.referral_code
+    
+    def _generate_unique_referral_code(self):
+        """Generate a unique referral code for this user."""
+        from config import REFERRAL_CODE_LENGTH
+        
+        # Use a mix of uppercase letters and digits, avoiding confusing characters
+        alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+        
+        while True:
+            code = ''.join(secrets.choice(alphabet) for _ in range(REFERRAL_CODE_LENGTH))
+            # Check that code doesn't already exist in users table
+            if not User.query.filter_by(referral_code=code).first():
+                # Also check referrals table to avoid conflicts (will be checked later when Referral class is defined)
+                return code
+    
+    def get_membership_source_summary(self):
+        """Get a summary of how the user obtained their membership."""
+        sources = []
+        
+        # Check if user has paid membership
+        if self.stripe_customer_id:
+            sources.append("payment")
+        
+        # Check if user used invitation code
+        if self.invitation_code_id:
+            sources.append("invitation_code")
+        
+        # Check if user was referred
+        if self.referred_by_code:
+            sources.append("referral")
+        
+        # Check if user has bonus days
+        if self.bonus_membership_days and self.bonus_membership_days > 0:
+            sources.append(f"bonus_{self.bonus_membership_days}_days")
+            
+        return sources if sources else ["free"]
+    
+    def can_generate_referral_codes(self):
+        """Check if user is eligible to generate referral codes."""
+        from config import REFERRAL_FEATURE_PAID_MEMBERS_ONLY
+        
+        if not REFERRAL_FEATURE_PAID_MEMBERS_ONLY:
+            return True
+            
+        return self.is_membership_active()
+    
+    def set_referred_by(self, referral_code):
+        """Set the referral code that referred this user."""
+        self.referred_by_code = referral_code
+        db.session.commit()
+        return True
 
 class TranslationRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -249,4 +338,151 @@ class GuestTranslation(db.Model):
     @classmethod
     def count_by_ip(cls, ip_address):
         """Count the number of translations made by a specific IP address."""
-        return cls.query.filter_by(ip_address=ip_address).count() 
+        return cls.query.filter_by(ip_address=ip_address).count()
+
+class Referral(db.Model):
+    """
+    Stores referral relationships and tracking information.
+    Tracks when users refer friends and manages reward allocation.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    referrer_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    referee_email = db.Column(db.String(120), nullable=False)
+    referee_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    referral_code = db.Column(db.String(20), unique=True, nullable=False, index=True)
+    status = db.Column(db.Enum('pending', 'completed', 'expired', name='referral_status'), 
+                      default='pending', nullable=False)
+    reward_claimed = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
+    completed_at = db.Column(db.DateTime, nullable=True)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    
+    # Relationships
+    referrer = db.relationship('User', foreign_keys=[referrer_user_id], 
+                              backref=db.backref('sent_referrals', lazy='dynamic'))
+    referee = db.relationship('User', foreign_keys=[referee_user_id], 
+                             backref=db.backref('received_referrals', lazy='dynamic'))
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if not self.referral_code:
+            self.referral_code = self.generate_referral_code()
+        if not self.expires_at:
+            self.expires_at = datetime.datetime.utcnow() + datetime.timedelta(days=REFERRAL_EXPIRY_DAYS)
+    
+    @classmethod
+    def generate_referral_code(cls, length=None):
+        """Generate a unique referral code."""
+        if length is None:
+            length = REFERRAL_CODE_LENGTH
+        
+        # Use a mix of uppercase letters and digits, avoiding confusing characters
+        alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+        
+        while True:
+            code = ''.join(secrets.choice(alphabet) for _ in range(length))
+            # Check that code doesn't already exist
+            if not cls.query.filter_by(referral_code=code).first():
+                return code
+    
+    def is_expired(self):
+        """Check if this referral has expired."""
+        return datetime.datetime.utcnow() > self.expires_at
+    
+    def is_valid(self):
+        """Check if this referral is still valid for use."""
+        return (self.status == 'pending' and 
+                not self.is_expired() and 
+                not self.referee_user_id)
+    
+    def complete_referral(self, referee_user):
+        """Mark this referral as completed when the referee registers."""
+        if self.status != 'pending':
+            return False
+        
+        if self.is_expired():
+            self.status = 'expired'
+            db.session.commit()
+            return False
+        
+        self.referee_user_id = referee_user.id
+        self.status = 'completed'
+        self.completed_at = datetime.datetime.utcnow()
+        db.session.commit()
+        return True
+    
+    def claim_reward(self):
+        """Claim the referral reward for both users."""
+        if self.status != 'completed' or self.reward_claimed:
+            return False
+        
+        from config import REFERRAL_REWARD_DAYS
+        
+        # Award bonus days to both referrer and referee
+        if self.referrer:
+            self.referrer.add_bonus_membership_days(REFERRAL_REWARD_DAYS)
+        
+        if self.referee:
+            self.referee.add_bonus_membership_days(REFERRAL_REWARD_DAYS)
+        
+        self.reward_claimed = True
+        db.session.commit()
+        return True
+    
+    @classmethod
+    def get_by_code(cls, referral_code):
+        """Get a referral by its code."""
+        return cls.query.filter_by(referral_code=referral_code).first()
+    
+    @classmethod
+    def get_user_referrals(cls, user_id, status=None):
+        """Get all referrals created by a user, optionally filtered by status."""
+        query = cls.query.filter_by(referrer_user_id=user_id)
+        if status:
+            query = query.filter_by(status=status)
+        return query.order_by(cls.created_at.desc()).all()
+
+class Feedback(db.Model):
+    """
+    Stores user feedback submitted through the application.
+    Supports both authenticated and anonymous feedback.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    feedback_text = db.Column(db.Text, nullable=False)
+    rating = db.Column(db.Integer, nullable=True)  # 1-5 star rating
+    user_email = db.Column(db.String(120), nullable=True)  # For anonymous feedback
+    page_context = db.Column(db.String(100), nullable=True)  # Which page feedback was given from
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
+    
+    # Relationship
+    user = db.relationship('User', backref=db.backref('feedback_submissions', lazy='dynamic'))
+    
+    def is_anonymous(self):
+        """Check if this feedback was submitted anonymously."""
+        return self.user_id is None
+    
+    def get_submitter_identifier(self):
+        """Get an identifier for the feedback submitter."""
+        if self.user:
+            return f"User: {self.user.username} ({self.user.email})"
+        elif self.user_email:
+            return f"Anonymous: {self.user_email}"
+        else:
+            return "Anonymous (no email provided)"
+    
+    @classmethod
+    def get_recent(cls, limit=20):
+        """Get the most recent feedback submissions."""
+        return cls.query.order_by(cls.created_at.desc()).limit(limit).all()
+    
+    @classmethod
+    def get_by_user(cls, user_id):
+        """Get all feedback submitted by a specific user."""
+        return cls.query.filter_by(user_id=user_id).order_by(cls.created_at.desc()).all()
+    
+    @classmethod
+    def get_average_rating(cls):
+        """Get the average rating from all feedback with ratings."""
+        result = db.session.query(db.func.avg(cls.rating)).filter(cls.rating.isnot(None)).scalar()
+        return round(result, 2) if result else None 

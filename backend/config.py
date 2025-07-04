@@ -141,3 +141,11 @@ LOCALE_TO_CURRENCY = {
     "ko": "krw",  # Korean - Won
     "ru": "rub",  # Russian - Ruble
 } 
+
+# Referral System Configuration
+REFERRAL_REWARD_DAYS = 3  # Reward days for BOTH referrer and referee
+INVITATION_CODE_REWARD_DAYS = 3  # Reward days for invitation codes - current user only
+REFERRAL_CODE_LENGTH = 12  # Length of referral codes
+REFERRAL_EXPIRY_DAYS = 30  # Referral link expiry in days
+MAX_REFERRALS_PER_USER = 100  # Anti-spam limit for referrals per user
+REFERRAL_FEATURE_PAID_MEMBERS_ONLY = True  # Only paid members can generate referral codes 

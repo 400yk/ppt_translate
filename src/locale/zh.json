@@ -75,7 +75,24 @@
     "request_must_be_json": "请求必须是JSON格式",
     "no_data_provided": "请求中未提供数据",
     "google_signin_failed": "Google登录失败",
-    "google_no_credential": "未收到Google凭据"
+    "google_no_credential": "未收到Google凭据",
+    "referral_membership_required": "只有具有有效会员资格的用户才能生成推荐码",
+    "referral_not_eligible": "您不符合生成推荐码的条件",
+    "referral_limit_reached": "您已达到推荐数量上限",
+    "missing_referee_email": "需要提供被推荐人邮箱",
+    "invalid_email_format": "请提供有效的邮箱地址",
+    "referral_already_exists": "该邮箱已被推荐过，推荐已过期或已使用",
+    "referral_generation_failed": "生成推荐链接失败",
+    "referral_code_not_found": "推荐码不存在",
+    "referral_code_expired": "推荐码已过期或已使用",
+    "referrer_not_found": "推荐人不存在",
+    "referral_tracking_failed": "跟踪推荐码失败",
+    "referrals_fetch_failed": "获取推荐记录失败",
+    "referral_not_found": "推荐记录不存在",
+    "referral_not_completed": "推荐尚未完成",
+    "reward_already_claimed": "该推荐奖励已被领取",
+    "no_rewards_available": "没有可领取的奖励",
+    "reward_claim_failed": "领取奖励失败"
   },
   "success": {
     "title": "成功",
@@ -317,5 +334,11 @@
     "changes_desc": "我们可能会不时更新此隐私政策，以反映例如我们做法的变化或其他运营、法律或监管原因。",
     "contact_us": "联系我们",
     "contact_desc": "有关我们隐私做法的更多信息，如果您有疑问，或者如果您想投诉，请通过电子邮件与我们联系：contact@long-agi.com。"
+  },
+  "referral": {
+    "using_existing": "使用该邮箱的现有推荐",
+    "link_generated": "推荐链接生成成功",
+    "code_valid": "有效的推荐码",
+    "rewards_claimed": "推荐奖励领取成功"
   }
 } 

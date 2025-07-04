@@ -75,7 +75,24 @@
     "request_must_be_json": "La demande doit être au format JSON",
     "no_data_provided": "Aucune donnée fournie dans la demande",
     "google_signin_failed": "Échec de la connexion Google",
-    "google_no_credential": "Aucune credential Google reçue"
+    "google_no_credential": "Aucune credential Google reçue",
+    "referral_membership_required": "Seuls les utilisateurs avec un abonnement actif peuvent générer des codes de parrainage",
+    "referral_not_eligible": "Vous n'êtes pas éligible pour générer des codes de parrainage",
+    "referral_limit_reached": "Vous avez atteint la limite maximale de parrainages",
+    "missing_referee_email": "L'email du parrain est requis",
+    "invalid_email_format": "Veuillez fournir une adresse email valide",
+    "referral_already_exists": "Cet email a déjà été parrainé et le parrainage a expiré ou a été utilisé",
+    "referral_generation_failed": "Échec de la génération du lien de parrainage",
+    "referral_code_not_found": "Code de parrainage introuvable",
+    "referral_code_expired": "Le code de parrainage a expiré ou a été utilisé",
+    "referrer_not_found": "Parrain introuvable",
+    "referral_tracking_failed": "Échec du suivi du code de parrainage",
+    "referrals_fetch_failed": "Échec de la récupération des parrainages",
+    "referral_not_found": "Parrainage introuvable",
+    "referral_not_completed": "Le parrainage n'est pas encore terminé",
+    "reward_already_claimed": "La récompense a déjà été réclamée pour ce parrainage",
+    "no_rewards_available": "Aucune récompense disponible à réclamer",
+    "reward_claim_failed": "Échec de la réclamation des récompenses"
   },
   "success": {
     "title": "Succès",
@@ -317,5 +334,11 @@
     "changes_desc": "Nous pouvons mettre à jour cette politique de confidentialité de temps en temps afin de refléter, par exemple, des changements dans nos pratiques ou pour d'autres raisons opérationnelles, légales ou réglementaires.",
     "contact_us": "NOUS CONTACTER",
     "contact_desc": "Pour plus d'informations sur nos pratiques de confidentialité, si vous avez des questions, ou si vous souhaitez faire une réclamation, veuillez nous contacter par e-mail à contact@long-agi.com."
+  },
+  "referral": {
+    "using_existing": "Utilisation du parrainage existant pour cet email",
+    "link_generated": "Lien de parrainage généré avec succès",
+    "code_valid": "Code de parrainage valide",
+    "rewards_claimed": "Récompenses de parrainage réclamées avec succès"
   }
 } 

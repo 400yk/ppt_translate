@@ -75,7 +75,24 @@
     "request_must_be_json": "請求必須是JSON格式",
     "no_data_provided": "請求中未提供數據",
     "google_signin_failed": "Google登錄失敗",
-    "google_no_credential": "未收到Google憑據"
+    "google_no_credential": "未收到Google憑據",
+    "referral_membership_required": "只有具有有效會員資格的用戶才能生成推薦碼",
+    "referral_not_eligible": "您不符合生成推薦碼的條件",
+    "referral_limit_reached": "您已達到推薦數量上限",
+    "missing_referee_email": "需要提供被推薦人郵箱",
+    "invalid_email_format": "請提供有效的郵箱地址",
+    "referral_already_exists": "該信箱已被推薦過，推薦已過期或已使用",
+    "referral_generation_failed": "生成推薦連結失敗",
+    "referral_code_not_found": "推薦碼不存在",
+    "referral_code_expired": "推薦碼已過期或已使用",
+    "referrer_not_found": "推薦人不存在",
+    "referral_tracking_failed": "追蹤推薦碼失敗",
+    "referrals_fetch_failed": "獲取推薦記錄失敗",
+    "referral_not_found": "推薦記錄不存在",
+    "referral_not_completed": "推薦尚未完成",
+    "reward_already_claimed": "該推薦獎勵已被領取",
+    "no_rewards_available": "沒有可領取的獎勵",
+    "reward_claim_failed": "領取獎勵失敗"
   },
   "success": {
     "title": "成功",
@@ -317,5 +334,11 @@
     "changes_desc": "我們可能會不時更新此隱私政策，以反映例如我們做法的變化或其他運營、法律或監管原因。",
     "contact_us": "聯繫我們",
     "contact_desc": "有關我們隱私做法的更多信息，如果您有疑問，或者如果您想投訴，請通過電子郵件與我們聯繫：contact@long-agi.com。"
+  },
+  "referral": {
+    "using_existing": "使用該信箱的現有推薦",
+    "link_generated": "推薦連結生成成功",
+    "code_valid": "有效的推薦碼",
+    "rewards_claimed": "推薦獎勵領取成功"
   }
 } 

@@ -75,7 +75,24 @@
     "request_must_be_json": "La solicitud debe estar en formato JSON",
     "no_data_provided": "No se proporcionaron datos en la solicitud",
     "google_signin_failed": "Error al iniciar sesión con Google",
-    "google_no_credential": "No se recibió credencial de Google"
+    "google_no_credential": "No se recibió credencial de Google",
+    "referral_membership_required": "Solo los usuarios con membresía activa pueden generar códigos de referencia",
+    "referral_not_eligible": "No eres elegible para generar códigos de referencia",
+    "referral_limit_reached": "Has alcanzado el límite máximo de referencias",
+    "missing_referee_email": "Se requiere el email del referido",
+    "invalid_email_format": "Por favor proporciona una dirección de email válida",
+    "referral_already_exists": "Este correo ya ha sido referido y la referencia ha expirado o ha sido utilizada",
+    "referral_generation_failed": "Error al generar enlace de referencia",
+    "referral_code_not_found": "Código de referencia no encontrado",
+    "referral_code_expired": "El código de referencia ha expirado o ha sido utilizado",
+    "referrer_not_found": "Referente no encontrado",
+    "referral_tracking_failed": "Error al rastrear código de referencia",
+    "referrals_fetch_failed": "Error al obtener referencias",
+    "referral_not_found": "Referencia no encontrada",
+    "referral_not_completed": "La referencia aún no está completada",
+    "reward_already_claimed": "La recompensa ya ha sido reclamada para esta referencia",
+    "no_rewards_available": "No hay recompensas disponibles para reclamar",
+    "reward_claim_failed": "Error al reclamar recompensas"
   },
   "success": {
     "title": "Éxito",
@@ -317,5 +334,11 @@
     "changes_desc": "Podemos actualizar esta política de privacidad de vez en cuando para reflejar, por ejemplo, cambios en nuestras prácticas o por otras razones operacionales, legales o regulatorias.",
     "contact_us": "CONTÁCTANOS",
     "contact_desc": "Para más información sobre nuestras prácticas de privacidad, si tiene preguntas, o si desea presentar una queja, contáctenos por correo electrónico en contact@long-agi.com."
+  },
+  "referral": {
+    "using_existing": "Usando referencia existente para este correo",
+    "link_generated": "Enlace de referencia generado exitosamente",
+    "code_valid": "Código de referencia válido",
+    "rewards_claimed": "Recompensas de referencia reclamadas exitosamente"
   }
 } 

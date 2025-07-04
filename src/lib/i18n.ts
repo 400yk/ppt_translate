@@ -129,6 +129,23 @@ export type TranslationKey =
   | 'errors.no_data_provided'
   | 'errors.google_signin_failed'
   | 'errors.google_no_credential'
+  | 'errors.referral_membership_required'
+  | 'errors.referral_not_eligible'
+  | 'errors.referral_limit_reached'
+  | 'errors.missing_referee_email'
+  | 'errors.invalid_email_format'
+  | 'errors.referral_already_exists'
+  | 'errors.referral_generation_failed'
+  | 'errors.referral_code_not_found'
+  | 'errors.referral_code_expired'
+  | 'errors.referrer_not_found'
+  | 'errors.referral_tracking_failed'
+  | 'errors.referrals_fetch_failed'
+  | 'errors.referral_not_found'
+  | 'errors.referral_not_completed'
+  | 'errors.reward_already_claimed'
+  | 'errors.no_rewards_available'
+  | 'errors.reward_claim_failed'
   | 'success.title'
   | 'success.translation_complete'
   | 'success.registration_complete'
@@ -316,7 +333,11 @@ export type TranslationKey =
   | 'pricing.features.char_per_file'
   | 'pricing.features.monthly_limit'
   | 'pricing.features.file_size'
-  | 'pricing.features.support';
+  | 'pricing.features.support'
+  | 'referral.using_existing'
+  | 'referral.link_generated'
+  | 'referral.code_valid'
+  | 'referral.rewards_claimed';
 
 // Define available locales map
 export const locales = {

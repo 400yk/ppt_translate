@@ -75,7 +75,24 @@
     "request_must_be_json": "요청은 JSON 형식이어야 합니다",
     "no_data_provided": "요청에 데이터가 제공되지 않았습니다",
     "google_signin_failed": "Google 로그인에 실패했습니다",
-    "google_no_credential": "Google 인증 정보를 받지 못했습니다"
+    "google_no_credential": "Google 인증 정보를 받지 못했습니다",
+    "referral_membership_required": "활성 멤버십을 가진 사용자만 추천 코드를 생성할 수 있습니다",
+    "referral_not_eligible": "추천 코드를 생성할 자격이 없습니다",
+    "referral_limit_reached": "최대 추천 수에 도달했습니다",
+    "missing_referee_email": "추천인 이메일이 필요합니다",
+    "invalid_email_format": "유효한 이메일 주소를 입력해주세요",
+    "referral_already_exists": "이 이메일은 이미 추천되었으며, 추천이 만료되었거나 사용되었습니다",
+    "referral_generation_failed": "추천 링크 생성에 실패했습니다",
+    "referral_code_not_found": "추천 코드를 찾을 수 없습니다",
+    "referral_code_expired": "추천 코드가 만료되었거나 사용되었습니다",
+    "referrer_not_found": "추천자를 찾을 수 없습니다",
+    "referral_tracking_failed": "추천 코드 추적에 실패했습니다",
+    "referrals_fetch_failed": "추천 정보 가져오기에 실패했습니다",
+    "referral_not_found": "추천을 찾을 수 없습니다",
+    "referral_not_completed": "추천이 아직 완료되지 않았습니다",
+    "reward_already_claimed": "이 추천에 대한 보상이 이미 청구되었습니다",
+    "no_rewards_available": "청구할 보상이 없습니다",
+    "reward_claim_failed": "보상 청구에 실패했습니다"
   },
   "success": {
     "title": "성공",
@@ -316,5 +333,11 @@
     "changes_desc": "예를 들어 당사의 관행 변경이나 기타 운영, 법적 또는 규제상의 이유로 이 개인정보 보호정책을 수시로 업데이트할 수 있습니다.",
     "contact_us": "문의하기",
     "contact_desc": "당사의 개인정보 보호 관행에 대한 자세한 정보가 필요하거나 질문이 있거나 불만을 제기하려면 contact@long-agi.com으로 이메일을 보내 주십시오."
+  },
+  "referral": {
+    "using_existing": "이 이메일의 기존 추천 사용",
+    "link_generated": "추천 링크가 성공적으로 생성되었습니다",
+    "code_valid": "유효한 추천 코드",
+    "rewards_claimed": "추천 보상이 성공적으로 청구되었습니다"
   }
 } 

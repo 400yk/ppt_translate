@@ -15,78 +15,93 @@ Implement a referral system that allows users to recommend Translide to friends 
 ## Phase 0: Configuration Setup
 
 ### 0.1 Backend Configuration
-- [ ] Add referral system configuration to `backend/config.py`
-  - [ ] `REFERRAL_REWARD_DAYS = 3` (reward days for BOTH referrer and referee)
-  - [ ] `INVITATION_CODE_REWARD_DAYS = 3` (reward days for invitation codes - current user only)
-  - [ ] `REFERRAL_CODE_LENGTH = 8` (length of referral codes)
-  - [ ] `REFERRAL_EXPIRY_DAYS = 30` (referral link expiry)
-  - [ ] `MAX_REFERRALS_PER_USER = 100` (anti-spam limit)
-  - [ ] `REFERRAL_FEATURE_PAID_MEMBERS_ONLY = True` (only paid members can generate referral codes)
+- [x] Add referral system configuration to `backend/config.py`
+  - [x] `REFERRAL_REWARD_DAYS = 3` (reward days for BOTH referrer and referee)
+  - [x] `INVITATION_CODE_REWARD_DAYS = 3` (reward days for invitation codes - current user only)
+  - [x] `REFERRAL_CODE_LENGTH = 12` (length of referral codes)
+  - [x] `REFERRAL_EXPIRY_DAYS = 30` (referral link expiry)
+  - [x] `MAX_REFERRALS_PER_USER = 100` (anti-spam limit)
+  - [x] `REFERRAL_FEATURE_PAID_MEMBERS_ONLY = True` (only paid members can generate referral codes)
 
 ---
 
 ## Phase 1: Database Schema Changes
 
 ### 1.1 Referral System Tables
-- [ ] Create `referrals` table
-  - [ ] `id` (Primary Key)
-  - [ ] `referrer_user_id` (Foreign Key to users)
-  - [ ] `referee_email` (Email of referred person)
-  - [ ] `referee_user_id` (Foreign Key to users, nullable until registration)
-  - [ ] `referral_code` (Unique code for tracking)
-  - [ ] `status` (pending, completed, expired)
-  - [ ] `reward_claimed` (Boolean)
-  - [ ] `created_at`
-  - [ ] `completed_at` (When referee registered)
-  - [ ] `expires_at`
+- [x] Create `referrals` table
+  - [x] `id` (Primary Key)
+  - [x] `referrer_user_id` (Foreign Key to users)
+  - [x] `referee_email` (Email of referred person)
+  - [x] `referee_user_id` (Foreign Key to users, nullable until registration)
+  - [x] `referral_code` (Unique code for tracking)
+  - [x] `status` (pending, completed, expired)
+  - [x] `reward_claimed` (Boolean)
+  - [x] `created_at`
+  - [x] `completed_at` (When referee registered)
+  - [x] `expires_at`
 
-- [ ] Create `feedback` table
-  - [ ] `id` (Primary Key)
-  - [ ] `user_id` (Foreign Key to users, nullable for anonymous)
-  - [ ] `feedback_text` (Text content)
-  - [ ] `rating` (Optional 1-5 star rating)
-  - [ ] `user_email` (For anonymous feedback)
-  - [ ] `page_context` (Which page feedback was given from)
-  - [ ] `created_at`
+- [x] Create `feedback` table
+  - [x] `id` (Primary Key)
+  - [x] `user_id` (Foreign Key to users, nullable for anonymous)
+  - [x] `feedback_text` (Text content)
+  - [x] `rating` (Optional 1-5 star rating)
+  - [x] `user_email` (For anonymous feedback)
+  - [x] `page_context` (Which page feedback was given from)
+  - [x] `created_at`
 
 ### 1.2 User Table Updates
-- [ ] Add `referral_code` column to users table (unique personal referral code)
-- [ ] Add `referred_by_code` column to users table (track who referred them)
-- [ ] Add `bonus_membership_days` column to track extra days earned
-- [ ] Update existing membership expiry logic to handle different membership sources:
-  - [ ] Membership from payment (existing)
-  - [ ] Membership from invitation codes
-  - [ ] Membership from referral codes
+- [x] Add `referral_code` column to users table (unique personal referral code)
+- [x] Add `referred_by_code` column to users table (track who referred them)
+- [x] Add `bonus_membership_days` column to track extra days earned
+- [x] Update existing membership expiry logic to handle different membership sources:
+  - [x] Membership from payment (existing)
+  - [x] Membership from invitation codes
+  - [x] Membership from referral codes
 
 ### 1.3 Database Migration
-- [ ] Create Alembic migration script for referral tables
-- [ ] Create Alembic migration script for user table updates
-- [ ] Test migrations on development database
+- [x] Create Alembic migration script for referral tables
+- [x] Create Alembic migration script for user table updates
+- [x] Test migrations on development database
 
 ---
 
 ## Phase 2: Backend API Development
 
 ### 2.1 Referral API Endpoints
-- [ ] `POST /api/referrals/generate` - Generate referral link for user
-  - [ ] Require authentication
-  - [ ] Check if user has active (non-expired) membership
-  - [ ] Return 403 error if user is not eligible (guest, unpaid, or expired membership)
-  - [ ] Generate unique referral code
-  - [ ] Return shareable link pointing to registration page with referral code
+- [x] `POST /api/referrals/generate` - Generate referral link for user
+  - [x] Require authentication
+  - [x] Check if user has active (non-expired) membership
+  - [x] Return 403 error if user is not eligible (guest, unpaid, or expired membership)
+  - [x] Generate unique referral code
+  - [x] Return shareable link pointing to registration page with referral code
   
-- [ ] `GET /api/referrals/track/<referral_code>` - Handle referral link clicks
-  - [ ] Store referral attempt in database
-  - [ ] Redirect to registration page with referral code as URL parameter
-  - [ ] Set cookie/session for tracking
+- [x] `GET /api/referrals/track/<referral_code>` - Handle referral link clicks
+  - [x] Store referral attempt in database
+  - [x] Redirect to registration page with referral code as URL parameter
+  - [x] Set cookie/session for tracking
   
-- [ ] `GET /api/referrals/my-referrals` - Get user's referral history
-  - [ ] Return list of referrals and their status
+- [x] `GET /api/referrals/my-referrals` - Get user's referral history
+  - [x] Return list of referrals and their status
   
-- [ ] `POST /api/referrals/claim-reward` - Claim referral reward
-  - [ ] Verify referral is completed
-  - [ ] Add bonus days to both users (configurable amount)
-  - [ ] Mark reward as claimed
+- [x] `POST /api/referrals/claim-reward` - Claim referral reward
+  - [x] Verify referral is completed
+  - [x] Add bonus days to both users (configurable amount)
+  - [x] Mark reward as claimed
+
+### 2.1.5 Internationalization for Referral System
+- [x] Add referral error keys to `src/lib/i18n.ts`
+- [x] Complete translations for all supported languages:
+  - [x] English (en.json) - Base translations
+  - [x] Simplified Chinese (zh.json) - 推荐系统
+  - [x] Traditional Chinese (zh_hk.json) - 推薦系統
+  - [x] Spanish (es.json) - Sistema de referencia
+  - [x] French (fr.json) - Système de parrainage
+  - [x] German (de.json) - Empfehlungssystem
+  - [x] Japanese (ja.json) - 紹介システム
+  - [x] Korean (ko.json) - 추천 시스템
+  - [x] Russian (ru.json) - Реферальная система
+- [x] Error message consistency with existing project patterns
+- [x] Success message translations for user feedback
 
 ### 2.2 Registration Enhancement
 - [ ] Update registration endpoint to handle both code types
@@ -267,15 +282,16 @@ Implement a referral system that allows users to recommend Translide to friends 
 ## Phase 7: Testing and Quality Assurance
 
 ### 7.1 Backend Testing
-- [ ] Unit tests for referral service functions
-- [ ] Integration tests for API endpoints
-- [ ] Database transaction testing
-- [ ] Code type detection testing (referral vs invitation codes)
-- [ ] Dual reward system testing (3 days vs 7 days rewards)
-- [ ] Active membership eligibility testing (can/cannot generate referral codes)
-- [ ] Membership expiry testing (users lose eligibility when membership expires)
-- [ ] Membership date calculation testing (proper expiry dates set)
-- [ ] Edge case testing (expired codes, invalid referrals, code conflicts, expired memberships)
+- [x] Unit tests for referral service functions
+- [x] Integration tests for API endpoints
+- [x] Database transaction testing
+- [x] Code type detection testing (referral vs invitation codes)
+- [x] Dual reward system testing (3 days vs 7 days rewards)
+- [x] Active membership eligibility testing (can/cannot generate referral codes)
+- [x] Membership expiry testing (users lose eligibility when membership expires)
+- [x] Membership date calculation testing (proper expiry dates set)
+- [x] Edge case testing (expired codes, invalid referrals, code conflicts, expired memberships)
+- [x] Comprehensive test script created in `backend/tests/test_referral_api.py`
 
 ### 7.2 Frontend Testing
 - [ ] Component unit tests

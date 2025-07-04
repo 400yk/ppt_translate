@@ -75,7 +75,24 @@
     "request_must_be_json": "リクエストはJSON形式である必要があります",
     "no_data_provided": "リクエストにデータが提供されていません",
     "google_signin_failed": "Googleサインインに失敗しました",
-    "google_no_credential": "Google認証情報を受信できませんでした"
+    "google_no_credential": "Google認証情報を受信できませんでした",
+    "referral_membership_required": "アクティブなメンバーシップを持つユーザーのみが紹介コードを生成できます",
+    "referral_not_eligible": "紹介コードを生成する資格がありません",
+    "referral_limit_reached": "紹介の最大数に達しました",
+    "missing_referee_email": "紹介者のメールアドレスが必要です",
+    "invalid_email_format": "有効なメールアドレスを入力してください",
+    "referral_already_exists": "このメールアドレスは既に紹介されており、紹介は期限切れまたは使用済みです",
+    "referral_generation_failed": "紹介リンクの生成に失敗しました",
+    "referral_code_not_found": "紹介コードが見つかりません",
+    "referral_code_expired": "紹介コードは期限切れまたは使用済みです",
+    "referrer_not_found": "紹介者が見つかりません",
+    "referral_tracking_failed": "紹介コードの追跡に失敗しました",
+    "referrals_fetch_failed": "紹介の取得に失敗しました",
+    "referral_not_found": "紹介が見つかりません",
+    "referral_not_completed": "紹介はまだ完了していません",
+    "reward_already_claimed": "この紹介の報酬は既に請求されています",
+    "no_rewards_available": "請求可能な報酬がありません",
+    "reward_claim_failed": "報酬の請求に失敗しました"
   },
   "success": {
     "title": "成功",
@@ -316,5 +333,11 @@
     "changes_desc": "このプライバシーポリシーは、当社の実践の変更やその他の運用上、法的、または規制上の理由を反映するために随時更新される場合があります。",
     "contact_us": "お問い合わせ",
     "contact_desc": "当社のプライバシー慣行について詳しく知りたい場合、ご質問がある場合、または苦情を申し立てたい場合は、contact@long-agi.comまでメールでお問い合わせください。"
+  },
+  "referral": {
+    "using_existing": "このメールアドレスの既存の紹介を使用",
+    "link_generated": "紹介リンクが正常に生成されました",
+    "code_valid": "有効な紹介コード",
+    "rewards_claimed": "紹介報酬が正常に請求されました"
   }
 } 
