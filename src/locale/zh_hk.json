@@ -92,7 +92,8 @@
     "referral_not_completed": "推薦尚未完成",
     "reward_already_claimed": "該推薦獎勵已被領取",
     "no_rewards_available": "沒有可領取的獎勵",
-    "reward_claim_failed": "領取獎勵失敗"
+    "reward_claim_failed": "領取獎勵失敗",
+    "referral_upgrade_description": "只有付費會員才能邀請朋友。升級以解鎖此功能並賺取額外的會員天數！"
   },
   "success": {
     "title": "成功",
@@ -143,11 +144,22 @@
     "processing": "處理中...",
     "use_without_code": "不使用邀請碼註冊",
     "register_success": "註冊成功",
+    "register_subtitle": "創建帳戶開始使用",
+    "register_with_referral_subtitle": "使用您的推薦碼創建帳戶",
+    "using_referral_code": "使用推薦碼",
+    "already_have_account": "已有帳戶？",
     "welcome": "歡迎使用幻翻！",
     "welcome_with_invitation": "歡迎使用幻翻！您的邀請碼已應用，會員已激活！",
     "no_code_warning": "不使用邀請碼註冊的用戶每週僅能使用一次翻譯服務。",
     "or_continue_with": "或者使用以下方式繼續",
-    "google_signin": "使用Google登錄"
+    "google_signin": "使用Google登錄",
+    "email_verification_required": "請驗證您的電子郵件地址以繼續",
+    "email_verification_sent": "驗證郵件已發送！請檢查您的收件箱。",
+    "email_verified": "電子郵件驗證成功！您現在可以存取您的帳戶。",
+    "verification_sent": "驗證郵件已發送",
+    "resend_verification": "重新發送驗證郵件",
+    "check_email": "請檢查您的電子郵件以獲取驗證連結",
+    "verify_email_first": "請先驗證您的電子郵件地址"
   },
   "languages": {
     "zh": "簡體中文",
@@ -193,7 +205,8 @@
   },
   "nav": {
     "translate_now": "立即翻譯",
-    "home": "返回主頁"
+    "home": "返回主頁",
+    "back_to_home": "返回主頁"
   },
   "landing": {
     "translate": "翻譯",
@@ -339,6 +352,58 @@
     "using_existing": "使用該信箱的現有推薦",
     "link_generated": "推薦連結生成成功",
     "code_valid": "有效的推薦碼",
-    "rewards_claimed": "推薦獎勵領取成功"
+    "rewards_claimed": "推薦獎勵領取成功",
+    "popup": {
+      "title": "喜歡幻翻？分享給朋友！",
+      "description": "幫助您的朋友發現幻翻，當他們註冊時，您和您的朋友都可以獲得額外的**{days}天**會員！",
+      "share_button": "分享幻翻",
+      "feedback_button": "反饋建議",
+      "footer_note": "關閉以繼續您的翻譯",
+      "close": "關閉彈窗"
+    }
+  },
+  "share": {
+    "modal": {
+      "title": "分享幻翻",
+      "description": "分享您的推薦連結，當朋友加入時獲得額外的會員天數！",
+      "referral_link_label": "您的推薦連結",
+      "generating_link": "正在生成連結...",
+      "social_media_title": "在社交媒體上分享",
+      "email_share": "透過電子郵件分享",
+      "copy_success": "推薦連結已複製到剪貼板！",
+      "close": "關閉",
+      "generate_new": "生成新的邀請",
+      "generate_new_success": "新推薦連結生成成功！",
+      "single_use_info": "每個連結僅限單次使用。生成新連結以邀請更多朋友。",
+      "twitter_text": "試試幻翻 - 一鍵PowerPoint翻譯！加入我們，你我都可以獲得{days}天額外會員：",
+      "whatsapp_text": "試試幻翻 - 一鍵PowerPoint翻譯！加入我們，你我都可以獲得{days}天額外會員：{link}",
+      "email_subject": "加入幻翻 - PowerPoint翻譯變得簡單！",
+      "email_body": "你好！\n\n我一直在使用幻翻來翻譯我的PowerPoint演示文稿，效果非常棒！一鍵翻譯，保留所有格式。\n\n使用此連結加入我們，你我都將獲得{days}天額外會員：\n{link}\n\n祝好！",
+      "generating": "生成中...",
+      "placeholder_generating": "正在生成推薦連結..."
+    }
+  },
+  "email": {
+    "verification": {
+      "subject": "請驗證您的電子郵件地址 - 幻翻",
+      "welcome_title": "歡迎使用幻翻！",
+      "hello": "您好 {username}！",
+      "verification_intro": "感謝您註冊幻翻。為了完成註冊並開始使用我們的PowerPoint翻譯服務，請驗證您的電子郵件地址。",
+      "button_text": "驗證電子郵件地址",
+      "button_fallback": "如果按鈕無法正常運作，您可以複製此連結並貼到您的瀏覽器中：",
+      "expires_note": "此連結將在24小時後過期。",
+      "ignore_note": "如果您沒有建立幻翻帳戶，您可以安全地忽略此郵件。",
+      "footer_copyright": "© 2025 幻翻。保留所有權利。"
+    },
+    "errors": {
+      "email_send_failed": "發送驗證郵件失敗",
+      "missing_token": "未提供驗證令牌。請檢查您電子郵件中的連結。",
+      "invalid_token": "無效的驗證令牌。請重新申請驗證郵件。",
+      "token_expired": "此驗證連結已過期。請重新申請驗證郵件。",
+      "missing_email": "需要電子郵件地址",
+      "email_already_verified": "電子郵件已驗證",
+      "verification_cooldown": "請等待後再申請另一封驗證郵件",
+      "email_not_verified": "需要電子郵件驗證"
+    }
   }
 } 

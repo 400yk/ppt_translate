@@ -14,7 +14,8 @@ referral_bp = Blueprint('referral', __name__)
 @jwt_required()
 def generate_referral_link():
     """
-    Generate a referral link for the authenticated user.
+    Generate a generic referral link for the authenticated user (Option B: Generic Shareable Links).
+    No email required upfront - first person to register with code becomes the referee.
     
     Returns:
     {
@@ -59,83 +60,30 @@ def generate_referral_link():
                 'errorKey': 'errors.referral_limit_reached'
             }), 400
         
-        # Get request data
-        if not request.is_json:
-            return jsonify({
-                'error': 'Request must be in JSON format', 
-                'errorKey': 'errors.invalid_request_format'
-            }), 400
-            
-        data = request.get_json()
-        referee_email = data.get('referee_email')
-        
-        if not referee_email:
-            return jsonify({
-                'error': 'Referee email is required',
-                'errorKey': 'errors.missing_referee_email'
-            }), 400
-        
-        # Validate email format
-        import re
-        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        if not re.match(email_pattern, referee_email):
-            return jsonify({
-                'error': 'Please provide a valid email address',
-                'errorKey': 'errors.invalid_email_format'
-            }), 400
-        
-        # Check if this email has already been referred by this user
-        existing_referral = Referral.query.filter_by(
-            referrer_user_id=user.id, 
-            referee_email=referee_email
-        ).first()
-        
-        if existing_referral:
-            # If referral exists and is still valid, return the existing one
-            if existing_referral.is_valid():
-                # Construct referral link
-                from config import FLASK_API_URL
-                base_url = FLASK_API_URL.replace('/api', '') if FLASK_API_URL.endswith('/api') else FLASK_API_URL
-                referral_link = f"{base_url}/register?ref={existing_referral.referral_code}"
-                
-                return jsonify({
-                    'success': True,
-                    'referral_code': existing_referral.referral_code,
-                    'referral_link': referral_link,
-                    'expires_at': existing_referral.expires_at.isoformat(),
-                    'message': 'Using existing referral for this email',
-                    'messageKey': 'referral.using_existing'
-                })
-            else:
-                return jsonify({
-                    'error': 'This email has already been referred and the referral has expired or been used',
-                    'errorKey': 'errors.referral_already_exists'
-                }), 400
-        
-        # Create new referral
+        # Create new generic referral (Option B: no email required upfront)
         referral = Referral(
-            referrer_user_id=user.id,
-            referee_email=referee_email
+            referrer_user_id=user.id
+            # referee_email is NULL - will be populated when someone registers with this code
         )
         
         db.session.add(referral)
         db.session.commit()
         
         # Construct referral link
-        from config import FLASK_API_URL
-        base_url = FLASK_API_URL.replace('/api', '') if FLASK_API_URL.endswith('/api') else FLASK_API_URL
-        referral_link = f"{base_url}/register?ref={referral.referral_code}"
+        from config import FRONTEND_URL
+        referral_link = f"{FRONTEND_URL}/register?ref={referral.referral_code}"
         
-        print(f"Generated referral link: {referral_link}")
+        print(f"Generated generic referral link: {referral_link}")
         
         return jsonify({
             'success': True,
             'referral_code': referral.referral_code,
             'referral_link': referral_link,
             'expires_at': referral.expires_at.isoformat(),
-            'referee_email': referee_email,
-            'message': 'Referral link generated successfully',
-            'messageKey': 'referral.link_generated'
+            'message': 'Generic referral link generated successfully - share with anyone!',
+            'messageKey': 'referral.generic_link_generated',
+            'reward_days': REFERRAL_REWARD_DAYS,
+            'note': 'First person to register with this code will become your referee'
         })
         
     except Exception as e:
@@ -145,12 +93,12 @@ def generate_referral_link():
             'error': 'Failed to generate referral link',
             'errorKey': 'errors.referral_generation_failed',
             'message': str(e)
-        }), 500 
+        }), 500
 
 @referral_bp.route('/api/referrals/track/<referral_code>', methods=['GET'])
 def track_referral_code(referral_code):
     """
-    Track a referral code and return its status.
+    Track a referral code and return its status (Option B: Generic Shareable Links).
     This endpoint is public (no authentication required) for registration process.
     
     Returns:
@@ -158,7 +106,8 @@ def track_referral_code(referral_code):
         "valid": True,
         "referrer_username": "john_doe",
         "expires_at": "2025-01-15T10:30:00",
-        "status": "pending"
+        "status": "pending",
+        "is_generic": True
     }
     """
     try:
@@ -193,11 +142,11 @@ def track_referral_code(referral_code):
         return jsonify({
             'valid': True,
             'referrer_username': referrer.username,
-            'referee_email': referral.referee_email,
             'expires_at': referral.expires_at.isoformat(),
             'status': referral.status,
             'reward_days': REFERRAL_REWARD_DAYS,
-            'message': 'Valid referral code',
+            'is_generic': referral.referee_email is None,  # True for Option B generic links
+            'message': 'Valid referral code - you will both get bonus membership!',
             'messageKey': 'referral.code_valid'
         })
         
@@ -222,12 +171,13 @@ def get_my_referrals():
         "referrals": [
             {
                 "id": 1,
-                "referee_email": "friend@example.com",
+                "referee_email": "friend@example.com",  # or null for generic links
                 "referral_code": "ABC123XYZ789",
                 "status": "pending",
                 "created_at": "2025-01-01T10:30:00",
                 "expires_at": "2025-01-15T10:30:00",
-                "reward_claimed": False
+                "reward_claimed": False,
+                "is_generic": True
             }
         ],
         "total_count": 5,
@@ -260,14 +210,16 @@ def get_my_referrals():
             
             referral_data = {
                 'id': referral.id,
-                'referee_email': referral.referee_email,
+                'referee_email': referral.referee_email,  # Can be null for generic links
                 'referral_code': referral.referral_code,
                 'status': referral.status,
                 'created_at': referral.created_at.isoformat(),
                 'expires_at': referral.expires_at.isoformat(),
                 'completed_at': referral.completed_at.isoformat() if referral.completed_at else None,
                 'reward_claimed': referral.reward_claimed,
-                'referee_username': referee_user.username if referee_user else None
+                'referee_username': referee_user.username if referee_user else None,
+                'is_generic': referral.referee_email is None,  # True for Option B generic links
+                'reward_days': REFERRAL_REWARD_DAYS
             }
             
             referral_list.append(referral_data)

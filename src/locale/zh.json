@@ -92,7 +92,8 @@
     "referral_not_completed": "推荐尚未完成",
     "reward_already_claimed": "该推荐奖励已被领取",
     "no_rewards_available": "没有可领取的奖励",
-    "reward_claim_failed": "领取奖励失败"
+    "reward_claim_failed": "领取奖励失败",
+    "referral_upgrade_description": "只有付费会员才能邀请朋友。升级以解锁此功能并赚取额外的会员天数！"
   },
   "success": {
     "title": "成功",
@@ -147,7 +148,25 @@
     "welcome_with_invitation": "欢迎使用幻翻！您的邀请码已应用，会员已激活！",
     "no_code_warning": "不使用邀请码注册的用户每周仅能使用一次翻译服务。",
     "or_continue_with": "或者使用以下方式继续",
-    "google_signin": "使用Google登录"
+    "google_signin": "使用Google登录",
+    "email_verification_required": "请验证您的邮箱地址以继续",
+    "email_verification_sent": "验证邮件已发送！请检查收件箱。",
+    "email_verified": "邮箱验证成功！您现在可以访问您的账户。",
+    "verification_sent": "验证邮件已发送",
+    "resend_verification": "重新发送验证邮件",
+    "check_email": "请查看您的邮箱以获取验证链接",
+    "verify_email_first": "请先验证您的邮箱地址",
+    "register_subtitle": "创建账户开始使用",
+    "register_with_referral_subtitle": "使用推荐码创建账户",
+    "using_referral_code": "使用推荐码",
+    "already_have_account": "已有账户？",
+    "invite_friends": "邀请好友",
+    "check_email_title": "查看您的邮箱",
+    "check_email_description": "我们已向您发送了验证链接以完成注册。",
+    "check_email_instructions": "请检查您的收件箱并点击验证链接以激活您的账户。",
+    "check_spam_folder": "没看到邮件？请检查您的垃圾邮件文件夹。",
+    "sending": "发送中...",
+    "resend_in_seconds": "{seconds}秒后重新发送"
   },
   "languages": {
     "zh": "中文",
@@ -193,7 +212,8 @@
   },
   "nav": {
     "translate_now": "立即翻译",
-    "home": "返回首页"
+    "home": "返回首页",
+    "back_to_home": "返回首页"
   },
   "landing": {
     "translate": "翻译",
@@ -339,6 +359,58 @@
     "using_existing": "使用该邮箱的现有推荐",
     "link_generated": "推荐链接生成成功",
     "code_valid": "有效的推荐码",
-    "rewards_claimed": "推荐奖励领取成功"
+    "rewards_claimed": "推荐奖励领取成功",
+    "popup": {
+      "title": "喜欢幻翻？分享给朋友！",
+      "description": "帮助您的朋友发现幻翻，当他们注册时，您和您的朋友都可以获得额外的**{days}天**会员！",
+      "share_button": "分享幻翻",
+      "feedback_button": "反馈建议",
+      "footer_note": "关闭以继续您的翻译",
+      "close": "关闭弹窗"
+    }
+  },
+  "share": {
+    "modal": {
+      "title": "分享幻翻",
+      "description": "分享您的推荐链接，当朋友加入时获得额外的会员天数！",
+      "referral_link_label": "您的推荐链接",
+      "generating_link": "正在生成链接...",
+      "social_media_title": "在社交媒体上分享",
+      "email_share": "通过邮件分享",
+      "copy_success": "推荐链接已复制到剪贴板！",
+      "close": "关闭",
+      "generate_new": "生成新的邀请",
+      "generate_new_success": "新推荐链接生成成功！",
+      "single_use_info": "每个链接仅限单次使用。生成新链接以邀请更多朋友。",
+      "twitter_text": "试试幻翻 - 一键PowerPoint翻译！加入我们，你我都可以获得{days}天额外会员：",
+      "whatsapp_text": "试试幻翻 - 一键PowerPoint翻译！加入我们，你我都可以获得{days}天额外会员：{link}",
+      "email_subject": "加入幻翻 - PowerPoint翻译变得简单！",
+      "email_body": "你好！\n\n我一直在使用幻翻来翻译我的PowerPoint演示文稿，效果非常棒！一键翻译，保留所有格式。\n\n使用此链接加入我们，你我都将获得{days}天额外会员：\n{link}\n\n祝好！",
+      "generating": "生成中...",
+      "placeholder_generating": "正在生成推荐链接..."
+    }
+  },
+  "email": {
+    "verification": {
+      "subject": "验证您的邮箱地址 - 幻翻",
+      "welcome_title": "欢迎使用幻翻！",
+      "hello": "您好 {username}！",
+      "verification_intro": "感谢您注册幻翻。为了完成注册并开始使用我们的PowerPoint翻译服务，请验证您的邮箱地址。",
+      "button_text": "验证邮箱地址",
+      "button_fallback": "如果按钮无法正常工作，您可以复制并粘贴此链接到您的浏览器：",
+      "expires_note": "此链接将在24小时后过期。",
+      "ignore_note": "如果您没有创建幻翻账户，您可以安全地忽略这封邮件。",
+      "footer_copyright": "© 2025 幻翻。保留所有权利。"
+    },
+    "errors": {
+      "email_send_failed": "发送验证邮件失败",
+      "missing_token": "未提供验证令牌。请检查您邮箱中的链接。",
+      "invalid_token": "无效的验证令牌。请重新申请验证邮件。",
+      "token_expired": "此验证链接已过期。请重新申请验证邮件。",
+      "missing_email": "需要邮箱地址",
+      "email_already_verified": "邮箱已验证",
+      "verification_cooldown": "请等待后再请求另一封验证邮件",
+      "email_not_verified": "需要邮箱验证"
+    }
   }
 } 

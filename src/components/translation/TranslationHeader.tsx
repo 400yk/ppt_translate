@@ -1,9 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { LanguageSelector } from '@/components/language-selector';
+import { ShareModal } from '@/components/share-modal';
+import { MembershipUpgradeModal } from '@/components/membership-upgrade-modal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,15 +25,54 @@ interface TranslationHeaderProps {
 }
 
 export function TranslationHeader({ isGuestUser, onShowRegistrationDialog }: TranslationHeaderProps) {
-  const { user, logout } = useAuth();
+  const { user, logout, fetchWithAuth } = useAuth();
   const router = useRouter();
   const { t } = useTranslation();
+  const [isShareModalVisible, setIsShareModalVisible] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   
   // Custom logout function to redirect to landing page
   const handleLogout = () => {
     logout(() => {
       router.push('/');
     });
+  };
+
+  // Handle opening share modal
+  const handleInviteFriends = async () => {
+    if (isGuestUser) {
+      onShowRegistrationDialog();
+      return;
+    }
+
+    try {
+      // Use fetchWithAuth from auth context for proper authentication
+      const response = await fetchWithAuth('/api/membership/status');
+      
+      if (response.ok) {
+        const membershipStatus = await response.json();
+        console.log('TranslationHeader - Membership status:', membershipStatus); // Debug log
+        
+        // Check if user has paid membership or invitation membership
+        if (membershipStatus.user_type === 'paid' || membershipStatus.user_type === 'invitation') {
+          setIsShareModalVisible(true);
+        } else {
+          console.log('TranslationHeader - User not eligible:', membershipStatus.user_type); // Debug log
+          setShowUpgradePrompt(true);
+        }
+      } else {
+        console.error('TranslationHeader - API response not ok:', response.status, response.statusText); // Debug log
+        setShowUpgradePrompt(true);
+      }
+    } catch (error) {
+      console.error('TranslationHeader - Error checking membership status:', error);
+      setShowUpgradePrompt(true);
+    }
+  };
+
+  // Handle closing share modal
+  const handleCloseShareModal = () => {
+    setIsShareModalVisible(false);
   };
 
   // Get translated texts for the dropdown menu
@@ -89,6 +131,10 @@ export function TranslationHeader({ isGuestUser, onShowRegistrationDialog }: Tra
                   <Icons.user className="mr-2 h-4 w-4" />
                   {t('profile.title')}
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleInviteFriends}>
+                  <Icons.share className="mr-2 h-4 w-4" />
+                  {t('auth.invite_friends')}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   <Icons.logout className="mr-2 h-4 w-4" />
                   {t('auth.logout')}
@@ -98,6 +144,18 @@ export function TranslationHeader({ isGuestUser, onShowRegistrationDialog }: Tra
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      
+      {/* Share Modal */}
+      <ShareModal 
+        isVisible={isShareModalVisible} 
+        onClose={handleCloseShareModal} 
+      />
+      
+      {/* Membership upgrade modal */}
+      <MembershipUpgradeModal 
+        isVisible={showUpgradePrompt} 
+        onClose={() => setShowUpgradePrompt(false)} 
+      />
     </div>
   );
 } 

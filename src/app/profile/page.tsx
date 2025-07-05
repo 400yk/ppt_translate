@@ -16,6 +16,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { PaymentModal } from '@/components/payment-modal';
 import apiClient, { getApiErrorMessage } from '@/lib/api-client';
+import { ShareModal } from '@/components/share-modal';
+import { MembershipUpgradeModal } from '@/components/membership-upgrade-modal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +41,8 @@ export default function ProfilePage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const { toast } = useToast();
 
   // Fix for hydration error - only render content after client-side mount
@@ -162,6 +166,27 @@ export default function ProfilePage() {
     }
   };
 
+  // Handle invite friends click
+  const handleInviteFriends = async () => {
+    if (!isAuthenticated) {
+      return;
+    }
+
+    try {
+      // Use the already fetched membership status
+      if (membershipStatus && (membershipStatus.user_type === 'paid' || membershipStatus.user_type === 'invitation')) {
+        console.log('Profile page - User eligible for invites:', membershipStatus.user_type); // Debug log
+        setShowShareModal(true);
+      } else {
+        console.log('Profile page - User not eligible:', membershipStatus?.user_type || 'no status'); // Debug log
+        setShowUpgradePrompt(true);
+      }
+    } catch (error) {
+      console.error('Error checking membership status:', error);
+      setShowUpgradePrompt(true);
+    }
+  };
+
   // If not yet client-side (first render), return minimal content to avoid hydration mismatch
   if (!isClient) {
     return <div className="container max-w-6xl py-10"></div>;
@@ -232,6 +257,10 @@ export default function ProfilePage() {
                         {t('profile.title')}
                       </div>
                     </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleInviteFriends}>
+                    <Icons.share className="mr-2 h-4 w-4" />
+                    {t('auth.invite_friends')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     <Icons.logout className="mr-2 h-4 w-4" />
@@ -396,6 +425,18 @@ export default function ProfilePage() {
         isOpen={showPaymentModal} 
         onClose={closePaymentModal}
         onSuccess={handlePaymentSuccess} 
+      />
+      
+      {/* Share modal */}
+      <ShareModal 
+        isVisible={showShareModal} 
+        onClose={() => setShowShareModal(false)} 
+      />
+      
+      {/* Membership upgrade modal */}
+      <MembershipUpgradeModal 
+        isVisible={showUpgradePrompt} 
+        onClose={() => setShowUpgradePrompt(false)} 
       />
     </div>
   );

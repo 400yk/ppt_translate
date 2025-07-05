@@ -60,6 +60,10 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     jwt = JWTManager(app)
+    
+    # Initialize email service
+    from services.email_service import email_service
+    email_service.init_app(app)
 
     # Create tables if they don't exist
     # This should ideally be handled by migrations in a production setup

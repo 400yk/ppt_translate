@@ -21,25 +21,33 @@ import {
 } from '@/lib/translation-service';
 import { consumeGuestUsage } from '@/lib/guest-session';
 import { getApiErrorMessage } from '@/lib/api-client';
+import { ReferralPopup } from '@/components/referral-popup';
+import { shouldShowPopup, setPopupPermanentlyDismissed } from '@/lib/referral-popup-utils';
 
 interface TranslationFormProps {
   isGuestUser: boolean;
   maxFileSizeMB: number;
   isPaidUser: boolean;
+  membershipStatus: any; // Membership status for popup eligibility
   onFileSizeExceeded: () => void;
   onWeeklyLimitReached: () => void;
   onRegistrationRequired: () => void;
   onSessionExpired: () => void;
+  onShare?: () => void; // Callback for share button
+  onFeedback?: () => void; // Callback for feedback button
 }
 
 export function TranslationForm({
   isGuestUser,
   maxFileSizeMB,
   isPaidUser,
+  membershipStatus,
   onFileSizeExceeded,
   onWeeklyLimitReached,
   onRegistrationRequired,
   onSessionExpired,
+  onShare,
+  onFeedback,
 }: TranslationFormProps) {
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
@@ -53,6 +61,10 @@ export function TranslationForm({
   const [invalidFileType, setInvalidFileType] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [fileSizeExceeded, setFileSizeExceeded] = useState(false);
+  
+  // Referral popup state
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupShownThisSession, setPopupShownThisSession] = useState(false);
 
   // Set default languages based on current locale
   const getDefaultLanguages = () => {
@@ -74,11 +86,39 @@ export function TranslationForm({
     setDestLang(newDefaultDest);
   }, [locale]);
 
+  // Monitor translation progress and show popup at 20%
+  useEffect(() => {
+    const shouldShow = shouldShowPopup(progress, isTranslating, membershipStatus, popupShownThisSession);
+    if (shouldShow && !showPopup) {
+      setShowPopup(true);
+      setPopupShownThisSession(true);
+    }
+  }, [progress, isTranslating, membershipStatus, popupShownThisSession, showPopup]);
+
   // Helper function to get translated language name
   const getLanguageName = (code: LanguageCode): string => {
     // Using type assertion to help TypeScript understand this is a valid key
     const key = `languages.${code}` as const;
     return t(key);
+  };
+
+  // Handle popup close
+  const handlePopupClose = () => {
+    setShowPopup(false);
+    // Don't mark as permanently dismissed on regular close
+    // Only use setPopupPermanentlyDismissed() if implementing "don't show again"
+  };
+
+  // Handle share button click
+  const handleShare = () => {
+    setShowPopup(false);
+    onShare?.();
+  };
+
+  // Handle feedback button click  
+  const handleFeedback = () => {
+    setShowPopup(false);
+    onFeedback?.();
   };
 
   // Function to swap source and destination languages
@@ -533,6 +573,14 @@ export function TranslationForm({
       <p className="text-sm text-gray-500 text-center max-w-lg">
         {t('footer.description')}
       </p>
+
+      {/* Referral Popup */}
+      <ReferralPopup
+        isVisible={showPopup}
+        onClose={handlePopupClose}
+        onShare={handleShare}
+        onFeedback={handleFeedback}
+      />
     </div>
   );
 } 

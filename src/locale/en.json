@@ -92,7 +92,8 @@
     "referral_not_completed": "Referral is not completed yet",
     "reward_already_claimed": "Reward already claimed for this referral",
     "no_rewards_available": "No rewards available to claim",
-    "reward_claim_failed": "Failed to claim rewards"
+    "reward_claim_failed": "Failed to claim rewards",
+    "referral_upgrade_description": "Only paid members can invite friends. Upgrade to unlock this feature and earn extra membership days!"
   },
   "success": {
     "title": "Success",
@@ -143,12 +144,34 @@
     "processing": "Processing...",
     "use_without_code": "Register without an invitation code",
     "register_success": "Registration Successful",
+    "register_subtitle": "Create an account to get started",
+    "register_with_referral_subtitle": "Create an account with your referral code",
+    "using_referral_code": "Using referral code",
+    "already_have_account": "Already have an account?",
     "welcome": "Welcome to Translide!",
     "invitation_code_applied": "Your invitation code has been applied and membership activated!",
     "welcome_with_invitation": "Welcome to Translide! Your invitation code has been applied and membership activated!",
     "no_code_warning": "Without an invitation code, you'll be limited to one translation per week.",
     "or_continue_with": "Or continue with",
-    "google_signin": "Sign in with Google"
+    "google_signin": "Sign in with Google",
+    "email_verification_required": "Please verify your email address to continue",
+    "email_verification_sent": "Verification email sent! Check your inbox.",
+    "email_verified": "Email verified successfully! You can now access your account.",
+    "verification_sent": "Verification email has been sent",
+    "resend_verification": "Resend verification email",
+    "check_email": "Check your email for verification link",
+    "verify_email_first": "Please verify your email address first",
+    "register_subtitle": "Create an account to get started",
+    "register_with_referral_subtitle": "Create an account with your referral code",
+    "using_referral_code": "Using referral code",
+    "already_have_account": "Already have an account?",
+    "invite_friends": "Invite Friends",
+    "check_email_title": "Check Your Email",
+    "check_email_description": "We've sent you a verification link to complete your registration.",
+    "check_email_instructions": "Please check your inbox and click the verification link to activate your account.",
+    "check_spam_folder": "Don't see the email? Check your spam folder.",
+    "sending": "Sending...",
+    "resend_in_seconds": "Resend in {seconds}s"
   },
   "languages": {
     "zh": "Chinese",
@@ -194,7 +217,8 @@
   },
   "nav": {
     "translate_now": "Translate Now",
-    "home": "Back to Home"
+    "home": "Back to Home",
+    "back_to_home": "Back to Home"
   },
   "landing": {
     "translate": "Translate",
@@ -340,6 +364,58 @@
     "using_existing": "Using existing referral for this email",
     "link_generated": "Referral link generated successfully",
     "code_valid": "Valid referral code",
-    "rewards_claimed": "Successfully claimed referral rewards"
+    "rewards_claimed": "Successfully claimed referral rewards",
+    "popup": {
+      "title": "Love Translide? Share it!",
+      "description": "Help your friends discover Translide and earn **{days} extra days** of membership for both of you when they sign up!",
+      "share_button": "Share Translide",
+      "feedback_button": "Give Feedback",
+      "footer_note": "Close to continue your translation",
+      "close": "Close popup"
+    }
+  },
+  "share": {
+    "modal": {
+      "title": "Share Translide",
+      "description": "Share your referral link and earn extra membership days when friends join!",
+      "referral_link_label": "Your Referral Link",
+      "generating_link": "Generating link...",
+      "social_media_title": "Share on Social Media",
+      "email_share": "Share via Email",
+      "copy_success": "Referral link copied to clipboard!",
+      "close": "Close",
+      "generate_new": "Generate New Invitation",
+      "generate_new_success": "New referral link generated successfully!",
+      "single_use_info": "Each link is single-use. Generate new links to invite more friends.",
+      "twitter_text": "Check out Translide - one-click PowerPoint translation! Join me and get {days} extra days of membership: ",
+      "whatsapp_text": "Check out Translide - one-click PowerPoint translation! Join me and get {days} extra days of membership: {link}",
+      "email_subject": "Join me on Translide - PowerPoint Translation Made Easy!",
+      "email_body": "Hi there!\n\nI've been using Translide for translating my PowerPoint presentations and it's amazing! One-click translation while preserving all formatting.\n\nJoin me using this link and we'll both get {days} extra days of membership:\n{link}\n\nBest regards!",
+      "generating": "Generating...",
+      "placeholder_generating": "Generating referral link..."
+    }
+  },
+  "email": {
+    "verification": {
+      "subject": "Verify your email address - Translide",
+      "welcome_title": "Welcome to Translide!",
+      "hello": "Hello {username}!",
+      "verification_intro": "Thank you for registering with Translide. To complete your registration and start using our PowerPoint translation service, please verify your email address.",
+      "button_text": "Verify Email Address",
+      "button_fallback": "If the button doesn't work, you can copy and paste this link into your browser:",
+      "expires_note": "This link will expire in 24 hours.",
+      "ignore_note": "If you didn't create an account with Translide, you can safely ignore this email.",
+      "footer_copyright": "© 2025 Translide. All rights reserved."
+    },
+    "errors": {
+      "email_send_failed": "Failed to send verification email",
+      "missing_token": "No verification token provided. Please check the link in your email.",
+      "invalid_token": "Invalid verification token. Please request a new verification email.",
+      "token_expired": "This verification link has expired. Please request a new verification email.",
+      "missing_email": "Email is required",
+      "email_already_verified": "Email is already verified",
+      "verification_cooldown": "Please wait before requesting another verification email",
+      "email_not_verified": "Email verification required"
+    }
   }
 } 

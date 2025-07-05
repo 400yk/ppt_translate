@@ -92,7 +92,8 @@
     "referral_not_completed": "Die Empfehlung ist noch nicht abgeschlossen",
     "reward_already_claimed": "Die Belohnung wurde bereits für diese Empfehlung beansprucht",
     "no_rewards_available": "Keine Belohnungen zum Beanspruchen verfügbar",
-    "reward_claim_failed": "Beanspruchung der Belohnungen fehlgeschlagen"
+    "reward_claim_failed": "Beanspruchung der Belohnungen fehlgeschlagen",
+    "referral_upgrade_description": "Nur bezahlte Mitglieder können Freunde einladen. Upgraden Sie, um diese Funktion freizuschalten und zusätzliche Mitgliedschaftstage zu verdienen!"
   },
   "success": {
     "title": "Erfolg",
@@ -147,10 +148,23 @@
     "welcome_with_invitation": "Willkommen bei FolieTrans! Ihr Einladungscode wurde angewendet und die Mitgliedschaft aktiviert!",
     "no_code_warning": "Ohne Einladungscode sind Sie auf eine Übersetzung pro Woche beschränkt.",
     "or_continue_with": "Oder fortfahren mit",
-    "google_signin": "Mit Google anmelden"
+    "google_signin": "Mit Google anmelden",
+    "email_verification_required": "Bitte verifizieren Sie Ihre E-Mail-Adresse, um fortzufahren",
+    "email_verification_sent": "Bestätigungs-E-Mail gesendet! Überprüfen Sie Ihr Postfach.",
+    "email_verified": "E-Mail erfolgreich verifiziert! Sie können jetzt auf Ihr Konto zugreifen.",
+    "verification_sent": "Bestätigungs-E-Mail wurde gesendet",
+    "resend_verification": "Bestätigungs-E-Mail erneut senden",
+    "check_email": "Überprüfen Sie Ihre E-Mail für den Bestätigungslink",
+    "verify_email_first": "Bitte verifizieren Sie zuerst Ihre E-Mail-Adresse",
+    "register_subtitle": "Erstellen Sie ein Konto, um zu beginnen",
+    "register_with_referral_subtitle": "Erstellen Sie ein Konto mit Ihrem Empfehlungscode",
+    "using_referral_code": "Verwende Empfehlungscode",
+    "already_have_account": "Haben Sie bereits ein Konto?",
+    "invite_friends": "Freunde Einladen"
   },
   "languages": {
     "zh": "Chinesisch",
+    "zh_hk": "Traditionelles Chinesisch",
     "en": "Englisch",
     "es": "Spanisch",
     "fr": "Französisch",
@@ -192,7 +206,8 @@
   },
   "nav": {
     "translate_now": "Jetzt übersetzen",
-    "home": "Zurück zur Startseite"
+    "home": "Zurück zur Startseite",
+    "back_to_home": "Zurück zur Startseite"
   },
   "landing": {
     "translate": "Übersetzen",
@@ -338,6 +353,58 @@
     "using_existing": "Verwendung der bestehenden Empfehlung für diese E-Mail",
     "link_generated": "Empfehlungslink erfolgreich generiert",
     "code_valid": "Gültiger Empfehlungscode",
-    "rewards_claimed": "Empfehlungsbelohnungen erfolgreich beansprucht"
+    "rewards_claimed": "Empfehlungsbelohnungen erfolgreich beansprucht",
+    "popup": {
+      "title": "Gefällt Ihnen Translide? Teilen Sie es!",
+      "description": "Helfen Sie Ihren Freunden, Translide zu entdecken und verdienen Sie beide **{days} zusätzliche Tage** Mitgliedschaft, wenn sie sich anmelden!",
+      "share_button": "Translide teilen",
+      "feedback_button": "Feedback geben",
+      "footer_note": "Schließen, um mit Ihrer Übersetzung fortzufahren",
+      "close": "Popup schließen"
+    }
+  },
+  "share": {
+    "modal": {
+      "title": "Translide teilen",
+      "description": "Teilen Sie Ihren Empfehlungslink und verdienen Sie zusätzliche Mitgliedschaftstage, wenn Ihre Freunde beitreten!",
+      "referral_link_label": "Ihr Empfehlungslink",
+      "generating_link": "Link wird generiert...",
+      "social_media_title": "In sozialen Medien teilen",
+      "email_share": "Per E-Mail teilen",
+      "copy_success": "Empfehlungslink in die Zwischenablage kopiert!",
+      "close": "Schließen",
+      "generate_new": "Neue Einladung erstellen",
+      "generate_new_success": "Neuer Empfehlungslink erfolgreich generiert!",
+      "single_use_info": "Jeder Link ist nur einmal verwendbar. Generieren Sie neue Links, um mehr Freunde einzuladen.",
+      "twitter_text": "Probieren Sie Translide aus - Ein-Klick-PowerPoint-Übersetzung! Werden Sie Mitglied und wir erhalten beide {days} zusätzliche Mitgliedschaftstage: ",
+      "whatsapp_text": "Probieren Sie Translide aus - Ein-Klick-PowerPoint-Übersetzung! Werden Sie Mitglied und wir erhalten beide {days} zusätzliche Mitgliedschaftstage: {link}",
+      "email_subject": "Werden Sie Mitglied bei Translide - PowerPoint-Übersetzung leicht gemacht!",
+      "email_body": "Hallo!\n\nIch verwende Translide zum Übersetzen meiner PowerPoint-Präsentationen und es ist fantastisch! Ein-Klick-Übersetzung unter Beibehaltung aller Formatierungen.\n\nWerden Sie Mitglied über diesen Link und wir erhalten beide {days} zusätzliche Mitgliedschaftstage:\n{link}\n\nViele Grüße!",
+      "generating": "Generieren...",
+      "placeholder_generating": "Empfehlungslink wird generiert..."
+    }
+  },
+  "email": {
+    "verification": {
+      "subject": "Bestätigen Sie Ihre E-Mail-Adresse - Translide",
+      "welcome_title": "Willkommen bei Translide!",
+      "hello": "Hallo {username}!",
+      "verification_intro": "Danke für Ihre Registrierung bei Translide. Um Ihre Registrierung abzuschließen und unseren PowerPoint-Übersetzungsservice zu nutzen, bestätigen Sie bitte Ihre E-Mail-Adresse.",
+      "button_text": "E-Mail-Adresse bestätigen",
+      "button_fallback": "Wenn der Button nicht funktioniert, können Sie diesen Link kopieren und in Ihren Browser einfügen:",
+      "expires_note": "Dieser Link läuft in 24 Stunden ab.",
+      "ignore_note": "Wenn Sie kein Translide-Konto erstellt haben, können Sie diese E-Mail sicher ignorieren.",
+      "footer_copyright": "© 2025 Translide. Alle Rechte vorbehalten."
+    },
+    "errors": {
+      "email_send_failed": "Senden der Bestätigungs-E-Mail fehlgeschlagen",
+      "missing_token": "Kein Bestätigungstoken bereitgestellt. Bitte überprüfen Sie den Link in Ihrer E-Mail.",
+      "invalid_token": "Ungültiger Bestätigungstoken. Bitte fordern Sie eine neue Bestätigungs-E-Mail an.",
+      "token_expired": "Dieser Bestätigungslink ist abgelaufen. Bitte fordern Sie eine neue Bestätigungs-E-Mail an.",
+      "missing_email": "E-Mail ist erforderlich",
+      "email_already_verified": "E-Mail ist bereits bestätigt",
+      "verification_cooldown": "Bitte warten Sie, bevor Sie eine weitere Bestätigungs-E-Mail anfordern",
+      "email_not_verified": "E-Mail-Bestätigung erforderlich"
+    }
   }
 } 

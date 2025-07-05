@@ -4,8 +4,8 @@ User management module for handling user permissions, translation limits, and me
 
 import datetime
 from flask import jsonify
-from db.models import User, TranslationRecord, db
-from config import FREE_USER_TRANSLATION_LIMIT, FREE_USER_TRANSLATION_PERIOD, GUEST_TRANSLATION_LIMIT, GUEST_USER_CHARACTER_MONTHLY_LIMIT
+from db.models import User, TranslationRecord, db, Referral
+from config import FREE_USER_TRANSLATION_LIMIT, FREE_USER_TRANSLATION_PERIOD, GUEST_TRANSLATION_LIMIT, GUEST_USER_CHARACTER_MONTHLY_LIMIT, MAX_REFERRALS_PER_USER, REFERRAL_REWARD_DAYS
 from services.guest_service import guest_tracker
 from utils.api_utils import error_response
 
@@ -293,4 +293,216 @@ def process_membership_purchase(user_id, plan_type):
         return get_membership_status(user)
     else:
         # Return current status if activation failed
-        return get_membership_status(user) 
+        return get_membership_status(user)
+
+class UserService:
+    """Service class for user-related operations."""
+    
+    @staticmethod
+    def get_membership_status(user):
+        """
+        Get comprehensive membership status for a user.
+        
+        Returns:
+        {
+            "is_active": bool,
+            "membership_end": datetime,
+            "days_remaining": int,
+            "sources": ["payment", "invitation_code", "referral"],
+            "bonus_days": int,
+            "can_generate_referrals": bool
+        }
+        """
+        if not user:
+            return {
+                "is_active": False,
+                "membership_end": None,
+                "days_remaining": 0,
+                "sources": ["free"],
+                "bonus_days": 0,
+                "can_generate_referrals": False
+            }
+        
+        is_active = user.is_membership_active()
+        days_remaining = user.get_membership_days_remaining()
+        sources = user.get_membership_source_summary()
+        bonus_days = user.bonus_membership_days or 0
+        can_generate_referrals = user.can_generate_referral_codes()
+        
+        return {
+            "is_active": is_active,
+            "membership_end": user.membership_end.isoformat() if user.membership_end else None,
+            "days_remaining": days_remaining,
+            "sources": sources,
+            "bonus_days": bonus_days,
+            "can_generate_referrals": can_generate_referrals
+        }
+    
+    @staticmethod
+    def can_show_referral_popup(user):
+        """
+        Check if the referral popup should be shown to the user.
+        Only show to users with active membership.
+        """
+        if not user:
+            return False
+        
+        # Only show popup to users with active membership
+        return user.is_membership_active()
+    
+    @staticmethod
+    def get_referral_stats(user):
+        """
+        Get referral statistics for a user.
+        
+        Returns:
+        {
+            "total_referrals": int,
+            "completed_referrals": int,
+            "pending_referrals": int,
+            "total_bonus_days_earned": int,
+            "can_create_more": bool,
+            "remaining_slots": int
+        }
+        """
+        if not user:
+            return {
+                "total_referrals": 0,
+                "completed_referrals": 0,
+                "pending_referrals": 0,
+                "total_bonus_days_earned": 0,
+                "can_create_more": False,
+                "remaining_slots": 0
+            }
+        
+        # Get all referrals created by this user
+        total_referrals = Referral.query.filter_by(referrer_user_id=user.id).count()
+        completed_referrals = Referral.query.filter_by(
+            referrer_user_id=user.id, 
+            status='completed'
+        ).count()
+        pending_referrals = Referral.query.filter_by(
+            referrer_user_id=user.id, 
+            status='pending'
+        ).count()
+        
+        # Calculate bonus days earned from referrals
+        total_bonus_days_earned = completed_referrals * REFERRAL_REWARD_DAYS
+        
+        # Check if user can create more referrals
+        remaining_slots = max(0, MAX_REFERRALS_PER_USER - total_referrals)
+        can_create_more = (
+            user.can_generate_referral_codes() and 
+            remaining_slots > 0
+        )
+        
+        return {
+            "total_referrals": total_referrals,
+            "completed_referrals": completed_referrals,
+            "pending_referrals": pending_referrals,
+            "total_bonus_days_earned": total_bonus_days_earned,
+            "can_create_more": can_create_more,
+            "remaining_slots": remaining_slots
+        }
+    
+    @staticmethod
+    def update_character_usage_with_bonus(user, character_count):
+        """
+        Update character usage considering bonus membership days.
+        This extends the existing character tracking to account for bonus days.
+        """
+        if not user:
+            return False
+        
+        # Use existing method but ensure membership status includes bonus days
+        user.update_character_usage(character_count)
+        return True
+    
+    @staticmethod
+    def get_user_permissions(user):
+        """
+        Get comprehensive user permissions including referral-related permissions.
+        
+        Returns:
+        {
+            "can_translate": bool,
+            "can_generate_referrals": bool,
+            "can_submit_feedback": bool,
+            "is_admin": bool,
+            "character_limit": int,
+            "remaining_characters": int
+        }
+        """
+        if not user:
+            return {
+                "can_translate": False,
+                "can_generate_referrals": False,
+                "can_submit_feedback": True,  # Anyone can submit feedback
+                "is_admin": False,
+                "character_limit": 0,
+                "remaining_characters": 0
+            }
+        
+        # Check basic permissions
+        can_translate = user.is_membership_active() or user.has_character_quota_available(1)
+        can_generate_referrals = user.can_generate_referral_codes()
+        is_admin = user.id == 1  # Simple admin check (can be enhanced)
+        
+        # Character limits
+        character_limit = user.get_character_limit()
+        remaining_characters = user.get_remaining_characters()
+        
+        return {
+            "can_translate": can_translate,
+            "can_generate_referrals": can_generate_referrals,
+            "can_submit_feedback": True,
+            "is_admin": is_admin,
+            "character_limit": character_limit,
+            "remaining_characters": remaining_characters
+        }
+    
+    @staticmethod
+    def calculate_membership_extension(user, bonus_days):
+        """
+        Calculate what the new membership end date would be if bonus days were added.
+        This is useful for preview purposes before actually adding the days.
+        """
+        if not user:
+            return None
+        
+        now = datetime.datetime.utcnow()
+        
+        if user.is_paid_user and user.membership_end and user.membership_end > now:
+            # User has active membership, extend it
+            new_end = user.membership_end + datetime.timedelta(days=bonus_days)
+        else:
+            # User doesn't have active membership, start from now
+            new_end = now + datetime.timedelta(days=bonus_days)
+        
+        return new_end
+    
+    @staticmethod
+    def get_user_dashboard_data(user):
+        """
+        Get comprehensive dashboard data for a user including membership and referral info.
+        """
+        if not user:
+            return None
+        
+        membership_status = UserService.get_membership_status(user)
+        referral_stats = UserService.get_referral_stats(user)
+        permissions = UserService.get_user_permissions(user)
+        
+        return {
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "created_at": user.created_at.isoformat(),
+                "last_login": user.last_login.isoformat() if user.last_login else None,
+                "is_email_verified": user.is_email_verified
+            },
+            "membership": membership_status,
+            "referrals": referral_stats,
+            "permissions": permissions
+        } 

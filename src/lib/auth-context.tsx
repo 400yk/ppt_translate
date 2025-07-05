@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { useRouter as useNavigationRouter } from 'next/navigation';
 import { clearGuestSession } from './guest-session';
 import apiClient from '@/lib/api-client';
@@ -33,6 +33,23 @@ interface AuthContextType {
     message?: string;
     messageKey?: string;
   }>;
+  verifyReferralCode: (code: string) => Promise<{
+    valid: boolean;
+    error?: string;
+    errorKey?: string;
+    message?: string;
+    messageKey?: string;
+  }>;
+  verifyCode: (code: string) => Promise<{
+    valid: boolean;
+    remaining?: number;
+    error?: string;
+    errorKey?: string;
+    message?: string;
+    messageKey?: string;
+  }>;
+  resendVerificationEmail: (email: string) => Promise<void>;
+  loginWithToken: (token: string, username: string) => void;
   fetchWithAuth: (url: string, options?: RequestInit) => Promise<Response>;
   clearRegistrationFlag: () => void;
 }
@@ -49,6 +66,10 @@ const AuthContext = createContext<AuthContextType>({
   logout: () => {},
   signInWithGoogle: async () => {},
   verifyInvitationCode: async () => ({ valid: false }),
+  verifyReferralCode: async () => ({ valid: false }),
+  verifyCode: async () => ({ valid: false }),
+  resendVerificationEmail: async () => {},
+  loginWithToken: () => {},
   fetchWithAuth: async () => new Response(),
   clearRegistrationFlag: () => {},
 });
@@ -61,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [registeredWithInvitation, setRegisteredWithInvitation] = useState<boolean | null>(null);
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   
   // We can't use the router hook directly here (only in client components)
   // So we'll update the logout function to take an optional callback
@@ -127,22 +148,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         username, 
         email, 
         password, 
-        invitation_code: invitationCode
+        invitation_code: invitationCode,
+        locale: locale  // Send current locale for email localization
       });
 
       const data = response.data;
       
-      // Save auth data after successful registration
-      setToken(data.access_token);
-      setUser({ username, email });
-      
-      // Store invitation code usage flag
-      setRegisteredWithInvitation(data.has_invitation || false);
-      
-      // Store in localStorage for persistence (only in browser)
-      if (isBrowser) {
-        localStorage.setItem('auth_token', data.access_token);
-        localStorage.setItem('auth_user', JSON.stringify({ username, email }));
+      // Handle email verification requirement
+      if (data.email_verification_required) {
+        // Email verification is required, don't log in yet
+        // Store invitation code usage flag for later (includes both invitation codes and referral codes)
+        setRegisteredWithInvitation(data.has_invitation || data.has_referral || false);
+        
+        // Store email verification data temporarily
+        if (isBrowser) {
+          localStorage.setItem('pending_verification_email', email);
+          localStorage.setItem('pending_verification_username', username);
+          localStorage.setItem('pending_verification_has_code', String(data.has_invitation || data.has_referral || false));
+        }
+      } else {
+        // No email verification required, log in immediately
+        setToken(data.access_token);
+        setUser({ username, email });
+        
+        // Store invitation code usage flag (includes both invitation codes and referral codes)
+        setRegisteredWithInvitation(data.has_invitation || data.has_referral || false);
+        
+        // Store in localStorage for persistence (only in browser)
+        if (isBrowser) {
+          localStorage.setItem('auth_token', data.access_token);
+          localStorage.setItem('auth_user', JSON.stringify({ username, email }));
+        }
       }
       
       // For new registrations, we do want to reset guest usage to give them a fresh start
@@ -187,6 +223,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error('No authentication token available');
     }
 
+    // Construct full URL if relative URL is provided
+    const fullUrl = url.startsWith('http') ? url : `${API_URL}${url}`;
+
     // Prepare headers with authentication token
     const headers = {
       ...options.headers,
@@ -194,7 +233,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     // Make the request
-    const response = await fetch(url, {
+    const response = await fetch(fullUrl, {
       ...options,
       headers
     });
@@ -252,6 +291,73 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Verify referral code
+  const verifyReferralCode = async (code: string) => {
+    try {
+      const response = await apiClient.get(`/api/referrals/track/${code}`);
+      return response.data;
+    } catch (error) {
+      console.error('Verify referral code error:', error);
+      return { valid: false, error: 'Failed to verify referral code' };
+    }
+  };
+
+  // Unified verification function that determines code type by length
+  const verifyCode = async (code: string) => {
+    // Referral codes are 12 characters long (REFERRAL_CODE_LENGTH from config.py)
+    const REFERRAL_CODE_LENGTH = 12;
+    
+    if (code.length === REFERRAL_CODE_LENGTH) {
+      // Code length matches referral code length, validate as referral code
+      return await verifyReferralCode(code);
+    } else {
+      // Code length doesn't match referral code length, validate as invitation code
+      return await verifyInvitationCode(code);
+    }
+  };
+
+  // Resend verification email
+  const resendVerificationEmail = async (email: string) => {
+    try {
+      const response = await apiClient.post('/api/resend-verification', {
+        email,
+        locale: locale  // Send current locale for email localization
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Resend verification email error:', error);
+      throw error;
+    }
+  };
+
+  // Login with token (for email verification auto-login)
+  const loginWithToken = useCallback((token: string, username: string) => {
+    setToken(token);
+    setUser({ username, email: '' });
+    
+    // Check if this is from email verification with pending registration code
+    if (isBrowser) {
+      const pendingEmail = localStorage.getItem('pending_verification_email');
+      const pendingUsername = localStorage.getItem('pending_verification_username');
+      const pendingHasCode = localStorage.getItem('pending_verification_has_code');
+      
+      if (pendingUsername === username && pendingHasCode === 'true') {
+        // Restore the registration flag for users who registered with codes
+        setRegisteredWithInvitation(true);
+        
+        // Clear pending verification data
+        localStorage.removeItem('pending_verification_email');
+        localStorage.removeItem('pending_verification_username');
+        localStorage.removeItem('pending_verification_has_code');
+      }
+      
+      // Store in localStorage for persistence
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('auth_user', JSON.stringify({ username, email: '' }));
+    }
+  }, [isBrowser]);
+
   // Sign in with Google function
   const signInWithGoogle = async (googleToken: string, invitationCode?: string) => {
     try {
@@ -265,8 +371,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(data.access_token);
         setUser(data.user); // Assuming backend returns user object { username, email, ... }
         
-        // Store invitation code usage flag for Google sign-in
-        setRegisteredWithInvitation(data.has_invitation || false);
+        // Store invitation code usage flag for Google sign-in (includes both invitation codes and referral codes)
+        setRegisteredWithInvitation(data.has_invitation || data.has_referral || false);
         
         // Store in localStorage for persistence (only in browser)
         if (isBrowser) {
@@ -305,6 +411,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         signInWithGoogle,
         verifyInvitationCode,
+        verifyReferralCode,
+        verifyCode,
+        resendVerificationEmail,
+        loginWithToken,
         fetchWithAuth,
         clearRegistrationFlag
       }}

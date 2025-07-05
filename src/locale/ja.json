@@ -92,7 +92,8 @@
     "referral_not_completed": "紹介はまだ完了していません",
     "reward_already_claimed": "この紹介の報酬は既に請求されています",
     "no_rewards_available": "請求可能な報酬がありません",
-    "reward_claim_failed": "報酬の請求に失敗しました"
+    "reward_claim_failed": "報酬の請求に失敗しました",
+    "referral_upgrade_description": "有料メンバーのみが友達を招待できます。この機能を解放し、追加のメンバーシップ日数を獲得するためにアップグレードしてください！"
   },
   "success": {
     "title": "成功",
@@ -143,14 +144,26 @@
     "processing": "処理中...",
     "use_without_code": "招待コードなしで登録",
     "register_success": "登録成功",
+    "register_subtitle": "アカウントを作成して始める",
+    "register_with_referral_subtitle": "紹介コードでアカウントを作成",
+    "using_referral_code": "紹介コードを使用",
+    "already_have_account": "アカウントをお持ちですか？",
     "welcome": "スライドトランスへようこそ！",
     "welcome_with_invitation": "スライドトランスへようこそ！招待コードが適用され、メンバーシップが有効化されました！",
     "no_code_warning": "招待コードなしでは、週に1回の翻訳に制限されます。",
     "or_continue_with": "または以下で続行",
-    "google_signin": "Googleでサインイン"
+    "google_signin": "Googleでサインイン",
+    "email_verification_required": "続行するにはメールアドレスを確認してください",
+    "email_verification_sent": "確認メールを送信しました！受信箱をご確認ください。",
+    "email_verified": "メールが正常に確認されました！アカウントにアクセスできます。",
+    "verification_sent": "確認メールが送信されました",
+    "resend_verification": "確認メールを再送信",
+    "check_email": "確認リンクのメールをご確認ください",
+    "verify_email_first": "最初にメールアドレスを確認してください"
   },
   "languages": {
     "zh": "中国語",
+    "zh_hk": "繁体字中国語",
     "en": "英語",
     "es": "スペイン語",
     "fr": "フランス語",
@@ -192,7 +205,8 @@
   },
   "nav": {
     "translate_now": "今すぐ翻訳",
-    "home": "ホームに戻る"
+    "home": "ホームに戻る",
+    "back_to_home": "ホームに戻る"
   },
   "landing": {
     "translate": "翻訳",
@@ -338,6 +352,58 @@
     "using_existing": "このメールアドレスの既存の紹介を使用",
     "link_generated": "紹介リンクが正常に生成されました",
     "code_valid": "有効な紹介コード",
-    "rewards_claimed": "紹介報酬が正常に請求されました"
+    "rewards_claimed": "紹介報酬が正常に請求されました",
+    "popup": {
+      "title": "Translideが気に入りましたか？シェアしよう！",
+      "description": "友達にTranslideを発見してもらい、彼らが登録すると、あなたと友達の両方が**{days}日間**の追加メンバーシップを獲得できます！",
+      "share_button": "Translideをシェア",
+      "feedback_button": "フィードバックする",
+      "footer_note": "閉じて翻訳を続ける",
+      "close": "ポップアップを閉じる"
+    }
+  },
+  "share": {
+    "modal": {
+      "title": "Translideを共有",
+      "description": "紹介リンクを共有して、友達が参加したときに追加のメンバーシップ日数を獲得しましょう！",
+      "referral_link_label": "あなたの紹介リンク",
+      "generating_link": "リンクを生成中...",
+      "social_media_title": "ソーシャルメディアで共有",
+      "email_share": "メールで共有",
+      "copy_success": "紹介リンクをクリップボードにコピーしました！",
+      "close": "閉じる",
+      "generate_new": "新しい招待を生成",
+      "generate_new_success": "新しい紹介リンクが正常に生成されました！",
+      "single_use_info": "各リンクは一回限りの使用です。より多くの友達を招待するために新しいリンクを生成してください。",
+      "twitter_text": "Translideを試してみてください - ワンクリックPowerPoint翻訳！私と一緒に参加して、{days}日間の追加メンバーシップを獲得しましょう：",
+      "whatsapp_text": "Translideを試してみてください - ワンクリックPowerPoint翻訳！私と一緒に参加して、{days}日間の追加メンバーシップを獲得しましょう：{link}",
+      "email_subject": "Translideに参加してください - PowerPoint翻訳が簡単に！",
+      "email_body": "こんにちは！\n\nPowerPointプレゼンテーションの翻訳にTranslideを使用していますが、素晴らしいです！ワンクリック翻訳でフォーマットをすべて保持。\n\nこのリンクを使用して参加すると、私たちは両方とも{days}日間の追加メンバーシップを獲得できます：\n{link}\n\nよろしくお願いします！",
+      "generating": "生成中...",
+      "placeholder_generating": "紹介リンクを生成中..."
+    }
+  },
+  "email": {
+    "verification": {
+      "subject": "メールアドレスを確認してください - Translide",
+      "welcome_title": "Translineへようこそ！",
+      "hello": "こんにちは {username}さん！",
+      "verification_intro": "Translineにご登録いただき、ありがとうございます。登録を完了し、PowerPoint翻訳サービスをご利用いただくため、メールアドレスを確認してください。",
+      "button_text": "メールアドレスを確認",
+      "button_fallback": "ボタンが機能しない場合は、このリンクをコピーしてブラウザに貼り付けてください：",
+      "expires_note": "このリンクは24時間で有効期限が切れます。",
+      "ignore_note": "Translineアカウントを作成していない場合は、このメールを無視していただいて構いません。",
+      "footer_copyright": "© 2025 Translide. 無断複写・転載を禁じます。"
+    },
+    "errors": {
+      "email_send_failed": "確認メールの送信に失敗しました",
+      "missing_token": "確認トークンが提供されていません。メール内のリンクを確認してください。",
+      "invalid_token": "確認トークンが無効です。新しい確認メールをリクエストしてください。",
+      "token_expired": "この確認リンクは期限切れです。新しい確認メールをリクエストしてください。",
+      "missing_email": "メールアドレスが必要です",
+      "email_already_verified": "メールアドレスは既に確認済みです",
+      "verification_cooldown": "別の確認メールをリクエストするまで少しお待ちください",
+      "email_not_verified": "メール確認が必要です"
+    }
   }
 } 

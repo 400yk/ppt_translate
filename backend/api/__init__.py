@@ -11,6 +11,7 @@ from .user_api import user_bp
 from .guest_api import guest_bp
 from .pricing_api import pricing_bp
 from .referral_api import referral_bp
+from .feedback_api import feedback_bp
 
 def register_blueprints(app):
     """Register all API blueprints with the Flask app."""
@@ -21,4 +22,5 @@ def register_blueprints(app):
     app.register_blueprint(user_bp)
     app.register_blueprint(guest_bp)
     app.register_blueprint(pricing_bp)
-    app.register_blueprint(referral_bp) 
+    app.register_blueprint(referral_bp)
+    app.register_blueprint(feedback_bp) 

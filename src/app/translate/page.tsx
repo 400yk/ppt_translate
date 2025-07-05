@@ -19,6 +19,7 @@ import {
 } from '@/components/translation/TranslationAlerts';
 import { fetchMaxFileSize } from '@/lib/translation-service';
 import { LanguageSelector } from '@/components/language-selector';
+import { ShareModal } from '@/components/share-modal';
 import apiClient from '@/lib/api-client';
 
 // Define API URL
@@ -41,6 +42,7 @@ export default function TranslationPage() {
   const [membershipStatus, setMembershipStatus] = useState<any>(null);
   const [isLoadingMembership, setIsLoadingMembership] = useState(false);
   const [guestCheckComplete, setGuestCheckComplete] = useState(false); // New state to track guest check completion
+  const [showShareModal, setShowShareModal] = useState(false);
   
   const {toast} = useToast();
   const {t, locale, setLocale} = useTranslation();
@@ -220,6 +222,12 @@ export default function TranslationPage() {
         }}
       />
       
+      {/* Share modal */}
+      <ShareModal
+        isVisible={showShareModal}
+        onClose={() => setShowShareModal(false)}
+      />
+      
       <div className="container mx-auto px-4 py-4 max-w-6xl flex flex-col h-full flex-1">
         {/* Header with user menu */}
         {isClient && (
@@ -254,10 +262,17 @@ export default function TranslationPage() {
               isGuestUser={isGuestUser}
               maxFileSizeMB={maxFileSizeMB}
               isPaidUser={membershipStatus?.user_type === 'paid'}
+              membershipStatus={membershipStatus}
               onFileSizeExceeded={() => setFileSizeExceeded(true)}
               onWeeklyLimitReached={() => setWeeklyLimitReached(true)}
               onRegistrationRequired={() => setShowRegistrationDialog(true)}
               onSessionExpired={handleLogout}
+              onShare={() => {
+                setShowShareModal(true);
+              }}
+              onFeedback={() => {
+                console.log('Feedback button clicked - will implement feedback modal in Phase 3.3');
+              }}
             />
           )}
         </div>

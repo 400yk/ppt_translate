@@ -93,12 +93,15 @@ PAID_USER_CHARACTER_MONTHLY_LIMIT = 5000000  # Number of characters allowed for 
 GUEST_USER_MAX_FILE_SIZE = 50  # 50MB
 GUEST_USER_CHARACTER_MONTHLY_LIMIT = 100000  # Number of characters allowed for guest users
 
+# Frontend and API URLs
+FLASK_API_URL = os.getenv('FLASK_API_URL', 'http://localhost:5000')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:9002')
+
 # Stripe payment settings
-FLASK_API_URL = os.getenv('FLASK_API_URL', 'http://localhost:9002')
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')  # No default value to avoid committed secrets
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')  # No default value
-STRIPE_SUCCESS_URL = os.getenv('STRIPE_SUCCESS_URL', f'{FLASK_API_URL}/payment/success')
-STRIPE_CANCEL_URL = os.getenv('STRIPE_CANCEL_URL', f'{FLASK_API_URL}/payment/cancel')
+STRIPE_SUCCESS_URL = os.getenv('STRIPE_SUCCESS_URL', f'{FRONTEND_URL}/payment/success')
+STRIPE_CANCEL_URL = os.getenv('STRIPE_CANCEL_URL', f'{FRONTEND_URL}/payment/cancel')
 
 # Pricing configuration (in USD)
 PRICING = {
@@ -148,4 +151,29 @@ INVITATION_CODE_REWARD_DAYS = 3  # Reward days for invitation codes - current us
 REFERRAL_CODE_LENGTH = 12  # Length of referral codes
 REFERRAL_EXPIRY_DAYS = 30  # Referral link expiry in days
 MAX_REFERRALS_PER_USER = 100  # Anti-spam limit for referrals per user
-REFERRAL_FEATURE_PAID_MEMBERS_ONLY = True  # Only paid members can generate referral codes 
+REFERRAL_FEATURE_PAID_MEMBERS_ONLY = True  # Only paid members can generate referral codes
+
+# Email Verification Configuration
+EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS = 24  # Email verification token expiry in hours
+EMAIL_VERIFICATION_COOLDOWN_MINUTES = 5  # Cooldown between verification email sends
+REQUIRE_EMAIL_VERIFICATION = True  # Enable for testing - set to False to disable
+SKIP_EMAIL_VERIFICATION_FOR_GOOGLE_AUTH = True  # Skip verification for Google OAuth users
+
+# Email Service Configuration
+EMAIL_SERVICE = os.environ.get('EMAIL_SERVICE', 'flask_mail')  # Use Flask-Mail for local development
+
+# Flask-Mail Configuration (for development)
+MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true'
+MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'False').lower() == 'true'
+MAIL_USERNAME = os.environ.get('MAIL_USERNAME')  # Your Gmail address
+MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')  # Your Gmail App Password
+MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', MAIL_USERNAME)
+
+# Third-party Email Service API Keys
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
+AWS_SES_REGION = os.getenv('AWS_SES_REGION', 'us-east-1')
+MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
+MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN')
+RESEND_API_KEY = os.getenv('RESEND_API_KEY') 

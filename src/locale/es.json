@@ -92,7 +92,8 @@
     "referral_not_completed": "La referencia aún no está completada",
     "reward_already_claimed": "La recompensa ya ha sido reclamada para esta referencia",
     "no_rewards_available": "No hay recompensas disponibles para reclamar",
-    "reward_claim_failed": "Error al reclamar recompensas"
+    "reward_claim_failed": "Error al reclamar recompensas",
+    "referral_upgrade_description": "Solo los miembros pagados pueden invitar amigos. ¡Actualiza para desbloquear esta función y ganar días de membresía adicionales!"
   },
   "success": {
     "title": "Éxito",
@@ -148,10 +149,23 @@
     "welcome_with_invitation": "¡Bienvenido a PresentaTrad! ¡Su código de invitación ha sido aplicado y la membresía activada!",
     "no_code_warning": "Sin un código de invitación, estará limitado a una traducción por semana.",
     "or_continue_with": "O continuar con",
-    "google_signin": "Iniciar sesión con Google"
+    "google_signin": "Iniciar sesión con Google",
+    "email_verification_required": "Por favor, verifique su dirección de correo electrónico para continuar",
+    "email_verification_sent": "¡Correo de verificación enviado! Revise su bandeja de entrada.",
+    "email_verified": "¡Correo verificado con éxito! Ahora puede acceder a su cuenta.",
+    "verification_sent": "Correo de verificación enviado",
+    "resend_verification": "Reenviar correo de verificación",
+    "check_email": "Revise su correo para el enlace de verificación",
+    "verify_email_first": "Por favor, verifique primero su dirección de correo electrónico",
+    "register_subtitle": "Crea una cuenta para comenzar",
+    "register_with_referral_subtitle": "Crea una cuenta con tu código de referencia",
+    "using_referral_code": "Usando código de referencia",
+    "already_have_account": "¿Ya tienes una cuenta?",
+    "invite_friends": "Invitar Amigos"
   },
   "languages": {
     "zh": "Chino",
+    "zh_hk": "Chino tradicional",
     "en": "Inglés",
     "es": "Español",
     "fr": "Francés",
@@ -193,7 +207,8 @@
   },
   "nav": {
     "translate_now": "Traducir ahora",
-    "home": "Volver a inicio"
+    "home": "Volver a inicio",
+    "back_to_home": "Volver a inicio"
   },
   "landing": {
     "translate": "Traduce",
@@ -339,6 +354,58 @@
     "using_existing": "Usando referencia existente para este correo",
     "link_generated": "Enlace de referencia generado exitosamente",
     "code_valid": "Código de referencia válido",
-    "rewards_claimed": "Recompensas de referencia reclamadas exitosamente"
+    "rewards_claimed": "Recompensas de referencia reclamadas exitosamente",
+    "popup": {
+      "title": "¿Te gusta Translide? ¡Compártelo!",
+      "description": "Ayuda a tus amigos a descubrir Translide y gana **{days} días extra** de membresía para ambos cuando se registren!",
+      "share_button": "Compartir Translide",
+      "feedback_button": "Dar Comentarios",
+      "footer_note": "Cerrar para continuar con tu traducción",
+      "close": "Cerrar ventana"
+    }
+  },
+  "share": {
+    "modal": {
+      "title": "Compartir Translide",
+      "description": "¡Comparte tu enlace de referencia y gana días extra de membresía cuando tus amigos se unan!",
+      "referral_link_label": "Tu Enlace de Referencia",
+      "generating_link": "Generando enlace...",
+      "social_media_title": "Compartir en Redes Sociales",
+      "email_share": "Compartir por Email",
+      "copy_success": "¡Enlace de referencia copiado al portapapeles!",
+      "close": "Cerrar",
+      "generate_new": "Generar Nueva Invitación",
+      "generate_new_success": "¡Nuevo enlace de referencia generado con éxito!",
+      "single_use_info": "Cada enlace es de un solo uso. Genera nuevos enlaces para invitar a más amigos.",
+      "twitter_text": "¡Prueba Translide - traducción de PowerPoint en un clic! Únete y obtendremos {days} días extra de membresía: ",
+      "whatsapp_text": "¡Prueba Translide - traducción de PowerPoint en un clic! Únete y obtendremos {days} días extra de membresía: {link}",
+      "email_subject": "¡Únete a Translide - Traducción de PowerPoint hecha fácil!",
+      "email_body": "¡Hola!\n\n¡He estado usando Translide para traducir mis presentaciones de PowerPoint y es increíble! Traducción en un clic manteniendo todo el formato.\n\nÚnete usando este enlace y ambos obtendremos {days} días extra de membresía:\n{link}\n\n¡Saludos!",
+      "generating": "Generando...",
+      "placeholder_generating": "Generando enlace de referencia..."
+    }
+  },
+  "email": {
+    "verification": {
+      "subject": "Verifique su dirección de correo electrónico - Translide",
+      "welcome_title": "¡Bienvenido a Translide!",
+      "hello": "¡Hola {username}!",
+      "verification_intro": "Gracias por registrarte en Translide. Para completar tu registro y comenzar a usar nuestro servicio de traducción de PowerPoint, por favor verifica tu dirección de correo electrónico.",
+      "button_text": "Verificar dirección de correo electrónico",
+      "button_fallback": "Si el botón no funciona, puedes copiar y pegar este enlace en tu navegador:",
+      "expires_note": "Este enlace expirará en 24 horas.",
+      "ignore_note": "Si no creaste una cuenta en Translide, puedes ignorar este correo de forma segura.",
+      "footer_copyright": "© 2025 Translide. Todos los derechos reservados."
+    },
+    "errors": {
+      "email_send_failed": "Error al enviar el correo de verificación",
+      "missing_token": "No se proporcionó token de verificación. Por favor, revisa el enlace en tu correo.",
+      "invalid_token": "Token de verificación inválido. Por favor, solicita un nuevo correo de verificación.",
+      "token_expired": "Este enlace de verificación ha expirado. Por favor, solicita un nuevo correo de verificación.",
+      "missing_email": "Se requiere correo electrónico",
+      "email_already_verified": "El correo electrónico ya está verificado",
+      "verification_cooldown": "Por favor, espera antes de solicitar otro correo de verificación",
+      "email_not_verified": "Se requiere verificación de correo electrónico"
+    }
   }
 } 

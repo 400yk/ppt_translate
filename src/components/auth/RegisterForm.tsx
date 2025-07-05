@@ -12,10 +12,14 @@ import { useRouter } from 'next/navigation';
 import { getApiErrorMessage } from '@/lib/api-client';
 import GoogleSignInButton from './GoogleSignInButton';
 
-export default function RegisterForm() {
+interface RegisterFormProps {
+  initialReferralCode?: string | null;
+}
+
+export default function RegisterForm({ initialReferralCode }: RegisterFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [invitationCode, setInvitationCode] = useState('');
+  const [invitationCode, setInvitationCode] = useState(initialReferralCode || '');
   const [codeValid, setCodeValid] = useState<boolean | null>(null);
   const [codeMessage, setCodeMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +27,7 @@ export default function RegisterForm() {
   const [forceRender, setForceRender] = useState(0);
   const [lastVerifiedCode, setLastVerifiedCode] = useState('');
   
-  const { register, verifyInvitationCode } = useAuth();
+  const { register, verifyCode, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
   const router = useRouter();
@@ -41,7 +45,7 @@ export default function RegisterForm() {
     
     setIsCheckingCode(true);
     try {
-      const result = await verifyInvitationCode(code);
+      const result = await verifyCode(code);
       setCodeValid(result.valid);
       setLastVerifiedCode(code); // Remember the code we just verified
       
@@ -58,7 +62,7 @@ export default function RegisterForm() {
     } finally {
       setIsCheckingCode(false);
     }
-  }, [verifyInvitationCode, t, isCheckingCode, lastVerifiedCode]);
+  }, [verifyCode, t, isCheckingCode, lastVerifiedCode]);
 
   // Force component re-render on locale change
   useEffect(() => {
@@ -127,8 +131,24 @@ export default function RegisterForm() {
     try {
       // Use email as username since we removed the username field
       await register(email, email, password, invitationCode);
-      // Toast message will be handled by AuthTabs component to show correct message
-      // based on whether invitation code was used or not
+      
+      // Use a small delay to let the auth state update
+      setTimeout(() => {
+        // Check if email verification is required (user not logged in immediately)
+        if (!isAuthenticated) {
+          // Email verification is required
+          toast({
+            title: t('auth.register_success'),
+            description: t('auth.check_email'),
+          });
+          
+          // Redirect to verification page after another short delay
+          setTimeout(() => {
+            router.push('/verify-email');
+          }, 2000);
+        }
+        // If authenticated, the redirect will be handled by the register page useEffect
+      }, 100);
     } catch (error: any) {
       const errorMessage = getApiErrorMessage(error);
       

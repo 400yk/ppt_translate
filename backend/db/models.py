@@ -3,13 +3,14 @@ import datetime
 import secrets
 import string
 from config import (
-    PAID_MEMBERSHIP_MONTHLY, 
-    PAID_MEMBERSHIP_YEARLY, 
     INVITATION_MEMBERSHIP_MONTHS, 
-    FREE_USER_CHARACTER_MONTHLY_LIMIT, 
+    PAID_MEMBERSHIP_MONTHLY, 
+    PAID_MEMBERSHIP_YEARLY,
+    FREE_USER_CHARACTER_MONTHLY_LIMIT,
     PAID_USER_CHARACTER_MONTHLY_LIMIT,
     REFERRAL_CODE_LENGTH,
-    REFERRAL_EXPIRY_DAYS
+    REFERRAL_EXPIRY_DAYS,
+    EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS
 )
 
 db = SQLAlchemy()
@@ -88,6 +89,11 @@ class User(db.Model):
     # Google OAuth fields
     google_id = db.Column(db.String(255), nullable=True, unique=True)
     google_access_token = db.Column(db.String(1024), nullable=True)
+    # Email verification fields
+    is_email_verified = db.Column(db.Boolean, default=False, nullable=False)
+    email_verification_token = db.Column(db.String(100), nullable=True, unique=True, index=True)
+    email_verification_sent_at = db.Column(db.DateTime, nullable=True)
+    email_verification_token_expires_at = db.Column(db.DateTime, nullable=True)
     # Referral system fields
     referral_code = db.Column(db.String(20), unique=True, nullable=True, index=True)  # User's personal referral code
     referred_by_code = db.Column(db.String(20), nullable=True, index=True)  # Code that referred this user
@@ -308,6 +314,53 @@ class User(db.Model):
         db.session.commit()
         return True
 
+    def generate_email_verification_token(self):
+        """Generate a new email verification token."""
+        import secrets
+        
+        self.email_verification_token = secrets.token_urlsafe(32)
+        self.email_verification_sent_at = datetime.datetime.utcnow()
+        self.email_verification_token_expires_at = (
+            datetime.datetime.utcnow() + 
+            datetime.timedelta(hours=EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS)
+        )
+        db.session.commit()
+        return self.email_verification_token
+    
+    def verify_email_token(self, token):
+        """Verify the email verification token."""
+        if not self.email_verification_token:
+            return False
+        
+        if token != self.email_verification_token:
+            return False
+        
+        # Check if token has expired
+        if datetime.datetime.utcnow() > self.email_verification_token_expires_at:
+            return False
+        
+        # Mark email as verified
+        self.is_email_verified = True
+        self.email_verification_token = None
+        self.email_verification_sent_at = None
+        self.email_verification_token_expires_at = None
+        db.session.commit()
+        return True
+    
+    def is_email_verification_token_expired(self):
+        """Check if the email verification token has expired."""
+        if not self.email_verification_token_expires_at:
+            return True
+        return datetime.datetime.utcnow() > self.email_verification_token_expires_at
+    
+    def can_resend_verification_email(self, cooldown_minutes=5):
+        """Check if user can request a new verification email (cooldown protection)."""
+        if not self.email_verification_sent_at:
+            return True
+        
+        cooldown_period = datetime.timedelta(minutes=cooldown_minutes)
+        return datetime.datetime.utcnow() > (self.email_verification_sent_at + cooldown_period)
+
 class TranslationRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -347,7 +400,7 @@ class Referral(db.Model):
     """
     id = db.Column(db.Integer, primary_key=True)
     referrer_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    referee_email = db.Column(db.String(120), nullable=False)
+    referee_email = db.Column(db.String(120), nullable=True)  # Nullable for Option B - populated during registration
     referee_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     referral_code = db.Column(db.String(20), unique=True, nullable=False, index=True)
     status = db.Column(db.Enum('pending', 'completed', 'expired', name='referral_status'), 
@@ -405,7 +458,9 @@ class Referral(db.Model):
             db.session.commit()
             return False
         
+        # Set referee information (first come, first served for Option B)
         self.referee_user_id = referee_user.id
+        self.referee_email = referee_user.email
         self.status = 'completed'
         self.completed_at = datetime.datetime.utcnow()
         db.session.commit()

@@ -8,6 +8,23 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 // Check for browser environment
 const isBrowser = typeof window !== 'undefined';
 
+// Map common English error messages to translation keys
+const errorMessageMap: Record<string, string> = {
+  'Username already exists': 'errors.username_exists',
+  'Email already exists': 'errors.email_exists',
+  'Invalid invitation code': 'errors.code_invalid',
+  'Invitation code not found': 'errors.code_invalid',
+  'Invitation code already used': 'errors.code_already_used',
+  'Invitation code deactivated': 'errors.code_deactivated',
+  'User not found': 'errors.user_not_found',
+  'Invalid credentials': 'errors.authentication_error',
+  'Weekly limit reached': 'errors.weekly_limit_reached',
+  'Translation failed': 'errors.translation_failed',
+  'File not found': 'errors.file_not_found_message',
+  'Task not found': 'errors.task_not_found_message',
+  'Service unavailable': 'errors.service_unavailable_message',
+};
+
 // Utility function to extract translated error message from API response
 export const getApiErrorMessage = (error: any): string => {
   // If it's an axios error with response data
@@ -19,19 +36,31 @@ export const getApiErrorMessage = (error: any): string => {
       return getTranslation(data.errorKey as any);
     }
     
-    // If there's an error message, use it
+    // If there's an error message, try to map it to a translation key
     if (data.error) {
+      const mappedKey = errorMessageMap[data.error];
+      if (mappedKey) {
+        return getTranslation(mappedKey as any);
+      }
       return data.error;
     }
     
-    // If there's a message field, use it
+    // If there's a message field, try to map it to a translation key
     if (data.message) {
+      const mappedKey = errorMessageMap[data.message];
+      if (mappedKey) {
+        return getTranslation(mappedKey as any);
+      }
       return data.message;
     }
   }
   
   // If it's a regular Error object
   if (error instanceof Error) {
+    const mappedKey = errorMessageMap[error.message];
+    if (mappedKey) {
+      return getTranslation(mappedKey as any);
+    }
     return error.message;
   }
   

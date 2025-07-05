@@ -92,7 +92,8 @@
     "referral_not_completed": "Le parrainage n'est pas encore terminé",
     "reward_already_claimed": "La récompense a déjà été réclamée pour ce parrainage",
     "no_rewards_available": "Aucune récompense disponible à réclamer",
-    "reward_claim_failed": "Échec de la réclamation des récompenses"
+    "reward_claim_failed": "Échec de la réclamation des récompenses",
+    "referral_upgrade_description": "Seuls les membres payants peuvent inviter des amis. Mettez à niveau pour débloquer cette fonctionnalité et gagner des jours de membership supplémentaires !"
   },
   "success": {
     "title": "Succès",
@@ -148,10 +149,23 @@
     "welcome_with_invitation": "Bienvenue sur DiaporamaTraduction ! Votre code d'invitation a été appliqué et l'adhésion activée!",
     "no_code_warning": "Sans code d'invitation, vous serez limité à une traduction par semaine.",
     "or_continue_with": "Ou continuer avec",
-    "google_signin": "Se connecter avec Google"
+    "google_signin": "Se connecter avec Google",
+    "email_verification_required": "Veuillez vérifier votre adresse e-mail pour continuer",
+    "email_verification_sent": "E-mail de vérification envoyé ! Vérifiez votre boîte de réception.",
+    "email_verified": "E-mail vérifié avec succès ! Vous pouvez maintenant accéder à votre compte.",
+    "verification_sent": "E-mail de vérification envoyé",
+    "resend_verification": "Renvoyer l'e-mail de vérification",
+    "check_email": "Vérifiez votre e-mail pour le lien de vérification",
+    "verify_email_first": "Veuillez d'abord vérifier votre adresse e-mail",
+    "register_subtitle": "Créez un compte pour commencer",
+    "register_with_referral_subtitle": "Créez un compte avec votre code de parrainage",
+    "using_referral_code": "Utilisation du code de parrainage",
+    "already_have_account": "Vous avez déjà un compte ?",
+    "invite_friends": "Inviter des Amis"
   },
   "languages": {
     "zh": "Chinois",
+    "zh_hk": "Chinois traditionnel",
     "en": "Anglais",
     "es": "Espagnol",
     "fr": "Français",
@@ -193,7 +207,8 @@
   },
   "nav": {
     "translate_now": "Traduire maintenant",
-    "home": "Retour à l'accueil"
+    "home": "Retour à l'accueil",
+    "back_to_home": "Retour à l'accueil"
   },
   "landing": {
     "translate": "Traduisez",
@@ -339,6 +354,58 @@
     "using_existing": "Utilisation du parrainage existant pour cet email",
     "link_generated": "Lien de parrainage généré avec succès",
     "code_valid": "Code de parrainage valide",
-    "rewards_claimed": "Récompenses de parrainage réclamées avec succès"
+    "rewards_claimed": "Récompenses de parrainage réclamées avec succès",
+    "popup": {
+      "title": "Vous aimez Translide ? Partagez-le !",
+      "description": "Aidez vos amis à découvrir Translide et gagnez **{days} jours supplémentaires** d'adhésion pour vous deux lorsqu'ils s'inscrivent!",
+      "share_button": "Partager Translide",
+      "feedback_button": "Donner un avis",
+      "footer_note": "Fermer pour continuer votre traduction",
+      "close": "Fermer la fenêtre"
+    }
+  },
+  "share": {
+    "modal": {
+      "title": "Partager Translide",
+      "description": "Partagez votre lien de parrainage et gagnez des jours d'abonnement supplémentaires quand vos amis rejoignent !",
+      "referral_link_label": "Votre Lien de Parrainage",
+      "generating_link": "Génération du lien...",
+      "social_media_title": "Partager sur les Réseaux Sociaux",
+      "email_share": "Partager par Email",
+      "copy_success": "Lien de parrainage copié dans le presse-papiers !",
+      "close": "Fermer",
+      "generate_new": "Générer une Nouvelle Invitation",
+      "generate_new_success": "Nouveau lien de parrainage généré avec succès !",
+      "single_use_info": "Chaque lien est à usage unique. Générez de nouveaux liens pour inviter plus d'amis.",
+      "twitter_text": "Découvrez Translide - traduction PowerPoint en un clic ! Rejoignez-moi et gagnons {days} jours d'adhésion supplémentaires : ",
+      "whatsapp_text": "Découvrez Translide - traduction PowerPoint en un clic ! Rejoignez-moi et gagnons {days} jours d'adhésion supplémentaires : {link}",
+      "email_subject": "Rejoignez-moi sur Translide - Traduction PowerPoint simplifiée !",
+      "email_body": "Bonjour !\n\nJ'utilise Translide pour traduire mes présentations PowerPoint et c'est fantastique ! Traduction en un clic tout en préservant le formatage.\n\nRejoignez-moi en utilisant ce lien et nous obtiendrons tous les deux {days} jours d'adhésion supplémentaires :\n{link}\n\nCordialement !",
+      "generating": "Génération...",
+      "placeholder_generating": "Génération du lien de parrainage..."
+    }
+  },
+  "email": {
+    "verification": {
+      "subject": "Vérifiez votre adresse e-mail - Translide",
+      "welcome_title": "Bienvenue sur Translide !",
+      "hello": "Bonjour {username} !",
+      "verification_intro": "Merci de vous être inscrit sur Translide. Pour compléter votre inscription et commencer à utiliser notre service de traduction PowerPoint, veuillez vérifier votre adresse e-mail.",
+      "button_text": "Vérifier l'adresse e-mail",
+      "button_fallback": "Si le bouton ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :",
+      "expires_note": "Ce lien expirera dans 24 heures.",
+      "ignore_note": "Si vous n'avez pas créé de compte Translide, vous pouvez ignorer cet e-mail en toute sécurité.",
+      "footer_copyright": "© 2025 Translide. Tous droits réservés."
+    },
+    "errors": {
+      "email_send_failed": "Échec de l'envoi de l'e-mail de vérification",
+      "missing_token": "Aucun jeton de vérification fourni. Veuillez vérifier le lien dans votre e-mail.",
+      "invalid_token": "Jeton de vérification invalide. Veuillez demander un nouvel e-mail de vérification.",
+      "token_expired": "Ce lien de vérification a expiré. Veuillez demander un nouvel e-mail de vérification.",
+      "missing_email": "L'e-mail est requis",
+      "email_already_verified": "L'e-mail est déjà vérifié",
+      "verification_cooldown": "Veuillez attendre avant de demander un autre e-mail de vérification",
+      "email_not_verified": "Vérification d'e-mail requise"
+    }
   }
 } 

@@ -34,6 +34,8 @@ import {
 } from '@/components/ui/select';
 import { RegistrationDialog } from '@/components/registration-dialog';
 import { initGuestSession, canGuestUseTranslation, fetchGuestUsage } from '@/lib/guest-session';
+import { ShareModal } from '@/components/share-modal';
+import { MembershipUpgradeModal } from '@/components/membership-upgrade-modal';
 
 // Define available languages (codes only)
 const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
@@ -53,12 +55,14 @@ const nativeLanguageNames = {
 
 export default function LandingPage() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout, fetchWithAuth } = useAuth();
   const { t, locale, setLocale } = useTranslation();
   const [isClient, setIsClient] = useState(false);
   const [forceRender, setForceRender] = useState(0);
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
   const [guestStatusLoaded, setGuestStatusLoaded] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
@@ -164,6 +168,38 @@ export default function LandingPage() {
     }
   };
 
+  // Handle invite friends click
+  const handleInviteFriends = async () => {
+    if (!isAuthenticated) {
+      setShowRegistrationDialog(true);
+      return;
+    }
+
+    try {
+      // Use fetchWithAuth from auth context for proper authentication
+      const response = await fetchWithAuth('/api/membership/status');
+      
+      if (response.ok) {
+        const membershipStatus = await response.json();
+        console.log('Membership status:', membershipStatus); // Debug log
+        
+        // Check if user has paid membership or invitation membership
+        if (membershipStatus.user_type === 'paid' || membershipStatus.user_type === 'invitation') {
+          setShowShareModal(true);
+        } else {
+          console.log('User type not eligible:', membershipStatus.user_type); // Debug log
+          setShowUpgradePrompt(true);
+        }
+      } else {
+        console.error('API response not ok:', response.status, response.statusText); // Debug log
+        setShowUpgradePrompt(true);
+      }
+    } catch (error) {
+      console.error('Error checking membership status:', error);
+      setShowUpgradePrompt(true);
+    }
+  };
+
   if (!isClient) {
     return <div className="min-h-screen"></div>;
   }
@@ -176,6 +212,18 @@ export default function LandingPage() {
       <RegistrationDialog 
         isOpen={showRegistrationDialog} 
         onClose={() => setShowRegistrationDialog(false)} 
+      />
+      
+      {/* Share modal */}
+      <ShareModal 
+        isVisible={showShareModal} 
+        onClose={() => setShowShareModal(false)} 
+      />
+      
+      {/* Membership upgrade modal */}
+      <MembershipUpgradeModal 
+        isVisible={showUpgradePrompt} 
+        onClose={() => setShowUpgradePrompt(false)} 
       />
       
       {/* Navbar */}
@@ -221,6 +269,10 @@ export default function LandingPage() {
                     <DropdownMenuItem onClick={() => router.push('/profile')}>
                       <Icons.user className="mr-2 h-4 w-4" />
                       {t('profile.title')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleInviteFriends}>
+                      <Icons.share className="mr-2 h-4 w-4" />
+                      {t('auth.invite_friends')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleLogout}>
                       <Icons.logout className="mr-2 h-4 w-4" />

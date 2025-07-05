@@ -16,6 +16,16 @@ export interface ConfigLimits {
   maxFileSizeMB: number;
 }
 
+// Type definition for referral configuration
+interface ReferralConfig {
+  rewardDays: number;
+  invitationCodeRewardDays: number;
+  codeLength: number;
+  expiryDays: number;
+  maxReferralsPerUser: number;
+  paidMembersOnly: boolean;
+}
+
 const defaultLimits: ConfigLimits = {
   freeUserCharPerFileLimit: 25000,
   freeUserCharMonthlyLimit: 100000,
@@ -23,6 +33,15 @@ const defaultLimits: ConfigLimits = {
   freeUserTranslationPeriod: 'weekly',
   paidUserCharMonthlyLimit: 5000000,
   maxFileSizeMB: 50
+};
+
+const defaultReferralConfig: ReferralConfig = {
+  rewardDays: 3,
+  invitationCodeRewardDays: 3,
+  codeLength: 12,
+  expiryDays: 30,
+  maxReferralsPerUser: 100,
+  paidMembersOnly: true
 };
 
 /**
@@ -72,4 +91,34 @@ export function useConfigLimits() {
   }, []);
   
   return { limits, isLoading, error };
+}
+
+/**
+ * Hook to get referral configuration from the backend
+ */
+export function useReferralConfig() {
+  const [config, setConfig] = useState<ReferralConfig>(defaultReferralConfig);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchReferralConfig = async () => {
+      try {
+        setIsLoading(true);
+        const response = await apiClient.get('/api/config/referral');
+        setConfig(response.data);
+      } catch (err) {
+        console.error('Error fetching referral configuration:', err);
+        setError('Failed to load referral configuration');
+        // Fallback to default config
+        setConfig(defaultReferralConfig);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReferralConfig();
+  }, []);
+  
+  return { config, isLoading, error };
 } 

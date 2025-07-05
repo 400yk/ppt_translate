@@ -181,4 +181,36 @@ def get_all_limits():
             'freeUserTranslationPeriod': 'weekly',
             'paidUserCharMonthlyLimit': 5000000,
             'maxFileSizeMB': 50
+        }), 500
+
+@membership_bp.route('/api/config/referral', methods=['GET'])
+def get_referral_config():
+    """
+    Returns referral system configuration values from config.py.
+    This endpoint is public and doesn't require authentication.
+    
+    Returns:
+        JSON response with referral configuration fields
+    """
+    try:
+        return jsonify({
+            'rewardDays': config.REFERRAL_REWARD_DAYS,
+            'invitationCodeRewardDays': config.INVITATION_CODE_REWARD_DAYS,
+            'codeLength': config.REFERRAL_CODE_LENGTH,
+            'expiryDays': config.REFERRAL_EXPIRY_DAYS,
+            'maxReferralsPerUser': config.MAX_REFERRALS_PER_USER,
+            'paidMembersOnly': config.REFERRAL_FEATURE_PAID_MEMBERS_ONLY
+        })
+    except Exception as e:
+        print(f"Error getting referral configuration: {str(e)}")
+        return jsonify({
+            'error': 'Failed to get referral configuration',
+            'message': str(e),
+            # Fallback values
+            'rewardDays': 3,
+            'invitationCodeRewardDays': 3,
+            'codeLength': 12,
+            'expiryDays': 30,
+            'maxReferralsPerUser': 100,
+            'paidMembersOnly': True
         }), 500 

@@ -19,10 +19,20 @@ import { PaymentModal } from '@/components/payment-modal';
 import { usePricing } from '@/lib/pricing-service';
 import { useConfigLimits } from '@/lib/config-service';
 import apiClient from '@/lib/api-client';
+import { ShareModal } from '@/components/share-modal';
+import { MembershipUpgradeModal } from '@/components/membership-upgrade-modal';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function PricingPage() {
   const { t, locale } = useTranslation();
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, fetchWithAuth } = useAuth();
   const router = useRouter();
   const { pricing, isLoading: isPricingLoading } = usePricing();
   const { limits, isLoading: isLimitsLoading } = useConfigLimits();
@@ -31,6 +41,8 @@ export default function PricingPage() {
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isPaidUser, setIsPaidUser] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -86,6 +98,38 @@ export default function PricingPage() {
     setShowPaymentModal(false);
   };
 
+  // Handle invite friends click
+  const handleInviteFriends = async () => {
+    if (!isAuthenticated) {
+      setShowRegistrationDialog(true);
+      return;
+    }
+
+    try {
+      // Use fetchWithAuth from auth context for proper authentication
+      const response = await fetchWithAuth('/api/membership/status');
+      
+      if (response.ok) {
+        const membershipStatus = await response.json();
+        console.log('Membership status:', membershipStatus); // Debug log
+        
+        // Check if user has paid membership or invitation membership
+        if (membershipStatus.user_type === 'paid' || membershipStatus.user_type === 'invitation') {
+          setShowShareModal(true);
+        } else {
+          console.log('User type not eligible:', membershipStatus.user_type); // Debug log
+          setShowUpgradePrompt(true);
+        }
+      } else {
+        console.error('API response not ok:', response.status, response.statusText); // Debug log
+        setShowUpgradePrompt(true);
+      }
+    } catch (error) {
+      console.error('Error checking membership status:', error);
+      setShowUpgradePrompt(true);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <DynamicHead />
@@ -100,6 +144,18 @@ export default function PricingPage() {
       <PaymentModal 
         isOpen={showPaymentModal} 
         onClose={closePaymentModal}
+      />
+      
+      {/* Share modal */}
+      <ShareModal 
+        isVisible={showShareModal} 
+        onClose={() => setShowShareModal(false)} 
+      />
+      
+      {/* Membership upgrade modal */}
+      <MembershipUpgradeModal 
+        isVisible={showUpgradePrompt} 
+        onClose={() => setShowUpgradePrompt(false)} 
       />
       
       {/* Navbar */}
@@ -131,10 +187,34 @@ export default function PricingPage() {
               </div>
               
               {isAuthenticated ? (
-                <Button onClick={() => router.push('/translate')} variant="outline" className="flex items-center gap-2">
-                  <Icons.user className="h-4 w-4" />
-                  <span>{user?.username}</span>
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Icons.user className="h-4 w-4" />
+                      <span>{user?.username}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>{user?.email || user?.username}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => router.push('/translate')}>
+                      <Icons.upload className="mr-2 h-4 w-4" />
+                      {t('nav.translate_now')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/profile')}>
+                      <Icons.user className="mr-2 h-4 w-4" />
+                      {t('profile.title')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleInviteFriends}>
+                      <Icons.share className="mr-2 h-4 w-4" />
+                      {t('auth.invite_friends')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/')}>
+                      <Icons.logout className="mr-2 h-4 w-4" />
+                      {t('auth.logout')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <Button onClick={() => setShowRegistrationDialog(true)} variant="outline">{t('auth.login')}</Button>
               )}

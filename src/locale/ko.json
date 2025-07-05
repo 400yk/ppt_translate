@@ -92,7 +92,8 @@
     "referral_not_completed": "추천이 아직 완료되지 않았습니다",
     "reward_already_claimed": "이 추천에 대한 보상이 이미 청구되었습니다",
     "no_rewards_available": "청구할 보상이 없습니다",
-    "reward_claim_failed": "보상 청구에 실패했습니다"
+    "reward_claim_failed": "보상 청구에 실패했습니다",
+    "referral_upgrade_description": "유료 회원만 친구를 초대할 수 있습니다. 이 기능을 잠금 해제하고 추가 멤버십 일수를 얻으려면 업그레이드하세요!"
   },
   "success": {
     "title": "성공",
@@ -143,14 +144,26 @@
     "processing": "처리 중...",
     "use_without_code": "초대 코드 없이 등록",
     "register_success": "등록 성공",
+    "register_subtitle": "계정을 만들어 시작하세요",
+    "register_with_referral_subtitle": "추천 코드로 계정을 만드세요",
+    "using_referral_code": "추천 코드 사용",
+    "already_have_account": "이미 계정이 있으신가요?",
     "welcome": "슬라이드번역에 오신 것을 환영합니다!",
     "welcome_with_invitation": "슬라이드번역에 오신 것을 환영합니다! 초대 코드가 적용되어 멤버십이 활성화되었습니다!",
     "no_code_warning": "초대 코드 없이는 주 1회 번역으로 제한됩니다.",
     "or_continue_with": "또는 다음으로 계속",
-    "google_signin": "Google로 로그인"
+    "google_signin": "Google로 로그인",
+    "email_verification_required": "계속하려면 이메일 주소를 확인해주세요",
+    "email_verification_sent": "확인 이메일이 전송되었습니다! 받은편지함을 확인하세요.",
+    "email_verified": "이메일이 성공적으로 확인되었습니다! 이제 계정에 액세스할 수 있습니다.",
+    "verification_sent": "확인 이메일이 전송되었습니다",
+    "resend_verification": "확인 이메일 재전송",
+    "check_email": "확인 링크를 위해 이메일을 확인하세요",
+    "verify_email_first": "먼저 이메일 주소를 확인해주세요"
   },
   "languages": {
     "zh": "중국어",
+    "zh_hk": "번체 중국어",
     "en": "영어",
     "es": "스페인어",
     "fr": "프랑스어",
@@ -192,7 +205,8 @@
   },
   "nav": {
     "translate_now": "지금 번역하기",
-    "home": "홈으로 돌아가기"
+    "home": "홈으로 돌아가기",
+    "back_to_home": "홈으로 돌아가기"
   },
   "landing": {
     "translate": "번역",
@@ -338,6 +352,58 @@
     "using_existing": "이 이메일의 기존 추천 사용",
     "link_generated": "추천 링크가 성공적으로 생성되었습니다",
     "code_valid": "유효한 추천 코드",
-    "rewards_claimed": "추천 보상이 성공적으로 청구되었습니다"
+    "rewards_claimed": "추천 보상이 성공적으로 청구되었습니다",
+    "popup": {
+      "title": "Translide가 마음에 드시나요? 공유해주세요!",
+      "description": "친구들이 Translide를 발견하도록 도와주시면, 그들이 가입할 때 당신과 친구 모두 **{days}일**의 추가 멤버십을 얻을 수 있습니다!",
+      "share_button": "Translide 공유",
+      "feedback_button": "피드백 제공",
+      "footer_note": "닫고 번역을 계속하기",
+      "close": "팝업 닫기"
+    }
+  },
+  "share": {
+    "modal": {
+      "title": "Translide 공유하기",
+      "description": "추천 링크를 공유하고 친구들이 가입할 때 추가 멤버십 일수를 획득하세요!",
+      "referral_link_label": "당신의 추천 링크",
+      "generating_link": "링크 생성 중...",
+      "social_media_title": "소셜 미디어에서 공유",
+      "email_share": "이메일로 공유",
+      "copy_success": "추천 링크가 클립보드에 복사되었습니다!",
+      "close": "닫기",
+      "generate_new": "새 초대 생성",
+      "generate_new_success": "새 추천 링크가 성공적으로 생성되었습니다!",
+      "single_use_info": "각 링크는 일회용입니다. 더 많은 친구를 초대하려면 새 링크를 생성하세요.",
+      "twitter_text": "Translide를 확인해보세요 - 원클릭 PowerPoint 번역! 저와 함께 가입하여 {days}일의 추가 멤버십을 받으세요: ",
+      "whatsapp_text": "Translide를 확인해보세요 - 원클릭 PowerPoint 번역! 저와 함께 가입하여 {days}일의 추가 멤버십을 받으세요: {link}",
+      "email_subject": "Translide에 함께 가입하세요 - PowerPoint 번역이 쉬워집니다!",
+      "email_body": "안녕하세요!\n\nPowerPoint 프레젠테이션 번역에 Translide를 사용하고 있는데 정말 놀랍습니다! 모든 서식을 유지하면서 원클릭 번역이 가능합니다.\n\n이 링크를 사용하여 가입하시면 우리 둘 다 {days}일의 추가 멤버십을 받게 됩니다:\n{link}\n\n감사합니다!",
+      "generating": "생성 중...",
+      "placeholder_generating": "추천 링크 생성 중..."
+    }
+  },
+  "email": {
+    "verification": {
+      "subject": "이메일 주소를 확인해주세요 - Translide",
+      "welcome_title": "Translide에 오신 것을 환영합니다!",
+      "hello": "안녕하세요 {username}님!",
+      "verification_intro": "Translide에 가입해 주셔서 감사합니다. 가입을 완료하고 PowerPoint 번역 서비스를 이용하시려면 이메일 주소를 확인해 주세요.",
+      "button_text": "이메일 주소 확인",
+      "button_fallback": "버튼이 작동하지 않으면 이 링크를 복사해서 브라우저에 붙여넣으세요:",
+      "expires_note": "이 링크는 24시간 후에 만료됩니다.",
+      "ignore_note": "Translide 계정을 만들지 않으셨다면 이 이메일을 안전하게 무시하셔도 됩니다.",
+      "footer_copyright": "© 2025 Translide. 모든 권리 보유."
+    },
+    "errors": {
+      "email_send_failed": "확인 이메일 전송 실패",
+      "missing_token": "확인 토큰이 제공되지 않았습니다. 이메일의 링크를 확인해주세요.",
+      "invalid_token": "유효하지 않은 확인 토큰입니다. 새 확인 이메일을 요청해주세요.",
+      "token_expired": "이 확인 링크가 만료되었습니다. 새 확인 이메일을 요청해주세요.",
+      "missing_email": "이메일이 필요합니다",
+      "email_already_verified": "이메일이 이미 확인되었습니다",
+      "verification_cooldown": "다른 확인 이메일을 요청하기 전에 잠시 기다려주세요",
+      "email_not_verified": "이메일 확인이 필요합니다"
+    }
   }
 } 
