@@ -7,3 +7,8 @@
 7. PPT files are not supported yet.
 8. Count of total characters used is not implemented yet.
 9. The progress bar is unevenly progressed and stuck at 90% for majority of time.
+
+Details
+1. Make all APIs in front-end together in a single file
+2. Make all language list together in a single file so one-click to add a new language
+3. The time shown in the referral code list isn't accurate, it's showing 8 hours behind

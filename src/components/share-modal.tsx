@@ -15,9 +15,10 @@ import LogoImage from '@/assets/Pure_logo.png';
 interface ShareModalProps {
   isVisible: boolean;
   onClose: () => void;
+  predefinedReferralCode?: string;
 }
 
-export function ShareModal({ isVisible, onClose }: ShareModalProps) {
+export function ShareModal({ isVisible, onClose, predefinedReferralCode }: ShareModalProps) {
   const { t } = useTranslation();
   const { fetchWithAuth } = useAuth();
   const { toast } = useToast();
@@ -34,12 +35,28 @@ export function ShareModal({ isVisible, onClose }: ShareModalProps) {
     setIsClient(true);
   }, []);
 
+  // Clear referral link when modal closes
+  useEffect(() => {
+    if (!isVisible) {
+      setReferralLink('');
+      setReferralCode('');
+    }
+  }, [isVisible]);
+
   // Generate referral link when modal opens
   useEffect(() => {
     if (isVisible && !referralLink) {
-      generateReferralLink();
+      if (predefinedReferralCode) {
+        // Use predefined code instead of generating new one
+        const baseUrl = window.location.origin;
+        const fullLink = `${baseUrl}/register?ref=${predefinedReferralCode}`;
+        setReferralCode(predefinedReferralCode);
+        setReferralLink(fullLink);
+      } else {
+        generateReferralLink();
+      }
     }
-  }, [isVisible]);
+  }, [isVisible, predefinedReferralCode]);
 
   // Reset copied state after 2 seconds
   useEffect(() => {

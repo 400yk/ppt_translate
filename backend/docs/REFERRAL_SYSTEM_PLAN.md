@@ -199,11 +199,18 @@ Implement a referral system that allows users to recommend Translide to friends 
   - [ ] Success/error message handling
 
 ### 3.4 Referral Dashboard
-- [ ] Create `ReferralDashboard` component for user profile
-  - [ ] Show user's referral code
-  - [ ] List of sent referrals and their status
-  - [ ] Display earned bonus days
-  - [ ] Referral statistics
+- [x] Create `ReferralDashboard` component for user profile
+  - [x] Show user's referral statistics (total, pending, completed, remaining)
+  - [x] List of sent referrals and their status with detailed information
+  - [x] Display earned bonus days and unclaimed rewards
+  - [x] Referral statistics with color-coded status badges
+  - [x] Claim rewards functionality (individual and bulk claiming)
+  - [x] Responsive design with modal overlay
+  - [x] Integration with `/api/referrals/my-referrals` and `/api/referrals/claim-reward` APIs
+  - [x] Real-time date formatting with relative time display
+  - [x] Complete internationalization support (English, Chinese, Spanish)
+  - [x] Integration into profile page with membership restrictions
+  - [x] Proper error handling and loading states
 
 ---
 
@@ -238,12 +245,43 @@ Implement a referral system that allows users to recommend Translide to friends 
 - [ ] **First come, first served** for referral codes (no email validation needed)
 - [ ] Set membership expiry date when users use any valid code
 
-### 4.3 Profile Page Integration
-- [ ] Add referral section to user profile
-- [ ] Show current bonus membership days
+### 4.3 Cross-Platform Integration
+- [x] **Invite Friends Feature Implementation**
+  - [x] **Landing Page**: Added to user dropdown menu with membership restriction
+  - [x] **Pricing Page**: Added to user dropdown menu with membership restriction
+  - [x] **Profile Page**: Added to user dropdown menu with membership restriction
+  - [x] **Translate Page**: Added to TranslationHeader dropdown menu with membership restriction
+- [x] **Membership Restriction System**:
+  - [x] Created `MembershipUpgradeModal` component for non-paid users
+  - [x] Paid/Invitation users: Can access ShareModal
+  - [x] Free users: See upgrade prompt modal
+  - [x] Automatic membership check via `/api/membership/status` API
+- [x] **Authentication & API Integration**:
+  - [x] Used `fetchWithAuth` from auth context for proper authentication
+  - [x] Added error handling and debug logging
+  - [x] Consistent API calls across all pages
+  - [x] Fixed authentication issues with proper token handling
+
+### 4.4 Feedback System Integration
+- [x] **Feedback Modal Integration**
+  - [x] **Landing Page**: Added to user dropdown menu
+  - [x] **Pricing Page**: Added to user dropdown menu  
+  - [x] **Profile Page**: Added to user dropdown menu
+  - [x] **Translate Page**: Integrated with referral popup
+- [x] **UI/UX Improvements**:
+  - [x] Enhanced hover effects for better visibility in referral popup
+  - [x] Consistent styling across all integration points
+  - [x] Proper error handling and user feedback
+
+### 4.5 Profile Page Enhancement
+- [x] Added "邀请好友" (Invite Friends) option to dropdown menu
+- [x] Added "反馈建议" (Give Feedback) option to dropdown menu  
+- [x] Integrated membership status checking for invite eligibility
+- [ ] Add referral section to user profile main content
+- [ ] Show current bonus membership days in profile details
 - [ ] Link to referral dashboard
 
-### 4.4 Authentication Context Updates
+### 4.6 Authentication Context Updates
 - [ ] Update auth context to track referral codes
 - [ ] Handle referral code in login/registration flows
 
@@ -518,12 +556,38 @@ Implement a referral system that allows users to recommend Translide to friends 
 - [x] Progress monitoring and smart timing
 - [x] Translation context passing to popup
 
+#### Phase 4.3: Cross-Platform Integration
+- [x] **Invite Friends Feature Implementation**
+  - [x] Landing Page: Added to user dropdown menu with membership restriction
+  - [x] Pricing Page: Added to user dropdown menu with membership restriction
+  - [x] Profile Page: Added to user dropdown menu with membership restriction
+  - [x] Translate Page: Added to TranslationHeader dropdown menu with membership restriction
+- [x] **Membership Restriction System**:
+  - [x] Created MembershipUpgradeModal component for non-paid users
+  - [x] Paid/Invitation users can access ShareModal
+  - [x] Free users see upgrade prompt modal
+  - [x] Automatic membership check via /api/membership/status API
+- [x] **Authentication & API Integration**:
+  - [x] Used fetchWithAuth from auth context for proper authentication
+  - [x] Added error handling and debug logging
+  - [x] Consistent API calls across all pages
+  - [x] Fixed authentication issues with proper token handling
+
+#### Phase 4.4: Feedback System Integration
+- [x] **Feedback Modal Integration**
+  - [x] Landing Page: Added to user dropdown menu
+  - [x] Pricing Page: Added to user dropdown menu  
+  - [x] Profile Page: Added to user dropdown menu
+  - [x] Translate Page: Integrated with referral popup
+- [x] **UI/UX Improvements**:
+  - [x] Enhanced hover effects for better visibility in referral popup
+  - [x] Consistent styling across all integration points
+  - [x] Proper error handling and user feedback
+
 #### Phase 7.1: Backend Testing
 - [x] Comprehensive test suite with 100% pass rate
 - [x] Option B functionality validation
 - [x] Edge case testing and validation
-
-### 🎯 Ready for Next Steps
 
 #### Phase 3.3: Feedback Modal
 - [x] Create `FeedbackModal` component
@@ -539,6 +603,20 @@ Implement a referral system that allows users to recommend Translide to friends 
   - [x] Complete internationalization for all 9 languages
   - [x] Integration with existing feedback API endpoints
   - [x] Integration with translate page and referral popup
+  - [x] Integration with profile page dropdown menu
+  - [x] Fixed hover effect visibility for feedback button in popup
+
+#### Phase 3.4: Referral Dashboard
+- [x] Create `ReferralDashboard` component
+  - [x] Complete dashboard with referral statistics and analytics
+  - [x] Real-time referral status tracking and management
+  - [x] Reward claiming system with individual and bulk options
+  - [x] Professional UI with responsive modal design
+  - [x] Full API integration with backend referral endpoints
+  - [x] Internationalization support for multiple languages
+  - [x] Profile page integration with membership-based access control
+
+### 🎯 Ready for Next Steps
 
 #### Phase 4.2: Registration Page Integration
 - Update registration form to handle both code types

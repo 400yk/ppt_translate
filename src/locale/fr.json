@@ -179,7 +179,13 @@
     "register_with_referral_subtitle": "Créez un compte avec votre code de parrainage",
     "using_referral_code": "Utilisation du code de parrainage",
     "already_have_account": "Vous avez déjà un compte ?",
-    "invite_friends": "Inviter des Amis"
+    "invite_friends": "Inviter des Amis",
+    "check_email_title": "Vérifiez votre email",
+    "check_email_description": "Nous vous avons envoyé un lien de vérification pour terminer votre inscription.",
+    "check_email_instructions": "Veuillez vérifier votre boîte de réception et cliquer sur le lien de vérification pour activer votre compte.",
+    "check_spam_folder": "Vous ne voyez pas l'email ? Vérifiez votre dossier de spam.",
+    "sending": "Envoi en cours...",
+    "resend_in_seconds": "Renvoyer dans {seconds}s"
   },
   "languages": {
     "zh": "Chinois",
@@ -373,6 +379,10 @@
     "link_generated": "Lien de parrainage généré avec succès",
     "code_valid": "Code de parrainage valide",
     "rewards_claimed": "Récompenses de parrainage réclamées avec succès",
+    "reward_claimed": "Récompense Réclamée",
+    "reward_ready": "Prêt à Réclamer",
+    "pending": "En attente",
+    "expired": "Expiré",
     "popup": {
       "title": "Vous aimez Translide ? Partagez-le !",
       "description": "Aidez vos amis à découvrir Translide et gagnez **{days} jours supplémentaires** d'adhésion pour vous deux lorsqu'ils s'inscrivent!",
@@ -380,6 +390,32 @@
       "feedback_button": "Donner un avis",
       "footer_note": "Fermer pour continuer votre traduction",
       "close": "Fermer la fenêtre"
+    },
+    "dashboard": {
+      "title": "Tableau de Bord des Parrainages",
+      "description": "Suivez vos parrainages et réclamez les récompenses",
+      "total_referrals": "Total des Parrainages",
+      "pending": "En attente",
+      "completed": "Terminé",
+      "remaining": "Restant",
+      "unclaimed_rewards": "Récompenses Non Réclamées",
+      "unclaimed_description": "Vous avez {count} récompenses non réclamées valant {days} jours bonus",
+      "claim_all_rewards": "Réclamer Toutes les Récompenses",
+      "your_referrals": "Vos Parrainages",
+      "referrals_description": "Voir tous vos liens de parrainage et leur statut",
+      "no_referrals": "Aucun parrainage encore. Commencez à partager et gagnez des récompenses !",
+      "created": "Créé",
+      "expires": "Expire",
+      "referee": "Parrainé",
+              "completed": "Terminé",
+        "days": "jours",
+        "claim": "Réclamer",
+        "resend": "Renvoyer",
+        "max_referrals_info": "Vous pouvez créer jusqu'à {max} codes de parrainage.",
+        "filter_all": "Tous",
+        "filter_pending": "En attente",
+        "filter_reward_claimed": "Récompense Réclamée",
+        "create_new_invitation": "Créer Nouvelle Invitation"
     }
   },
   "share": {

@@ -19,6 +19,7 @@ import apiClient, { getApiErrorMessage } from '@/lib/api-client';
 import { ShareModal } from '@/components/share-modal';
 import { MembershipUpgradeModal } from '@/components/membership-upgrade-modal';
 import { FeedbackModal } from '@/components/feedback-modal';
+import { ReferralDashboard } from '@/components/referral-dashboard';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +46,7 @@ export default function ProfilePage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showReferralDashboard, setShowReferralDashboard] = useState(false);
   const { toast } = useToast();
 
   // Fix for hydration error - only render content after client-side mount
@@ -405,26 +407,42 @@ export default function ProfilePage() {
                   </div>
                 )}
               </CardContent>
-              <CardFooter className="flex justify-end">
-                {(!membershipStatus || membershipStatus.user_type === 'free' || membershipStatus.user_type === 'invitation') && (
-                  <Button onClick={openPaymentModal} className="bg-teal-600 hover:bg-teal-700 text-white">
-                    <Icons.payment className="mr-2 h-4 w-4" />
-                    {t('profile.upgrade_membership')}
-                  </Button>
-                )}
+              <CardFooter className="flex justify-between">
+                <div>
+                  {/* Referral Dashboard Button - Show for paid and invitation users */}
+                  {membershipStatus && (membershipStatus.user_type === 'paid' || membershipStatus.user_type === 'invitation') && (
+                    <Button 
+                      onClick={() => setShowReferralDashboard(true)} 
+                      variant="outline"
+                      className="mr-2"
+                    >
+                      <Icons.share className="mr-2 h-4 w-4" />
+                      {t('referral.dashboard.title')}
+                    </Button>
+                  )}
+                </div>
                 
-                {membershipStatus && membershipStatus.user_type === 'paid' && (
-                  <>
-                    <Button onClick={openPaymentModal} variant="outline">
+                <div className="flex gap-2">
+                  {(!membershipStatus || membershipStatus.user_type === 'free' || membershipStatus.user_type === 'invitation') && (
+                    <Button onClick={openPaymentModal} className="bg-teal-600 hover:bg-teal-700 text-white">
                       <Icons.payment className="mr-2 h-4 w-4" />
-                      {t('profile.extend_membership')}
+                      {t('profile.upgrade_membership')}
                     </Button>
-                    <Button onClick={handleManageSubscription} variant="outline" className="ml-2">
-                      <Icons.settings className="mr-2 h-4 w-4" />
-                      {t('profile.manage_billing')}
-                    </Button>
-                  </>
-                )}
+                  )}
+                  
+                  {membershipStatus && membershipStatus.user_type === 'paid' && (
+                    <>
+                      <Button onClick={openPaymentModal} variant="outline">
+                        <Icons.payment className="mr-2 h-4 w-4" />
+                        {t('profile.extend_membership')}
+                      </Button>
+                      <Button onClick={handleManageSubscription} variant="outline">
+                        <Icons.settings className="mr-2 h-4 w-4" />
+                        {t('profile.manage_billing')}
+                      </Button>
+                    </>
+                  )}
+                </div>
               </CardFooter>
             </Card>
           </div>
@@ -454,6 +472,12 @@ export default function ProfilePage() {
       <FeedbackModal 
         isVisible={showFeedbackModal} 
         onClose={() => setShowFeedbackModal(false)} 
+      />
+      
+      {/* Referral Dashboard */}
+      <ReferralDashboard 
+        isVisible={showReferralDashboard} 
+        onClose={() => setShowReferralDashboard(false)} 
       />
     </div>
   );

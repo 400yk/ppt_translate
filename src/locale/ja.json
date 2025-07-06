@@ -177,7 +177,14 @@
     "verification_sent": "確認メールが送信されました",
     "resend_verification": "確認メールを再送信",
     "check_email": "確認リンクのメールをご確認ください",
-    "verify_email_first": "最初にメールアドレスを確認してください"
+    "verify_email_first": "最初にメールアドレスを確認してください",
+    "invite_friends": "友達を招待",
+    "check_email_title": "メールを確認してください",
+    "check_email_description": "登録を完了するための確認リンクをお送りしました。",
+    "check_email_instructions": "受信箱を確認し、確認リンクをクリックしてアカウントを有効化してください。",
+    "check_spam_folder": "メールが見つからない場合は、迷惑メールフォルダをご確認ください。",
+    "sending": "送信中...",
+    "resend_in_seconds": "{seconds}秒後に再送信"
   },
   "languages": {
     "zh": "中国語",
@@ -371,6 +378,10 @@
     "link_generated": "紹介リンクが正常に生成されました",
     "code_valid": "有効な紹介コード",
     "rewards_claimed": "紹介報酬が正常に請求されました",
+    "reward_claimed": "報酬が請求されました",
+    "reward_ready": "請求可能",
+    "pending": "保留中",
+    "expired": "期限切れ",
     "popup": {
       "title": "Translideが気に入りましたか？シェアしよう！",
       "description": "友達にTranslideを発見してもらい、彼らが登録すると、あなたと友達の両方が**{days}日間**の追加メンバーシップを獲得できます！",
@@ -378,6 +389,32 @@
       "feedback_button": "フィードバックする",
       "footer_note": "閉じて翻訳を続ける",
       "close": "ポップアップを閉じる"
+    },
+    "dashboard": {
+      "title": "紹介ダッシュボード",
+      "description": "あなたの紹介を追跡して報酬を請求する",
+      "total_referrals": "総紹介数",
+      "pending": "保留中",
+      "completed": "完了",
+      "remaining": "残り",
+      "unclaimed_rewards": "未請求の報酬",
+      "unclaimed_description": "{count}件の未請求報酬があります（{days}ボーナス日数相当）",
+      "claim_all_rewards": "すべての報酬を請求",
+      "your_referrals": "あなたの紹介",
+      "referrals_description": "すべての紹介リンクとそのステータスを表示",
+      "no_referrals": "まだ紹介がありません。シェアして報酬を獲得しましょう！",
+      "created": "作成日時",
+      "expires": "有効期限",
+      "referee": "紹介された人",
+              "completed": "完了",
+        "days": "日",
+        "claim": "請求",
+        "resend": "再送信",
+        "max_referrals_info": "最大{max}個の紹介コードを作成できます。",
+        "filter_all": "すべて",
+        "filter_pending": "保留中",
+        "filter_reward_claimed": "報酬請求済み",
+        "create_new_invitation": "新しい招待を作成"
     }
   },
   "share": {

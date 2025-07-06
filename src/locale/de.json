@@ -178,7 +178,13 @@
     "register_with_referral_subtitle": "Erstellen Sie ein Konto mit Ihrem Empfehlungscode",
     "using_referral_code": "Verwende Empfehlungscode",
     "already_have_account": "Haben Sie bereits ein Konto?",
-    "invite_friends": "Freunde Einladen"
+    "invite_friends": "Freunde Einladen",
+    "check_email_title": "Überprüfen Sie Ihre E-Mail",
+    "check_email_description": "Wir haben Ihnen einen Bestätigungslink gesendet, um Ihre Registrierung abzuschließen.",
+    "check_email_instructions": "Bitte überprüfen Sie Ihren Posteingang und klicken Sie auf den Bestätigungslink, um Ihr Konto zu aktivieren.",
+    "check_spam_folder": "E-Mail nicht sichtbar? Überprüfen Sie Ihren Spam-Ordner.",
+    "sending": "Senden...",
+    "resend_in_seconds": "Erneut senden in {seconds}s"
   },
   "languages": {
     "zh": "Chinesisch",
@@ -372,6 +378,10 @@
     "link_generated": "Empfehlungslink erfolgreich generiert",
     "code_valid": "Gültiger Empfehlungscode",
     "rewards_claimed": "Empfehlungsbelohnungen erfolgreich beansprucht",
+    "reward_claimed": "Belohnung Beansprucht",
+    "reward_ready": "Bereit zum Beanspruchen",
+    "pending": "Ausstehend",
+    "expired": "Abgelaufen",
     "popup": {
       "title": "Gefällt Ihnen Translide? Teilen Sie es!",
       "description": "Helfen Sie Ihren Freunden, Translide zu entdecken und verdienen Sie beide **{days} zusätzliche Tage** Mitgliedschaft, wenn sie sich anmelden!",
@@ -379,6 +389,32 @@
       "feedback_button": "Feedback geben",
       "footer_note": "Schließen, um mit Ihrer Übersetzung fortzufahren",
       "close": "Popup schließen"
+    },
+    "dashboard": {
+      "title": "Empfehlungs-Dashboard",
+      "description": "Verfolgen Sie Ihre Empfehlungen und beanspruchen Sie Belohnungen",
+      "total_referrals": "Gesamte Empfehlungen",
+      "pending": "Ausstehend",
+      "completed": "Abgeschlossen",
+      "remaining": "Verbleibend",
+      "unclaimed_rewards": "Unbeanspruchte Belohnungen",
+      "unclaimed_description": "Sie haben {count} unbeanspruchte Belohnungen im Wert von {days} Bonustagen",
+      "claim_all_rewards": "Alle Belohnungen beanspruchen",
+      "your_referrals": "Ihre Empfehlungen",
+      "referrals_description": "Alle Ihre Empfehlungslinks und deren Status anzeigen",
+      "no_referrals": "Noch keine Empfehlungen. Beginnen Sie zu teilen und verdienen Sie Belohnungen!",
+      "created": "Erstellt",
+      "expires": "Läuft ab",
+      "referee": "Empfohlener",
+              "completed": "Abgeschlossen",
+        "days": "Tage",
+        "claim": "Beanspruchen",
+        "resend": "Erneut senden",
+        "max_referrals_info": "Sie können bis zu {max} Empfehlungscodes erstellen.",
+        "filter_all": "Alle",
+        "filter_pending": "Ausstehend",
+        "filter_reward_claimed": "Belohnung Beansprucht",
+        "create_new_invitation": "Neue Einladung Erstellen"
     }
   },
   "share": {

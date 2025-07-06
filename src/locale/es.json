@@ -179,7 +179,13 @@
     "register_with_referral_subtitle": "Crea una cuenta con tu código de referencia",
     "using_referral_code": "Usando código de referencia",
     "already_have_account": "¿Ya tienes una cuenta?",
-    "invite_friends": "Invitar Amigos"
+    "invite_friends": "Invitar Amigos",
+    "check_email_title": "Revisa tu correo electrónico",
+    "check_email_description": "Te hemos enviado un enlace de verificación para completar tu registro.",
+    "check_email_instructions": "Por favor revisa tu bandeja de entrada y haz clic en el enlace de verificación para activar tu cuenta.",
+    "check_spam_folder": "¿No ves el correo? Revisa tu carpeta de spam.",
+    "sending": "Enviando...",
+    "resend_in_seconds": "Reenviar en {seconds}s"
   },
   "languages": {
     "zh": "Chino",
@@ -372,7 +378,11 @@
     "using_existing": "Usando referencia existente para este correo",
     "link_generated": "Enlace de referencia generado exitosamente",
     "code_valid": "Código de referencia válido",
-    "rewards_claimed": "Recompensas de referencia reclamadas exitosamente",
+    "rewards_claimed": "Se reclamaron exitosamente {count} recompensas por un valor de {days} días adicionales",
+    "reward_claimed": "Recompensa Reclamada",
+    "reward_ready": "Listo para Reclamar",
+    "pending": "Pendiente",
+    "expired": "Expirado",
     "popup": {
       "title": "¿Te gusta Translide? ¡Compártelo!",
       "description": "Ayuda a tus amigos a descubrir Translide y gana **{days} días extra** de membresía para ambos cuando se registren!",
@@ -380,6 +390,32 @@
       "feedback_button": "Dar Comentarios",
       "footer_note": "Cerrar para continuar con tu traducción",
       "close": "Cerrar ventana"
+    },
+    "dashboard": {
+      "title": "Panel de Referencias",
+      "description": "Rastrea tus referencias y reclama recompensas",
+      "total_referrals": "Referencias Totales",
+      "pending": "Pendientes",
+      "completed": "Completadas",
+      "remaining": "Restantes",
+      "unclaimed_rewards": "Recompensas No Reclamadas",
+      "unclaimed_description": "Tienes {count} recompensas no reclamadas por un valor de {days} días adicionales",
+      "claim_all_rewards": "Reclamar Todas las Recompensas",
+      "your_referrals": "Tus Referencias",
+      "referrals_description": "Ve todos tus enlaces de referencia y su estado",
+      "no_referrals": "Aún no hay referencias. ¡Comienza a compartir y gana recompensas!",
+      "created": "Creado",
+      "expires": "Expira",
+      "referee": "Referido",
+              "completed": "Completado",
+        "days": "días",
+        "claim": "Reclamar",
+        "resend": "Reenviar",
+        "max_referrals_info": "Puedes crear hasta {max} códigos de referencia.",
+        "filter_all": "Todos",
+        "filter_pending": "Pendientes",
+        "filter_reward_claimed": "Recompensa Reclamada",
+        "create_new_invitation": "Crear Nueva Invitación"
     }
   },
   "share": {

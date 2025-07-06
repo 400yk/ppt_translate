@@ -155,7 +155,6 @@ REFERRAL_FEATURE_PAID_MEMBERS_ONLY = True  # Only paid members can generate refe
 
 # Email Verification Configuration
 EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS = 24  # Email verification token expiry in hours
-EMAIL_VERIFICATION_COOLDOWN_MINUTES = 5  # Cooldown between verification email sends
 REQUIRE_EMAIL_VERIFICATION = True  # Enable for testing - set to False to disable
 SKIP_EMAIL_VERIFICATION_FOR_GOOGLE_AUTH = True  # Skip verification for Google OAuth users
 

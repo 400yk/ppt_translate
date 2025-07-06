@@ -177,7 +177,14 @@
     "verification_sent": "驗證郵件已發送",
     "resend_verification": "重新發送驗證郵件",
     "check_email": "請檢查您的電子郵件以獲取驗證連結",
-    "verify_email_first": "請先驗證您的電子郵件地址"
+    "verify_email_first": "請先驗證您的電子郵件地址",
+    "invite_friends": "邀請好友",
+    "check_email_title": "檢查您的電子郵件",
+    "check_email_description": "我們已向您發送了驗證連結以完成註冊。",
+    "check_email_instructions": "請檢查您的收件箱並點擊驗證連結以激活您的帳戶。",
+    "check_spam_folder": "看不到郵件？請檢查您的垃圾郵件夾。",
+    "sending": "發送中...",
+    "resend_in_seconds": "{seconds}秒後重發"
   },
   "languages": {
     "zh": "簡體中文",
@@ -370,7 +377,11 @@
     "using_existing": "使用該信箱的現有推薦",
     "link_generated": "推薦連結生成成功",
     "code_valid": "有效的推薦碼",
-    "rewards_claimed": "推薦獎勵領取成功",
+    "rewards_claimed": "成功領取{count}個獎勵，獲得{days}天額外會員",
+    "reward_claimed": "獎勵已領取",
+    "reward_ready": "可領取",
+    "pending": "待完成",
+    "expired": "已過期",
     "popup": {
       "title": "喜歡幻翻？分享給朋友！",
       "description": "幫助您的朋友發現幻翻，當他們註冊時，您和您的朋友都可以獲得額外的**{days}天**會員！",
@@ -378,6 +389,32 @@
       "feedback_button": "反饋建議",
       "footer_note": "關閉以繼續您的翻譯",
       "close": "關閉彈窗"
+    },
+    "dashboard": {
+      "title": "推薦儀表板",
+      "description": "追蹤您的推薦並領取獎勵",
+      "total_referrals": "總推薦數",
+      "pending": "待完成",
+      "completed": "已完成",
+      "remaining": "剩餘數量",
+      "unclaimed_rewards": "未領取獎勵",
+      "unclaimed_description": "您有{count}個未領取的獎勵，價值{days}天額外會員",
+      "claim_all_rewards": "領取所有獎勵",
+      "your_referrals": "您的推薦",
+      "referrals_description": "查看您所有的推薦連結及其狀態",
+      "no_referrals": "還沒有推薦。開始分享並賺取獎勵！",
+      "created": "創建時間",
+      "expires": "過期時間",
+      "referee": "被推薦人",
+      "completed": "已完成",
+      "days": "天",
+      "claim": "領取",
+      "resend": "重新發送",
+      "max_referrals_info": "您最多可以創建{max}個推薦碼。",
+      "filter_all": "全部",
+      "filter_pending": "待完成",
+      "filter_reward_claimed": "已領取獎勵",
+      "create_new_invitation": "創建新邀請"
     }
   },
   "share": {
