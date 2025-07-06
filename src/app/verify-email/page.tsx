@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth-context';
@@ -9,7 +9,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { CheckCircle, XCircle, Loader2, Mail, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-export default function VerifyEmailPage() {
+// Loading component for Suspense fallback
+function VerifyEmailLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Card className="w-full max-w-md">
+        <CardContent className="flex items-center justify-center p-6">
+          <Loader2 className="h-6 w-6 animate-spin mr-2" />
+          <span>Loading...</span>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Component that handles search params logic
+function VerifyEmailContent() {
   const { t } = useTranslation();
   const { loginWithToken, fetchWithAuth } = useAuth();
   const router = useRouter();
@@ -117,7 +132,7 @@ export default function VerifyEmailPage() {
       setIsLoading(false);
       return () => clearInterval(timer);
     }
-  }, [searchParams, loginWithToken]);
+  }, [searchParams, loginWithToken, toast, t]);
 
   const getErrorMessage = (errorType: string) => {
     switch (errorType) {
@@ -361,5 +376,14 @@ export default function VerifyEmailPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// Main page component that wraps content in Suspense
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<VerifyEmailLoading />}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 } 
