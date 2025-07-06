@@ -18,7 +18,7 @@
       "token_expired": "이 확인 링크가 만료되었습니다. 새 확인 이메일을 요청해주세요.",
       "missing_email": "이메일이 필요합니다",
       "email_already_verified": "이메일이 이미 확인되었습니다",
-      "verification_cooldown": "다른 확인 이메일을 요청하기 전에 잠시 기다려주세요",
+      "verification_cooldown": "다른 확인 이메일을 요청하기 전에 2분 기다려주세요",
       "email_not_verified": "이메일 확인이 필요합니다"
     },
     "reset_password": {

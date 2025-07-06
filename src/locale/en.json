@@ -93,7 +93,8 @@
     "reward_already_claimed": "Reward already claimed for this referral",
     "no_rewards_available": "No rewards available to claim",
     "reward_claim_failed": "Failed to claim rewards",
-    "referral_upgrade_description": "Only paid members can invite friends. Upgrade to unlock this feature and earn extra membership days!"
+    "referral_upgrade_description": "Only paid members can invite friends. Upgrade to unlock this feature and earn extra membership days!",
+    "verification_cooldown": "Please wait 2 minutes before requesting another verification email."
   },
   "success": {
     "title": "Success",
@@ -458,7 +459,7 @@
       "token_expired": "This verification link has expired. Please request a new verification email.",
       "missing_email": "Email is required",
       "email_already_verified": "Email is already verified",
-      "verification_cooldown": "Please wait before requesting another verification email",
+      "verification_cooldown": "Please wait 2 minutes before requesting another verification email",
       "email_not_verified": "Email verification required"
     }
   }

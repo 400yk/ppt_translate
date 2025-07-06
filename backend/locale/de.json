@@ -18,7 +18,7 @@
       "token_expired": "Dieser Bestätigungslink ist abgelaufen. Bitte fordern Sie eine neue Bestätigungs-E-Mail an.",
       "missing_email": "E-Mail ist erforderlich",
       "email_already_verified": "E-Mail ist bereits bestätigt",
-      "verification_cooldown": "Bitte warten Sie, bevor Sie eine weitere Bestätigungs-E-Mail anfordern",
+      "verification_cooldown": "Bitte warten Sie 2 Minuten, bevor Sie eine weitere Bestätigungs-E-Mail anfordern",
       "email_not_verified": "E-Mail-Bestätigung erforderlich"
     },
     "reset_password": {

@@ -18,7 +18,7 @@
       "token_expired": "この確認リンクは期限切れです。新しい確認メールをリクエストしてください。",
       "missing_email": "メールアドレスが必要です",
       "email_already_verified": "メールアドレスは既に確認済みです",
-      "verification_cooldown": "別の確認メールをリクエストするまで少しお待ちください",
+      "verification_cooldown": "別の確認メールをリクエストするまで2分お待ちください",
       "email_not_verified": "メール確認が必要です"
     },
     "reset_password": {

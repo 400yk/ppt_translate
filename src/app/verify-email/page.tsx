@@ -26,7 +26,7 @@ function VerifyEmailLoading() {
 // Component that handles search params logic
 function VerifyEmailContent() {
   const { t } = useTranslation();
-  const { loginWithToken, fetchWithAuth } = useAuth();
+  const { loginWithToken, fetchWithAuth, user, resendVerificationEmail } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
@@ -56,7 +56,7 @@ function VerifyEmailContent() {
     }
     
     setCanResend(false);
-    setResendCooldown(60);
+    setResendCooldown(120);
     timerStartedRef.current = true;
     
     timerRef.current = setInterval(() => {
@@ -203,34 +203,52 @@ function VerifyEmailContent() {
     
     setIsResending(true);
     try {
-      const response = await fetchWithAuth('/api/auth/resend-verification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        toast({
-          title: t('success.title'),
-          description: t('auth.verification_sent'),
-        });
-        
-        // Reset cooldown using the helper function
-        timerStartedRef.current = false; // Reset the flag so timer can restart
-        startCountdownTimer();
-      } else {
-        const errorData = await response.json();
+      // Get email from localStorage (stored during registration) or from user object
+      const pendingEmail = localStorage.getItem('pending_verification_email');
+      const userEmail = user?.email;
+      const email = pendingEmail || userEmail;
+      
+      if (!email) {
         toast({
           title: t('errors.generic_error_title'),
-          description: errorData.message || t('errors.unknown_error'),
+          description: t('errors.unknown_error'),
           variant: 'destructive',
         });
+        return;
       }
-    } catch (error) {
+
+      await resendVerificationEmail(email);
+      
       toast({
-        title: t('errors.generic_error_title'),
-        description: t('errors.unknown_error'),
+        title: t('success.title'),
+        description: t('auth.verification_sent'),
+      });
+      
+      // Reset cooldown using the helper function
+      timerStartedRef.current = false; // Reset the flag so timer can restart
+      startCountdownTimer();
+    } catch (error: any) {
+      console.error('Resend verification email error:', error);
+      
+      let errorMessage = t('errors.unknown_error');
+      let errorTitle = t('errors.generic_error_title');
+      
+      // Handle different error types
+      if (error?.response?.status === 429) {
+        // Rate limiting / cooldown error
+        errorTitle = t('errors.generic_error_title');
+        errorMessage = t('errors.verification_cooldown');
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      toast({
+        title: errorTitle,
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

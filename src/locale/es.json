@@ -458,7 +458,7 @@
       "token_expired": "Este enlace de verificación ha expirado. Por favor, solicita un nuevo correo de verificación.",
       "missing_email": "Se requiere correo electrónico",
       "email_already_verified": "El correo electrónico ya está verificado",
-      "verification_cooldown": "Por favor, espera antes de solicitar otro correo de verificación",
+      "verification_cooldown": "Por favor, espera 2 minutos antes de solicitar otro correo de verificación",
       "email_not_verified": "Se requiere verificación de correo electrónico"
     }
   }

@@ -93,7 +93,8 @@
     "reward_already_claimed": "该推荐奖励已被领取",
     "no_rewards_available": "没有可领取的奖励",
     "reward_claim_failed": "领取奖励失败",
-    "referral_upgrade_description": "只有付费会员才能邀请朋友。升级以解锁此功能并赚取额外的会员天数！"
+    "referral_upgrade_description": "只有付费会员才能邀请朋友。升级以解锁此功能并赚取额外的会员天数！",
+    "verification_cooldown": "请等待2分钟后再请求发送验证邮件。"
   },
   "success": {
     "title": "成功",
@@ -457,7 +458,7 @@
       "token_expired": "此验证链接已过期。请重新申请验证邮件。",
       "missing_email": "需要邮箱地址",
       "email_already_verified": "邮箱已验证",
-      "verification_cooldown": "请等待后再请求另一封验证邮件",
+      "verification_cooldown": "请等待2分钟后再请求另一封验证邮件",
       "email_not_verified": "需要邮箱验证"
     }
   }

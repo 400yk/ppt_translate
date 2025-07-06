@@ -18,7 +18,7 @@
       "token_expired": "此验证链接已过期。请重新申请验证邮件。",
       "missing_email": "需要邮箱地址",
       "email_already_verified": "邮箱已验证",
-      "verification_cooldown": "请等待后再请求另一封验证邮件",
+      "verification_cooldown": "请等待2分钟后再请求另一封验证邮件",
       "email_not_verified": "需要邮箱验证"
     },
     "reset_password": {

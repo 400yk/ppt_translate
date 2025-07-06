@@ -353,7 +353,7 @@ class User(db.Model):
             return True
         return datetime.datetime.utcnow() > self.email_verification_token_expires_at
     
-    def can_resend_verification_email(self, cooldown_minutes=5):
+    def can_resend_verification_email(self, cooldown_minutes=2):
         """Check if user can request a new verification email (cooldown protection)."""
         if not self.email_verification_sent_at:
             return True

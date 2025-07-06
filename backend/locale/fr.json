@@ -18,7 +18,7 @@
       "token_expired": "Ce lien de vérification a expiré. Veuillez demander un nouvel e-mail de vérification.",
       "missing_email": "L'e-mail est requis",
       "email_already_verified": "L'e-mail est déjà vérifié",
-      "verification_cooldown": "Veuillez attendre avant de demander un autre e-mail de vérification",
+      "verification_cooldown": "Veuillez attendre 2 minutes avant de demander un autre e-mail de vérification",
       "email_not_verified": "Vérification d'e-mail requise"
     },
     "reset_password": {
