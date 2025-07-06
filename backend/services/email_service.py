@@ -469,7 +469,6 @@ class EmailService:
         
         try:
             import resend
-            from resend.exceptions import ValidationError, RateLimitError
             
             # Set API key
             resend.api_key = RESEND_API_KEY
@@ -499,14 +498,12 @@ class EmailService:
         except ImportError:
             self.logger.error("Resend not installed. Install with: pip install resend")
             return False
-        except ValidationError as e:
-            self.logger.error(f"Resend validation error: {str(e)}")
-            return False
-        except RateLimitError as e:
-            self.logger.error(f"Resend rate limit error: {str(e)}")
-            return False
         except Exception as e:
-            self.logger.error(f"Resend error: {str(e)}")
+            # Check if it's a validation error
+            if "validation" in str(e).lower() or "invalid" in str(e).lower():
+                self.logger.error(f"Resend validation error: {str(e)}")
+            else:
+                self.logger.error(f"Resend error: {str(e)}")
             return False
     
     def test_email_configuration(self) -> Dict[str, Any]:
