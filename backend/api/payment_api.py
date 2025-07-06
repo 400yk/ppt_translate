@@ -10,7 +10,7 @@ from flask import Blueprint, jsonify, request, redirect, url_for, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from db.models import User, db
 from services.user_service import get_membership_status, process_membership_purchase
-from config import PRICING, CURRENCY_RATES, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, FLASK_API_URL
+from config import PRICING, CURRENCY_RATES, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, FLASK_API_URL, FRONTEND_URL
 from utils.api_utils import error_response, success_response
 
 payment_bp = Blueprint('payment', __name__)
@@ -36,8 +36,7 @@ CANCEL_URL = STRIPE_CANCEL_URL
 MONTHLY_PRICE_LOOKUP_KEY = 'Translide-monthly'
 YEARLY_PRICE_LOOKUP_KEY = 'Translide-yearly'
 
-# Get Flask API URL from environment
-FLASK_API_URL = os.getenv('FLASK_API_URL', 'http://localhost:5000')
+# Flask API URL is imported from config
 
 # Import pricing configuration
 try:
@@ -271,7 +270,7 @@ def create_portal_session():
         
         # Get return URL from request data, or use default
         data = request.get_json() or {}
-        return_url = data.get('return_url', f'{FLASK_API_URL}/profile')
+        return_url = data.get('return_url', f'{FRONTEND_URL}/profile')
         
         # Get the customer ID from the user model
         # This assumes you store Stripe customer IDs in your user model

@@ -94,7 +94,7 @@ GUEST_USER_MAX_FILE_SIZE = 50  # 50MB
 GUEST_USER_CHARACTER_MONTHLY_LIMIT = 100000  # Number of characters allowed for guest users
 
 # Frontend and API URLs
-FLASK_API_URL = os.getenv('FLASK_API_URL', 'http://localhost:5000')
+FLASK_API_URL = os.getenv('FLASK_API_URL', 'http://localhost:5000/api')
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:9002')
 
 # Stripe payment settings

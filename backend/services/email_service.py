@@ -14,7 +14,7 @@ from config import (
     MAIL_USERNAME, MAIL_PASSWORD, MAIL_DEFAULT_SENDER,
     SENDGRID_API_KEY, AWS_SES_REGION, MAILGUN_API_KEY, MAILGUN_DOMAIN,
     RESEND_API_KEY,
-    FLASK_API_URL,
+    FLASK_API_URL, FRONTEND_URL,
     REQUIRE_EMAIL_VERIFICATION
 )
 
@@ -23,6 +23,26 @@ def load_email_translations():
     """Load email translations from frontend locale files."""
     translations = {}
     locale_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'locale')
+    
+    # Fallback translations for email templates
+    fallback_translations = {
+        'en': {
+            'verification': {
+                'subject': 'Verify your email address',
+                'welcome_title': 'Welcome to Translide!',
+                'hello': 'Hello {username}!',
+                'verification_intro': 'Thank you for signing up! Please verify your email address by clicking the button below.',
+                'button_text': 'Verify Email Address',
+                'button_fallback': 'If the button doesn\'t work, you can copy and paste this link into your browser:',
+                'expires_note': 'This verification link will expire in 24 hours.',
+                'ignore_note': 'If you didn\'t create an account, you can safely ignore this email.',
+                'footer_copyright': '© 2025 Translide. All rights reserved.'
+            },
+            'reset_password': {
+                'subject': 'Reset your password'
+            }
+        }
+    }
     
     # Define supported locales
     locales = ['en', 'zh', 'zh_hk', 'es', 'fr', 'de', 'ja', 'ko', 'ru']
@@ -36,6 +56,15 @@ def load_email_translations():
                     translations[locale] = data.get('email', {})
             except Exception as e:
                 logging.warning(f"Failed to load translations for {locale}: {e}")
+    
+    # If no translations were loaded, use fallback
+    if not translations:
+        logging.warning("No translation files found, using fallback translations")
+        translations = fallback_translations
+    
+    # Ensure English fallback exists
+    if 'en' not in translations:
+        translations['en'] = fallback_translations['en']
     
     return translations
 
@@ -122,7 +151,7 @@ class EmailService:
             self.logger.info("Email verification is disabled - skipping email send")
             return True
         
-        verify_url = f"{FLASK_API_URL}/api/verify-email?token={verification_token}"
+        verify_url = f"{FLASK_API_URL}/verify-email?token={verification_token}"
         
         # Get localized strings
         subject = get_translation("verification.subject", locale)
@@ -238,7 +267,7 @@ class EmailService:
     
     def send_password_reset_email(self, user_email: str, username: str, reset_token: str) -> bool:
         """Send password reset email."""
-        reset_url = f"{FLASK_API_URL}/reset-password?token={reset_token}"
+        reset_url = f"{FRONTEND_URL}/reset-password?token={reset_token}"
         
         subject = get_translation("reset_password.subject", username=username)
         
