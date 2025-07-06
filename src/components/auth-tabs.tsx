@@ -14,9 +14,10 @@ interface AuthTabsProps {
   defaultTab?: 'login' | 'register';
   onAuthSuccess?: () => void;
   onTabChange?: (tab: 'login' | 'register') => void;
+  initialReferralCode?: string | null;
 }
 
-export default function AuthTabs({ defaultTab = 'login', onAuthSuccess, onTabChange }: AuthTabsProps) {
+export default function AuthTabs({ defaultTab = 'login', onAuthSuccess, onTabChange, initialReferralCode }: AuthTabsProps) {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>(defaultTab);
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -95,7 +96,7 @@ export default function AuthTabs({ defaultTab = 'login', onAuthSuccess, onTabCha
       </TabsContent>
       
       <TabsContent value="register" className="space-y-4">
-        <RegisterForm />
+        <RegisterForm initialReferralCode={initialReferralCode} />
       </TabsContent>
     </Tabs>
   );
