@@ -469,6 +469,7 @@ class EmailService:
         
         try:
             import resend
+            from resend.exceptions import ValidationError, RateLimitError
             
             # Set API key
             resend.api_key = RESEND_API_KEY
@@ -488,15 +489,21 @@ class EmailService:
             # Send email using the new API
             email = resend.Emails.send(params)
             
-            if email and hasattr(email, 'id'):
-                self.logger.info(f"Email sent successfully to {to_email} via Resend (ID: {email.id})")
+            if email and email.get('id'):
+                self.logger.info(f"Email sent successfully to {to_email} via Resend (ID: {email.get('id')})")
                 return True
             else:
-                self.logger.error(f"Resend error: No message ID returned")
+                self.logger.error(f"Resend error: No message ID returned. Response: {email}")
                 return False
                 
         except ImportError:
             self.logger.error("Resend not installed. Install with: pip install resend")
+            return False
+        except ValidationError as e:
+            self.logger.error(f"Resend validation error: {str(e)}")
+            return False
+        except RateLimitError as e:
+            self.logger.error(f"Resend rate limit error: {str(e)}")
             return False
         except Exception as e:
             self.logger.error(f"Resend error: {str(e)}")
