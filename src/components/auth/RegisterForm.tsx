@@ -28,6 +28,13 @@ export default function RegisterForm({ initialReferralCode }: RegisterFormProps)
   const [lastVerifiedCode, setLastVerifiedCode] = useState('');
   
   const { register, verifyCode, isAuthenticated } = useAuth();
+  
+  // Update invitation code when initialReferralCode prop changes
+  useEffect(() => {
+    if (initialReferralCode && initialReferralCode !== invitationCode) {
+      setInvitationCode(initialReferralCode);
+    }
+  }, [initialReferralCode, invitationCode]);
   const { toast } = useToast();
   const { t } = useTranslation();
   const router = useRouter();

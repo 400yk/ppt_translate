@@ -117,11 +117,11 @@ export function TranslationHeader({ isGuestUser, onShowRegistrationDialog }: Tra
                 <DropdownMenuLabel>{guestUserText}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onShowRegistrationDialog}>
-                  <Icons.user className="mr-2 h-4 w-4" />
+                  <Icons.user className="h-4 w-4" />
                   {registerLoginText}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/')}>
-                  <Icons.home className="mr-2 h-4 w-4" />
+                  <Icons.home className="h-4 w-4" />
                   {backToHomeText}
                 </DropdownMenuItem>
               </>
@@ -130,19 +130,19 @@ export function TranslationHeader({ isGuestUser, onShowRegistrationDialog }: Tra
                 <DropdownMenuLabel>{user?.email || user?.username}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => router.push('/profile')}>
-                  <Icons.user className="mr-2 h-4 w-4" />
+                  <Icons.user className="h-4 w-4" />
                   {t('profile.title')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleInviteFriends}>
-                  <Icons.share className="mr-2 h-4 w-4" />
+                  <Icons.share className="h-4 w-4" />
                   {t('auth.invite_friends')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowFeedbackModal(true)}>
-                  <Icons.messageSquare className="mr-2 h-4 w-4" />
+                  <Icons.messageSquare className="h-4 w-4" />
                   {t('feedback.title')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
-                  <Icons.logout className="mr-2 h-4 w-4" />
+                  <Icons.logout className="h-4 w-4" />
                   {t('auth.logout')}
                 </DropdownMenuItem>
               </>
