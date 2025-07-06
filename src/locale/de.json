@@ -116,6 +116,24 @@
   "footer": {
     "description": "Übersetzen Sie Ihre PowerPoint-Folien unter Beibehaltung aller Formatierungen und Layouts."
   },
+  "feedback": {
+    "title": "Feedback Geben",
+    "description": "Helfen Sie uns, Translide zu verbessern, indem Sie Ihre Gedanken und Vorschläge teilen.",
+    "rating_label": "Bewerten Sie Ihre Erfahrung",
+    "rating_optional": "optional",
+    "star": "Stern",
+    "stars": "Sterne",
+    "feedback_label": "Ihr Feedback",
+    "feedback_placeholder": "Sagen Sie uns, was Sie über Translide denken, welche Funktionen Sie sehen möchten, oder melden Sie Probleme, die Sie erlebt haben...",
+    "characters": "Zeichen",
+    "submit": "Feedback Senden",
+    "submitting": "Wird gesendet...",
+    "close": "Schließen",
+    "success_message": "Danke für Ihr Feedback! Wir schätzen Ihre Meinung.",
+    "error_empty_feedback": "Bitte geben Sie Ihr Feedback ein, bevor Sie es senden.",
+    "error_email_required": "Bitte geben Sie Ihre E-Mail-Adresse ein.",
+    "error_submit_failed": "Feedback senden fehlgeschlagen. Bitte versuchen Sie es erneut."
+  },
   "auth": {
     "login": "Anmelden",
     "login_subtitle": "Melden Sie sich an, um fortzufahren",

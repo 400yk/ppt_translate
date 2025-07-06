@@ -116,6 +116,24 @@
   "footer": {
     "description": "PowerPointスライドを翻訳し、すべての書式とレイアウトを保持します。"
   },
+  "feedback": {
+    "title": "フィードバックを送る",
+    "description": "あなたの考えや提案を共有して、Translideの改善にご協力ください。",
+    "rating_label": "体験を評価してください",
+    "rating_optional": "任意",
+    "star": "星",
+    "stars": "星",
+    "feedback_label": "フィードバック",
+    "feedback_placeholder": "Translideについてどう思うか、どのような機能を見たいか、または遭遇した問題を報告してください...",
+    "characters": "文字",
+    "submit": "フィードバックを送信",
+    "submitting": "送信中...",
+    "close": "閉じる",
+    "success_message": "フィードバックありがとうございます！ご意見をお聞かせいただき感謝いたします。",
+    "error_empty_feedback": "送信前にフィードバックを入力してください。",
+    "error_email_required": "メールアドレスを入力してください。",
+    "error_submit_failed": "フィードバックの送信に失敗しました。もう一度お試しください。"
+  },
   "auth": {
     "login": "ログイン",
     "login_subtitle": "続行するにはアカウントにログインしてください",

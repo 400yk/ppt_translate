@@ -18,6 +18,7 @@ import { PaymentModal } from '@/components/payment-modal';
 import apiClient, { getApiErrorMessage } from '@/lib/api-client';
 import { ShareModal } from '@/components/share-modal';
 import { MembershipUpgradeModal } from '@/components/membership-upgrade-modal';
+import { FeedbackModal } from '@/components/feedback-modal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +44,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const { toast } = useToast();
 
   // Fix for hydration error - only render content after client-side mount
@@ -187,6 +189,11 @@ export default function ProfilePage() {
     }
   };
 
+  // Handle feedback click
+  const handleFeedback = () => {
+    setShowFeedbackModal(true);
+  };
+
   // If not yet client-side (first render), return minimal content to avoid hydration mismatch
   if (!isClient) {
     return <div className="container max-w-6xl py-10"></div>;
@@ -261,6 +268,10 @@ export default function ProfilePage() {
                   <DropdownMenuItem onClick={handleInviteFriends}>
                     <Icons.share className="mr-2 h-4 w-4" />
                     {t('auth.invite_friends')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleFeedback}>
+                    <Icons.messageSquare className="mr-2 h-4 w-4" />
+                    {t('feedback.title')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout}>
                     <Icons.logout className="mr-2 h-4 w-4" />
@@ -437,6 +448,12 @@ export default function ProfilePage() {
       <MembershipUpgradeModal 
         isVisible={showUpgradePrompt} 
         onClose={() => setShowUpgradePrompt(false)} 
+      />
+
+      {/* Feedback modal */}
+      <FeedbackModal 
+        isVisible={showFeedbackModal} 
+        onClose={() => setShowFeedbackModal(false)} 
       />
     </div>
   );

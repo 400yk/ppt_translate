@@ -116,6 +116,24 @@
   "footer": {
     "description": "Traduzca sus diapositivas de PowerPoint manteniendo todo el formato y diseño."
   },
+  "feedback": {
+    "title": "Dar Retroalimentación",
+    "description": "Ayúdanos a mejorar Translide compartiendo tus pensamientos y sugerencias.",
+    "rating_label": "Califica tu experiencia",
+    "rating_optional": "opcional",
+    "star": "estrella",
+    "stars": "estrellas",
+    "feedback_label": "Tu retroalimentación",
+    "feedback_placeholder": "Cuéntanos qué piensas sobre Translide, qué características te gustaría ver, o reporta cualquier problema que hayas encontrado...",
+    "characters": "caracteres",
+    "submit": "Enviar Retroalimentación",
+    "submitting": "Enviando...",
+    "close": "Cerrar",
+    "success_message": "¡Gracias por tu retroalimentación! Valoramos tu opinión.",
+    "error_empty_feedback": "Por favor ingresa tu retroalimentación antes de enviar.",
+    "error_email_required": "Por favor ingresa tu dirección de correo electrónico.",
+    "error_submit_failed": "Error al enviar retroalimentación. Por favor intenta de nuevo."
+  },
   "auth": {
     "login": "Iniciar sesión",
     "login_subtitle": "Inicie sesión en su cuenta para continuar",

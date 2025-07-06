@@ -7,6 +7,7 @@ import { Icons } from '@/components/icons';
 import { LanguageSelector } from '@/components/language-selector';
 import { ShareModal } from '@/components/share-modal';
 import { MembershipUpgradeModal } from '@/components/membership-upgrade-modal';
+import { FeedbackModal } from '@/components/feedback-modal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,7 @@ export function TranslationHeader({ isGuestUser, onShowRegistrationDialog }: Tra
   const { t } = useTranslation();
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   
   // Custom logout function to redirect to landing page
   const handleLogout = () => {
@@ -135,6 +137,10 @@ export function TranslationHeader({ isGuestUser, onShowRegistrationDialog }: Tra
                   <Icons.share className="mr-2 h-4 w-4" />
                   {t('auth.invite_friends')}
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowFeedbackModal(true)}>
+                  <Icons.messageSquare className="mr-2 h-4 w-4" />
+                  {t('feedback.title')}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   <Icons.logout className="mr-2 h-4 w-4" />
                   {t('auth.logout')}
@@ -155,6 +161,13 @@ export function TranslationHeader({ isGuestUser, onShowRegistrationDialog }: Tra
       <MembershipUpgradeModal 
         isVisible={showUpgradePrompt} 
         onClose={() => setShowUpgradePrompt(false)} 
+      />
+      
+      {/* Feedback modal */}
+      <FeedbackModal
+        isVisible={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        pageContext="translate-header"
       />
     </div>
   );

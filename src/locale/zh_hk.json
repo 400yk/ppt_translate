@@ -116,6 +116,24 @@
   "footer": {
     "description": "翻譯您的PowerPoint幻燈片，同時保留所有格式和佈局。"
   },
+  "feedback": {
+    "title": "反饋建議",
+    "description": "透過分享您的想法和建議來幫助我們改進 Translide。",
+    "rating_label": "評價您的體驗",
+    "rating_optional": "可選",
+    "star": "星",
+    "stars": "星",
+    "feedback_label": "您的反饋",
+    "feedback_placeholder": "告訴我們您對 Translide 的看法、希望看到的功能或遇到的問題...",
+    "characters": "字符",
+    "submit": "提交反饋",
+    "submitting": "提交中...",
+    "close": "關閉",
+    "success_message": "感謝您的反饋！我們非常重視您的意見。",
+    "error_empty_feedback": "請在提交前輸入您的反饋。",
+    "error_email_required": "請輸入您的電子郵件地址。",
+    "error_submit_failed": "提交反饋失敗。請重試。"
+  },
   "auth": {
     "login": "登錄",
     "login_subtitle": "登錄您的賬戶以繼續",

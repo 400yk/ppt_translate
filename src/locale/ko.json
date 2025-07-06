@@ -116,6 +116,24 @@
   "footer": {
     "description": "모든 형식과 레이아웃을 유지하면서 PowerPoint 슬라이드를 번역합니다."
   },
+  "feedback": {
+    "title": "피드백 제공",
+    "description": "생각과 제안을 공유하여 Translide 개선에 도움을 주세요.",
+    "rating_label": "경험을 평가하세요",
+    "rating_optional": "선택사항",
+    "star": "별",
+    "stars": "별",
+    "feedback_label": "피드백",
+    "feedback_placeholder": "Translide에 대한 생각, 보고 싶은 기능, 또는 경험한 문제에 대해 알려주세요...",
+    "characters": "문자",
+    "submit": "피드백 제출",
+    "submitting": "제출 중...",
+    "close": "닫기",
+    "success_message": "피드백 감사합니다! 귀하의 의견을 소중히 생각합니다.",
+    "error_empty_feedback": "제출하기 전에 피드백을 입력해 주세요.",
+    "error_email_required": "이메일 주소를 입력해 주세요.",
+    "error_submit_failed": "피드백 제출에 실패했습니다. 다시 시도해 주세요."
+  },
   "auth": {
     "login": "로그인",
     "login_subtitle": "계속하려면 계정에 로그인하세요",

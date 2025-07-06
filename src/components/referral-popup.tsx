@@ -88,7 +88,7 @@ export function ReferralPopup({ isVisible, onClose, onShare, onFeedback }: Refer
             <Button
               onClick={onFeedback}
               variant="outline"
-              className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 py-2 text-sm font-medium"
+              className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 hover:text-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 py-2 text-sm font-medium transition-colors"
               size="sm"
             >
               <MessageSquare className="mr-2 h-4 w-4" />

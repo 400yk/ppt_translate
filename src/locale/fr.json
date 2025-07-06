@@ -116,6 +116,24 @@
   "footer": {
     "description": "Traduisez vos diapositives PowerPoint tout en préservant la mise en forme et la mise en page."
   },
+  "feedback": {
+    "title": "Donner un Retour",
+    "description": "Aidez-nous à améliorer Translide en partageant vos pensées et suggestions.",
+    "rating_label": "Évaluez votre expérience",
+    "rating_optional": "optionnel",
+    "star": "étoile",
+    "stars": "étoiles",
+    "feedback_label": "Votre retour",
+    "feedback_placeholder": "Dites-nous ce que vous pensez de Translide, quelles fonctionnalités vous aimeriez voir, ou signalez tout problème que vous avez rencontré...",
+    "characters": "caractères",
+    "submit": "Envoyer le Retour",
+    "submitting": "Envoi...",
+    "close": "Fermer",
+    "success_message": "Merci pour votre retour ! Nous apprécions votre contribution.",
+    "error_empty_feedback": "Veuillez saisir votre retour avant de l'envoyer.",
+    "error_email_required": "Veuillez saisir votre adresse e-mail.",
+    "error_submit_failed": "Échec de l'envoi du retour. Veuillez réessayer."
+  },
   "auth": {
     "login": "Connexion",
     "login_subtitle": "Connectez-vous à votre compte pour continuer",

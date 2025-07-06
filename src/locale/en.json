@@ -116,6 +116,24 @@
   "footer": {
     "description": "Translate your PowerPoint slides while preserving all formatting and layout."
   },
+  "feedback": {
+    "title": "Give Feedback",
+    "description": "Help us improve Translide by sharing your thoughts and suggestions.",
+    "rating_label": "Rate your experience",
+    "rating_optional": "optional",
+    "star": "star",
+    "stars": "stars",
+    "feedback_label": "Your feedback",
+    "feedback_placeholder": "Tell us what you think about Translide, what features you'd like to see, or report any issues you've encountered...",
+    "characters": "characters",
+    "submit": "Submit Feedback",
+    "submitting": "Submitting...",
+    "close": "Close",
+    "success_message": "Thank you for your feedback! We appreciate your input.",
+    "error_empty_feedback": "Please enter your feedback before submitting.",
+    "error_email_required": "Please enter your email address.",
+    "error_submit_failed": "Failed to submit feedback. Please try again."
+  },
   "auth": {
     "login": "Login",
     "login_subtitle": "Sign in to your account to continue",

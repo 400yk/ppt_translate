@@ -36,6 +36,7 @@ import { RegistrationDialog } from '@/components/registration-dialog';
 import { initGuestSession, canGuestUseTranslation, fetchGuestUsage } from '@/lib/guest-session';
 import { ShareModal } from '@/components/share-modal';
 import { MembershipUpgradeModal } from '@/components/membership-upgrade-modal';
+import { FeedbackModal } from '@/components/feedback-modal';
 
 // Define available languages (codes only)
 const languageCodes = ["zh", "en", "es", "fr", "de", "ja", "ko", "ru"] as const;
@@ -63,6 +64,7 @@ export default function LandingPage() {
   const [guestStatusLoaded, setGuestStatusLoaded] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   // Fix for hydration error - only render content after client-side mount
   useEffect(() => {
@@ -226,6 +228,13 @@ export default function LandingPage() {
         onClose={() => setShowUpgradePrompt(false)} 
       />
       
+      {/* Feedback modal */}
+      <FeedbackModal
+        isVisible={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        pageContext="landing"
+      />
+      
       {/* Navbar */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4">
@@ -273,6 +282,10 @@ export default function LandingPage() {
                     <DropdownMenuItem onClick={handleInviteFriends}>
                       <Icons.share className="mr-2 h-4 w-4" />
                       {t('auth.invite_friends')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowFeedbackModal(true)}>
+                      <Icons.messageSquare className="mr-2 h-4 w-4" />
+                      {t('feedback.title')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleLogout}>
                       <Icons.logout className="mr-2 h-4 w-4" />

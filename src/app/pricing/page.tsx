@@ -21,6 +21,7 @@ import { useConfigLimits } from '@/lib/config-service';
 import apiClient from '@/lib/api-client';
 import { ShareModal } from '@/components/share-modal';
 import { MembershipUpgradeModal } from '@/components/membership-upgrade-modal';
+import { FeedbackModal } from '@/components/feedback-modal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +44,7 @@ export default function PricingPage() {
   const [isPaidUser, setIsPaidUser] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -158,6 +160,13 @@ export default function PricingPage() {
         onClose={() => setShowUpgradePrompt(false)} 
       />
       
+      {/* Feedback modal */}
+      <FeedbackModal
+        isVisible={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        pageContext="pricing"
+      />
+      
       {/* Navbar */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4">
@@ -208,6 +217,10 @@ export default function PricingPage() {
                     <DropdownMenuItem onClick={handleInviteFriends}>
                       <Icons.share className="mr-2 h-4 w-4" />
                       {t('auth.invite_friends')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowFeedbackModal(true)}>
+                      <Icons.messageSquare className="mr-2 h-4 w-4" />
+                      {t('feedback.title')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => router.push('/')}>
                       <Icons.logout className="mr-2 h-4 w-4" />
