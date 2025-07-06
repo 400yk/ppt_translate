@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useEffect, useState, useCallback, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { useAuth } from '@/lib/auth-context';
@@ -37,12 +37,67 @@ function VerifyEmailContent() {
   const [isResending, setIsResending] = useState(false);
   const [canResend, setCanResend] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const hasLoggedInRef = useRef(false); // Track if login has been performed
+  const timerRef = useRef<NodeJS.Timeout | null>(null); // Track timer reference
+  const timerStartedRef = useRef(false); // Track if timer has been started
 
   // Ensure component only renders after hydration to prevent hydration mismatch
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // Helper function to start countdown timer
+  const startCountdownTimer = useCallback(() => {
+    console.log('Starting countdown timer, current state:', { resendCooldown, canResend });
+    
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    
+    setCanResend(false);
+    setResendCooldown(60);
+    timerStartedRef.current = true;
+    
+    timerRef.current = setInterval(() => {
+      setResendCooldown(prev => {
+        console.log('Timer tick, countdown:', prev - 1);
+        if (prev <= 1) {
+          setCanResend(true);
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+          console.log('Timer finished, can resend now');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  // Cleanup timer on component unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
+
+  // Debug logging for state changes
+  useEffect(() => {
+    console.log('State change:', { 
+      verificationStatus, 
+      resendCooldown, 
+      canResend, 
+      isLoading, 
+      isMounted,
+      timerStarted: timerStartedRef.current 
+    });
+  }, [verificationStatus, resendCooldown, canResend, isLoading, isMounted]);
+
+  // Handle URL params and verification logic
   useEffect(() => {
     const success = searchParams.get('success');
     const error = searchParams.get('error');
@@ -53,8 +108,11 @@ function VerifyEmailContent() {
       // Email verification successful (redirected from backend)
       setVerificationStatus('success');
       
-      // Auto-login the user
-      loginWithToken(token, username);
+      // Auto-login the user (only once)
+      if (!hasLoggedInRef.current) {
+        loginWithToken(token, username);
+        hasLoggedInRef.current = true;
+      }
       setIsLoading(false);
     } else if (error) {
       // Email verification failed (redirected from backend)
@@ -81,6 +139,7 @@ function VerifyEmailContent() {
               // Verification successful
               setVerificationStatus('success');
               loginWithToken(data.access_token, data.username);
+              hasLoggedInRef.current = true;
               
               toast({
                 title: t('success.title'),
@@ -116,23 +175,15 @@ function VerifyEmailContent() {
       // No URL parameters - user just registered and is waiting for email verification
       setVerificationStatus('waiting');
       
-      // Start cooldown timer (60 seconds before they can resend)
-      setResendCooldown(60);
-      const timer = setInterval(() => {
-        setResendCooldown(prev => {
-          if (prev <= 1) {
-            setCanResend(true);
-            clearInterval(timer);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+      // Start cooldown timer (60 seconds before they can resend) - only once
+      if (!timerStartedRef.current) {
+        console.log('Starting timer for waiting state');
+        startCountdownTimer();
+      }
 
       setIsLoading(false);
-      return () => clearInterval(timer);
     }
-  }, [searchParams, loginWithToken, toast, t]);
+  }, [searchParams, toast, t]);
 
   const getErrorMessage = (errorType: string) => {
     switch (errorType) {
@@ -165,19 +216,9 @@ function VerifyEmailContent() {
           description: t('auth.verification_sent'),
         });
         
-        // Reset cooldown
-        setCanResend(false);
-        setResendCooldown(60);
-        const timer = setInterval(() => {
-          setResendCooldown(prev => {
-            if (prev <= 1) {
-              setCanResend(true);
-              clearInterval(timer);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
+        // Reset cooldown using the helper function
+        timerStartedRef.current = false; // Reset the flag so timer can restart
+        startCountdownTimer();
       } else {
         const errorData = await response.json();
         toast({
