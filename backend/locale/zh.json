@@ -1,0 +1,36 @@
+{
+  "email": {
+    "verification": {
+      "subject": "验证您的邮箱地址 - 幻翻",
+      "welcome_title": "欢迎使用幻翻！",
+      "hello": "您好 {username}！",
+      "verification_intro": "感谢您注册幻翻。为了完成注册并开始使用我们的PowerPoint翻译服务，请验证您的邮箱地址。",
+      "button_text": "验证邮箱地址",
+      "button_fallback": "如果按钮无法正常工作，您可以复制并粘贴此链接到您的浏览器：",
+      "expires_note": "此链接将在24小时后过期。",
+      "ignore_note": "如果您没有创建幻翻账户，您可以安全地忽略这封邮件。",
+      "footer_copyright": "© 2025 幻翻。保留所有权利。"
+    },
+    "errors": {
+      "email_send_failed": "发送验证邮件失败",
+      "missing_token": "未提供验证令牌。请检查您邮箱中的链接。",
+      "invalid_token": "无效的验证令牌。请重新申请验证邮件。",
+      "token_expired": "此验证链接已过期。请重新申请验证邮件。",
+      "missing_email": "需要邮箱地址",
+      "email_already_verified": "邮箱已验证",
+      "verification_cooldown": "请等待后再请求另一封验证邮件",
+      "email_not_verified": "需要邮箱验证"
+    },
+    "reset_password": {
+      "subject": "重置您的密码 - 幻翻",
+      "welcome_title": "密码重置请求",
+      "hello": "你好 {username}！",
+      "reset_intro": "我们收到了重置您幻翻账户密码的请求。",
+      "button_text": "重置密码",
+      "button_fallback": "如果按钮不起作用，您可以复制并粘贴此链接到您的浏览器：",
+      "expires_note": "此链接将在1小时后过期。",
+      "ignore_note": "如果您没有请求密码重置，您可以安全地忽略此邮件。",
+      "footer_copyright": "© 2025 幻翻。保留所有权利。"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "email": {
+    "verification": {
+      "subject": "이메일 주소를 확인해주세요 - Translide",
+      "welcome_title": "Translide에 오신 것을 환영합니다!",
+      "hello": "안녕하세요 {username}님!",
+      "verification_intro": "Translide에 가입해 주셔서 감사합니다. 가입을 완료하고 PowerPoint 번역 서비스를 이용하시려면 이메일 주소를 확인해 주세요.",
+      "button_text": "이메일 주소 확인",
+      "button_fallback": "버튼이 작동하지 않으면 이 링크를 복사해서 브라우저에 붙여넣으세요:",
+      "expires_note": "이 링크는 24시간 후에 만료됩니다.",
+      "ignore_note": "Translide 계정을 만들지 않으셨다면 이 이메일을 안전하게 무시하셔도 됩니다.",
+      "footer_copyright": "© 2025 Translide. 모든 권리 보유."
+    },
+    "errors": {
+      "email_send_failed": "확인 이메일 전송 실패",
+      "missing_token": "확인 토큰이 제공되지 않았습니다. 이메일의 링크를 확인해주세요.",
+      "invalid_token": "유효하지 않은 확인 토큰입니다. 새 확인 이메일을 요청해주세요.",
+      "token_expired": "이 확인 링크가 만료되었습니다. 새 확인 이메일을 요청해주세요.",
+      "missing_email": "이메일이 필요합니다",
+      "email_already_verified": "이메일이 이미 확인되었습니다",
+      "verification_cooldown": "다른 확인 이메일을 요청하기 전에 잠시 기다려주세요",
+      "email_not_verified": "이메일 확인이 필요합니다"
+    },
+    "reset_password": {
+      "subject": "비밀번호 재설정 - Translide",
+      "welcome_title": "비밀번호 재설정 요청",
+      "hello": "안녕하세요 {username}님!",
+      "reset_intro": "Translide 계정의 비밀번호 재설정 요청을 받았습니다.",
+      "button_text": "비밀번호 재설정",
+      "button_fallback": "버튼이 작동하지 않으면 이 링크를 브라우저에 복사하여 붙여넣으세요:",
+      "expires_note": "이 링크는 1시간 후에 만료됩니다.",
+      "ignore_note": "비밀번호 재설정을 요청하지 않았다면 이 이메일을 무시하셔도 됩니다.",
+      "footer_copyright": "© 2025 Translide. 모든 권리 보유."
+    }
+  }
+}

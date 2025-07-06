@@ -1,0 +1,36 @@
+{
+  "email": {
+    "verification": {
+      "subject": "Vérifiez votre adresse e-mail - Translide",
+      "welcome_title": "Bienvenue sur Translide !",
+      "hello": "Bonjour {username} !",
+      "verification_intro": "Merci de vous être inscrit sur Translide. Pour compléter votre inscription et commencer à utiliser notre service de traduction PowerPoint, veuillez vérifier votre adresse e-mail.",
+      "button_text": "Vérifier l'adresse e-mail",
+      "button_fallback": "Si le bouton ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :",
+      "expires_note": "Ce lien expirera dans 24 heures.",
+      "ignore_note": "Si vous n'avez pas créé de compte Translide, vous pouvez ignorer cet e-mail en toute sécurité.",
+      "footer_copyright": "© 2025 Translide. Tous droits réservés."
+    },
+    "errors": {
+      "email_send_failed": "Échec de l'envoi de l'e-mail de vérification",
+      "missing_token": "Aucun jeton de vérification fourni. Veuillez vérifier le lien dans votre e-mail.",
+      "invalid_token": "Jeton de vérification invalide. Veuillez demander un nouvel e-mail de vérification.",
+      "token_expired": "Ce lien de vérification a expiré. Veuillez demander un nouvel e-mail de vérification.",
+      "missing_email": "L'e-mail est requis",
+      "email_already_verified": "L'e-mail est déjà vérifié",
+      "verification_cooldown": "Veuillez attendre avant de demander un autre e-mail de vérification",
+      "email_not_verified": "Vérification d'e-mail requise"
+    },
+    "reset_password": {
+      "subject": "Réinitialisez votre mot de passe - Translide",
+      "welcome_title": "Demande de réinitialisation de mot de passe",
+      "hello": "Bonjour {username} !",
+      "reset_intro": "Nous avons reçu une demande de réinitialisation de votre mot de passe Translide.",
+      "button_text": "Réinitialiser le mot de passe",
+      "button_fallback": "Si le bouton ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :",
+      "expires_note": "Ce lien expirera dans 1 heure.",
+      "ignore_note": "Si vous n'avez pas demandé de réinitialisation, vous pouvez ignorer cet e-mail.",
+      "footer_copyright": "© 2025 Translide. Tous droits réservés."
+    }
+  }
+}

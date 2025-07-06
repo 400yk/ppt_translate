@@ -20,26 +20,34 @@ from config import (
 
 # Load translations for email templates
 def load_email_translations():
-    """Load email translations from frontend locale files."""
+    """Load email translations from backend locale files."""
     translations = {}
-    locale_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'locale')
+    locale_dir = os.path.join(os.path.dirname(__file__), '..', 'locale')
     
     # Fallback translations for email templates
     fallback_translations = {
         'en': {
             'verification': {
-                'subject': 'Verify your email address',
+                'subject': 'Verify your email address - Translide',
                 'welcome_title': 'Welcome to Translide!',
                 'hello': 'Hello {username}!',
-                'verification_intro': 'Thank you for signing up! Please verify your email address by clicking the button below.',
+                'verification_intro': 'Thank you for registering with Translide. To complete your registration and start using our PowerPoint translation service, please verify your email address.',
                 'button_text': 'Verify Email Address',
                 'button_fallback': 'If the button doesn\'t work, you can copy and paste this link into your browser:',
-                'expires_note': 'This verification link will expire in 24 hours.',
-                'ignore_note': 'If you didn\'t create an account, you can safely ignore this email.',
+                'expires_note': 'This link will expire in 24 hours.',
+                'ignore_note': 'If you didn\'t create an account with Translide, you can safely ignore this email.',
                 'footer_copyright': '© 2025 Translide. All rights reserved.'
             },
             'reset_password': {
-                'subject': 'Reset your password'
+                'subject': 'Reset your password - Translide',
+                'welcome_title': 'Password Reset Request',
+                'hello': 'Hello {username}!',
+                'reset_intro': 'We received a request to reset your password for your Translide account.',
+                'button_text': 'Reset Password',
+                'button_fallback': 'If the button doesn\'t work, you can copy and paste this link into your browser:',
+                'expires_note': 'This link will expire in 1 hour.',
+                'ignore_note': 'If you didn\'t request a password reset, you can safely ignore this email.',
+                'footer_copyright': '© 2025 Translide. All rights reserved.'
             }
         }
     }
@@ -265,11 +273,20 @@ class EmailService:
             text_content=text_content
         )
     
-    def send_password_reset_email(self, user_email: str, username: str, reset_token: str) -> bool:
+    def send_password_reset_email(self, user_email: str, username: str, reset_token: str, locale: str = 'en') -> bool:
         """Send password reset email."""
         reset_url = f"{FRONTEND_URL}/reset-password?token={reset_token}"
         
-        subject = get_translation("reset_password.subject", username=username)
+        # Get localized strings
+        subject = get_translation("reset_password.subject", locale)
+        welcome_title = get_translation("reset_password.welcome_title", locale)
+        hello_text = get_translation("reset_password.hello", locale, username=username)
+        reset_intro = get_translation("reset_password.reset_intro", locale)
+        button_text = get_translation("reset_password.button_text", locale)
+        button_fallback = get_translation("reset_password.button_fallback", locale)
+        expires_note = get_translation("reset_password.expires_note", locale)
+        ignore_note = get_translation("reset_password.ignore_note", locale)
+        footer_copyright = get_translation("reset_password.footer_copyright", locale)
         
         html_template = """
         <!DOCTYPE html>
@@ -285,11 +302,12 @@ class EmailService:
                 .button { 
                     display: inline-block; 
                     background-color: #dc2626; 
-                    color: white; 
+                    color: white !important; 
                     padding: 12px 24px; 
                     text-decoration: none; 
                     border-radius: 6px; 
                     margin: 20px 0;
+                    font-weight: bold;
                 }
                 .footer { text-align: center; font-size: 12px; color: #666; margin-top: 30px; }
             </style>
@@ -297,39 +315,77 @@ class EmailService:
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>Password Reset Request</h1>
+                    <h1>{{ welcome_title }}</h1>
                 </div>
                 <div class="content">
-                    <h2>Hello {{ username }}!</h2>
-                    <p>We received a request to reset your password for your Translide account.</p>
+                    <h2>{{ hello_text }}</h2>
+                    <p>{{ reset_intro }}</p>
                     
                     <p style="text-align: center;">
-                        <a href="{{ reset_url }}" class="button">Reset Password</a>
+                        <a href="{{ reset_url }}" class="button">{{ button_text }}</a>
                     </p>
                     
-                    <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
+                    <p>{{ button_fallback }}</p>
                     <p style="word-break: break-all; background-color: #f3f4f6; padding: 10px; border-radius: 4px;">
                         {{ reset_url }}
                     </p>
                     
-                    <p><strong>This link will expire in 1 hour.</strong></p>
+                    <p><strong>{{ expires_note }}</strong></p>
                     
-                    <p>If you didn't request a password reset, you can safely ignore this email.</p>
+                    <p>{{ ignore_note }}</p>
                 </div>
                 <div class="footer">
-                    <p>© 2025 Translide. All rights reserved.</p>
+                    <p>{{ footer_copyright }}</p>
                 </div>
             </div>
         </body>
         </html>
         """
         
-        html_content = render_template_string(html_template, username=username, reset_url=reset_url)
+        # Plain text version
+        text_template = """
+        {{ welcome_title }}
+        
+        {{ hello_text }}
+        
+        {{ reset_intro }}
+        
+        {{ reset_url }}
+        
+        {{ expires_note }}
+        
+        {{ ignore_note }}
+        
+        {{ footer_copyright }}
+        """
+        
+        html_content = render_template_string(html_template, 
+            welcome_title=welcome_title,
+            hello_text=hello_text,
+            reset_intro=reset_intro,
+            button_text=button_text,
+            button_fallback=button_fallback,
+            expires_note=expires_note,
+            ignore_note=ignore_note,
+            footer_copyright=footer_copyright,
+            reset_url=reset_url
+        )
+        
+        text_content = render_template_string(text_template,
+            welcome_title=welcome_title,
+            hello_text=hello_text,
+            reset_intro=reset_intro,
+            expires_note=expires_note,
+            ignore_note=ignore_note,
+            footer_copyright=footer_copyright,
+            reset_url=reset_url
+        )
         
         return self._send_email(
             to_email=user_email,
             subject=subject,
-            html_content=html_content
+            html_content=html_content,
+            text_content=text_content
         )
     
     def _send_email(self, to_email: str, subject: str, html_content: str, text_content: str = None) -> bool:

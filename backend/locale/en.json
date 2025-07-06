@@ -1,0 +1,36 @@
+{
+  "email": {
+    "verification": {
+      "subject": "Verify your email address - Translide",
+      "welcome_title": "Welcome to Translide!",
+      "hello": "Hello {username}!",
+      "verification_intro": "Thank you for registering with Translide. To complete your registration and start using our PowerPoint translation service, please verify your email address.",
+      "button_text": "Verify Email Address",
+      "button_fallback": "If the button doesn't work, you can copy and paste this link into your browser:",
+      "expires_note": "This link will expire in 24 hours.",
+      "ignore_note": "If you didn't create an account with Translide, you can safely ignore this email.",
+      "footer_copyright": "© 2025 Translide. All rights reserved."
+    },
+    "errors": {
+      "email_send_failed": "Failed to send verification email",
+      "missing_token": "No verification token provided. Please check the link in your email.",
+      "invalid_token": "Invalid verification token. Please request a new verification email.",
+      "token_expired": "This verification link has expired. Please request a new verification email.",
+      "missing_email": "Email is required",
+      "email_already_verified": "Email is already verified",
+      "verification_cooldown": "Please wait before requesting another verification email",
+      "email_not_verified": "Email verification required"
+    },
+    "reset_password": {
+      "subject": "Reset your password - Translide",
+      "welcome_title": "Password Reset Request",
+      "hello": "Hello {username}!",
+      "reset_intro": "We received a request to reset your password for your Translide account.",
+      "button_text": "Reset Password",
+      "button_fallback": "If the button doesn't work, you can copy and paste this link into your browser:",
+      "expires_note": "This link will expire in 1 hour.",
+      "ignore_note": "If you didn't request a password reset, you can safely ignore this email.",
+      "footer_copyright": "© 2025 Translide. All rights reserved."
+    }
+  }
+}

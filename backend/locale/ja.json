@@ -1,0 +1,36 @@
+{
+  "email": {
+    "verification": {
+      "subject": "メールアドレスを確認してください - Translide",
+      "welcome_title": "Translineへようこそ！",
+      "hello": "こんにちは {username}さん！",
+      "verification_intro": "Translineにご登録いただき、ありがとうございます。登録を完了し、PowerPoint翻訳サービスをご利用いただくため、メールアドレスを確認してください。",
+      "button_text": "メールアドレスを確認",
+      "button_fallback": "ボタンが機能しない場合は、このリンクをコピーしてブラウザに貼り付けてください：",
+      "expires_note": "このリンクは24時間で有効期限が切れます。",
+      "ignore_note": "Translineアカウントを作成していない場合は、このメールを無視していただいて構いません。",
+      "footer_copyright": "© 2025 Translide. 無断複写・転載を禁じます。"
+    },
+    "errors": {
+      "email_send_failed": "確認メールの送信に失敗しました",
+      "missing_token": "確認トークンが提供されていません。メール内のリンクを確認してください。",
+      "invalid_token": "確認トークンが無効です。新しい確認メールをリクエストしてください。",
+      "token_expired": "この確認リンクは期限切れです。新しい確認メールをリクエストしてください。",
+      "missing_email": "メールアドレスが必要です",
+      "email_already_verified": "メールアドレスは既に確認済みです",
+      "verification_cooldown": "別の確認メールをリクエストするまで少しお待ちください",
+      "email_not_verified": "メール確認が必要です"
+    },
+    "reset_password": {
+      "subject": "パスワードをリセット - Translide",
+      "welcome_title": "パスワードリセットリクエスト",
+      "hello": "こんにちは {username} さん！",
+      "reset_intro": "Translideアカウントのパスワードリセットのリクエストを受け取りました。",
+      "button_text": "パスワードをリセット",
+      "button_fallback": "ボタンが機能しない場合、このリンクをブラウザにコピーして貼り付けてください：",
+      "expires_note": "このリンクは1時間で期限切れになります。",
+      "ignore_note": "パスワードリセットをリクエストしていない場合は、このメールを無視してください。",
+      "footer_copyright": "© 2025 Translide. 無断転載禁止。"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "email": {
+    "verification": {
+      "subject": "Bestätigen Sie Ihre E-Mail-Adresse - Translide",
+      "welcome_title": "Willkommen bei Translide!",
+      "hello": "Hallo {username}!",
+      "verification_intro": "Danke für Ihre Registrierung bei Translide. Um Ihre Registrierung abzuschließen und unseren PowerPoint-Übersetzungsservice zu nutzen, bestätigen Sie bitte Ihre E-Mail-Adresse.",
+      "button_text": "E-Mail-Adresse bestätigen",
+      "button_fallback": "Wenn der Button nicht funktioniert, können Sie diesen Link kopieren und in Ihren Browser einfügen:",
+      "expires_note": "Dieser Link läuft in 24 Stunden ab.",
+      "ignore_note": "Wenn Sie kein Translide-Konto erstellt haben, können Sie diese E-Mail sicher ignorieren.",
+      "footer_copyright": "© 2025 Translide. Alle Rechte vorbehalten."
+    },
+    "errors": {
+      "email_send_failed": "Senden der Bestätigungs-E-Mail fehlgeschlagen",
+      "missing_token": "Kein Bestätigungstoken bereitgestellt. Bitte überprüfen Sie den Link in Ihrer E-Mail.",
+      "invalid_token": "Ungültiger Bestätigungstoken. Bitte fordern Sie eine neue Bestätigungs-E-Mail an.",
+      "token_expired": "Dieser Bestätigungslink ist abgelaufen. Bitte fordern Sie eine neue Bestätigungs-E-Mail an.",
+      "missing_email": "E-Mail ist erforderlich",
+      "email_already_verified": "E-Mail ist bereits bestätigt",
+      "verification_cooldown": "Bitte warten Sie, bevor Sie eine weitere Bestätigungs-E-Mail anfordern",
+      "email_not_verified": "E-Mail-Bestätigung erforderlich"
+    },
+    "reset_password": {
+      "subject": "Passwort zurücksetzen - Translide",
+      "welcome_title": "Passwort-Zurücksetzungsanfrage",
+      "hello": "Hallo {username}!",
+      "reset_intro": "Wir haben eine Anfrage erhalten, Ihr Translide-Passwort zurückzusetzen.",
+      "button_text": "Passwort zurücksetzen",
+      "button_fallback": "Wenn der Button nicht funktioniert, können Sie diesen Link in Ihren Browser kopieren:",
+      "expires_note": "Dieser Link läuft in 1 Stunde ab.",
+      "ignore_note": "Wenn Sie keine Passwort-Zurücksetzung angefordert haben, können Sie diese E-Mail ignorieren.",
+      "footer_copyright": "© 2025 Translide. Alle Rechte vorbehalten."
+    }
+  }
+}

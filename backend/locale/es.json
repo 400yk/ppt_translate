@@ -1,0 +1,36 @@
+{
+  "email": {
+    "verification": {
+      "subject": "Verifique su dirección de correo electrónico - Translide",
+      "welcome_title": "¡Bienvenido a Translide!",
+      "hello": "¡Hola {username}!",
+      "verification_intro": "Gracias por registrarte en Translide. Para completar tu registro y comenzar a usar nuestro servicio de traducción de PowerPoint, por favor verifica tu dirección de correo electrónico.",
+      "button_text": "Verificar dirección de correo electrónico",
+      "button_fallback": "Si el botón no funciona, puedes copiar y pegar este enlace en tu navegador:",
+      "expires_note": "Este enlace expirará en 24 horas.",
+      "ignore_note": "Si no creaste una cuenta en Translide, puedes ignorar este correo de forma segura.",
+      "footer_copyright": "© 2025 Translide. Todos los derechos reservados."
+    },
+    "errors": {
+      "email_send_failed": "Error al enviar el correo de verificación",
+      "missing_token": "No se proporcionó token de verificación. Por favor, revisa el enlace en tu correo.",
+      "invalid_token": "Token de verificación inválido. Por favor, solicita un nuevo correo de verificación.",
+      "token_expired": "Este enlace de verificación ha expirado. Por favor, solicita un nuevo correo de verificación.",
+      "missing_email": "Se requiere correo electrónico",
+      "email_already_verified": "El correo electrónico ya está verificado",
+      "verification_cooldown": "Por favor, espera antes de solicitar otro correo de verificación",
+      "email_not_verified": "Se requiere verificación de correo electrónico"
+    },
+    "reset_password": {
+      "subject": "Restablece tu contraseña - Translide",
+      "welcome_title": "Solicitud de restablecimiento de contraseña",
+      "hello": "¡Hola {username}!",
+      "reset_intro": "Recibimos una solicitud para restablecer tu contraseña de Translide.",
+      "button_text": "Restablecer Contraseña",
+      "button_fallback": "Si el botón no funciona, puedes copiar y pegar este enlace en tu navegador:",
+      "expires_note": "Este enlace expirará en 1 hora.",
+      "ignore_note": "Si no solicitaste restablecer tu contraseña, puedes ignorar este correo.",
+      "footer_copyright": "© 2025 Translide. Todos los derechos reservados."
+    }
+  }
+}
