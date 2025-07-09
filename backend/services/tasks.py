@@ -134,28 +134,35 @@ def process_translation_task(self, user_id: int, original_file_content_bytes: by
 
         print(f"Celery task {self.request.id}: Translation successful ({src_lang} → {dest_lang}). File at: {translated_file_path}, Chars: {character_count}")
         
-        # Try to upload to S3 if available
-        s3_key = None
-        download_url = None
+        # Try to upload to S3 with OSS fallback
+        upload_result = {'success': False, 'service': None, 'key': None, 'download_url': None}
         
         if s3_service.is_available():
             try:
-                s3_key = s3_service.upload_file(translated_file_path, self.request.id, f"translated_{original_filename}")
-                if s3_key:
-                    # Generate a presigned URL for download (valid for 24 hours)
-                    download_url = s3_service.generate_presigned_url(s3_key, expiration=86400)
-                    print(f"Celery task {self.request.id}: File uploaded to S3: {s3_key}")
+                upload_result = s3_service.upload_file_with_fallback(
+                    translated_file_path, 
+                    self.request.id, 
+                    f"translated_{original_filename}"
+                )
+                
+                if upload_result['success']:
+                    service = upload_result['service']
+                    key = upload_result['key']
+                    download_url = upload_result['download_url']
                     
-                    # Clean up local file after successful S3 upload
+                    print(f"Celery task {self.request.id}: File uploaded to {service.upper()}: {key}")
+                    
+                    # Clean up local file after successful upload
                     try:
                         os.unlink(translated_file_path)
                         print(f"Celery task {self.request.id}: Local file cleaned up")
                     except Exception as e:
                         print(f"Celery task {self.request.id}: Warning - could not clean up local file: {e}")
                 else:
-                    print(f"Celery task {self.request.id}: S3 upload failed, keeping local file")
+                    print(f"Celery task {self.request.id}: Upload failed: {upload_result['error']}")
+                    
             except Exception as e:
-                print(f"Celery task {self.request.id}: Error uploading to S3: {e}")
+                print(f"Celery task {self.request.id}: Error during upload with fallback: {e}")
         else:
             print(f"Celery task {self.request.id}: S3 not available, using local storage")
         
@@ -171,10 +178,13 @@ def process_translation_task(self, user_id: int, original_file_content_bytes: by
         }
         
         # Include appropriate file reference based on storage method
-        if s3_key and download_url:
-            result['s3_key'] = s3_key
-            result['download_url'] = download_url
-            result['storage_type'] = 's3'
+        if upload_result['success']:
+            result['storage_key'] = upload_result['key']
+            result['download_url'] = upload_result['download_url']
+            result['storage_type'] = upload_result['service']
+            # Keep backward compatibility
+            if upload_result['service'] == 's3':
+                result['s3_key'] = upload_result['key']
         else:
             result['translated_file_path'] = translated_file_path  # Path on the WORKER dyno
             result['storage_type'] = 'local'
@@ -284,28 +294,35 @@ def process_guest_translation_task(self, client_ip: str, original_file_content_b
 
         print(f"Celery guest task {self.request.id}: Translation successful ({src_lang} → {dest_lang}). File at: {translated_file_path}, Chars: {character_count}")
         
-        # Try to upload to S3 if available
-        s3_key = None
-        download_url = None
+        # Try to upload to S3 with OSS fallback
+        upload_result = {'success': False, 'service': None, 'key': None, 'download_url': None}
         
         if s3_service.is_available():
             try:
-                s3_key = s3_service.upload_file(translated_file_path, self.request.id, f"translated_{original_filename}")
-                if s3_key:
-                    # Generate a presigned URL for download (valid for 24 hours)
-                    download_url = s3_service.generate_presigned_url(s3_key, expiration=86400)
-                    print(f"Celery guest task {self.request.id}: File uploaded to S3: {s3_key}")
+                upload_result = s3_service.upload_file_with_fallback(
+                    translated_file_path, 
+                    self.request.id, 
+                    f"translated_{original_filename}"
+                )
+                
+                if upload_result['success']:
+                    service = upload_result['service']
+                    key = upload_result['key']
+                    download_url = upload_result['download_url']
                     
-                    # Clean up local file after successful S3 upload
+                    print(f"Celery guest task {self.request.id}: File uploaded to {service.upper()}: {key}")
+                    
+                    # Clean up local file after successful upload
                     try:
                         os.unlink(translated_file_path)
                         print(f"Celery guest task {self.request.id}: Local file cleaned up")
                     except Exception as e:
                         print(f"Celery guest task {self.request.id}: Warning - could not clean up local file: {e}")
                 else:
-                    print(f"Celery guest task {self.request.id}: S3 upload failed, keeping local file")
+                    print(f"Celery guest task {self.request.id}: Upload failed: {upload_result['error']}")
+                    
             except Exception as e:
-                print(f"Celery guest task {self.request.id}: Error uploading to S3: {e}")
+                print(f"Celery guest task {self.request.id}: Error during upload with fallback: {e}")
         else:
             print(f"Celery guest task {self.request.id}: S3 not available, using local storage")
         
@@ -321,10 +338,13 @@ def process_guest_translation_task(self, client_ip: str, original_file_content_b
         }
         
         # Include appropriate file reference based on storage method
-        if s3_key and download_url:
-            result['s3_key'] = s3_key
-            result['download_url'] = download_url
-            result['storage_type'] = 's3'
+        if upload_result['success']:
+            result['storage_key'] = upload_result['key']
+            result['download_url'] = upload_result['download_url']
+            result['storage_type'] = upload_result['service']
+            # Keep backward compatibility
+            if upload_result['service'] == 's3':
+                result['s3_key'] = upload_result['key']
         else:
             result['translated_file_path'] = translated_file_path  # Path on the WORKER dyno
             result['storage_type'] = 'local'

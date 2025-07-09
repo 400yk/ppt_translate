@@ -62,6 +62,15 @@ AWS_S3_REGION = os.getenv('AWS_S3_REGION', 'us-east-1')
 # Enable S3 storage if credentials are available
 USE_S3_STORAGE = bool(AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY)
 
+# Alicloud OSS Configuration (fallback for S3)
+ALICLOUD_OSS_ACCESS_KEY_ID = os.getenv('ALICLOUD_OSS_ACCESS_KEY_ID')
+ALICLOUD_OSS_ACCESS_KEY_SECRET = os.getenv('ALICLOUD_OSS_ACCESS_KEY_SECRET')
+ALICLOUD_OSS_BUCKET_NAME = os.getenv('ALICLOUD_OSS_BUCKET_NAME', 'translide-backup')
+ALICLOUD_OSS_ENDPOINT = os.getenv('ALICLOUD_OSS_ENDPOINT', 'https://oss-us-east-1.aliyuncs.com')
+ALICLOUD_OSS_REGION = os.getenv('ALICLOUD_OSS_REGION', 'us-east-1')
+# Enable OSS storage if credentials are available
+USE_OSS_STORAGE = bool(ALICLOUD_OSS_ACCESS_KEY_ID and ALICLOUD_OSS_ACCESS_KEY_SECRET)
+
 # Secret key for session management
 SECRET_KEY = os.getenv('SECRET_KEY', os.urandom(24).hex())
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', os.urandom(24).hex())

@@ -126,7 +126,8 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                     text_shapes.append(shape)
                     texts.append(shape.text)
                 else:
-                    print(f"Skipping non-translatable text: {shape.text[:50]}...")
+                    # print(f"Skipping non-translatable text: {shape.text[:50]}...")
+                    pass
             
             # Handle tables
             if hasattr(shape, "has_table") and shape.has_table:
@@ -139,7 +140,8 @@ def translate_pptx(input_stream, src_lang, dest_lang):
                                 table_cells.append(cell)
                                 table_texts.append(cell.text)
                             else:
-                                print(f"Skipping non-translatable table text: {cell.text[:50]}...")
+                                # print(f"Skipping non-translatable table text: {cell.text[:50]}...")
+                                pass
 
     # Batch translate all text content together using the new batched approach
     all_texts = texts + table_texts
