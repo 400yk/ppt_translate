@@ -4,9 +4,18 @@ import json
 import ast  # For safe eval fallback
 import re  # Move re import to module level
 import time  # Add for retry delays
-from config import GEMINI_API_URL, GEMINI_API_BATCH_SIZE, GEMINI_API_CHARACTER_BATCH_SIZE
+from config import GEMINI_API_URL, GEMINI_API_BATCH_SIZE, GEMINI_API_CHARACTER_BATCH_SIZE, DEEPSEEK_API_URL, DEEPSEEK_MODEL, DEEPSEEK_API_CHARACTER_BATCH_SIZE, DEEPSEEK_API_BATCH_SIZE
+
+# Import OpenAI client for DeepSeek
+try:
+    from openai import OpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+    print("Warning: OpenAI library not available. DeepSeek fallback will be disabled.")
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+DASHSCOPE_API_KEY = os.getenv('DASHSCOPE_API_KEY')
 
 def clean_json_response(json_str):
     """
@@ -125,6 +134,184 @@ def clean_json_response(json_str):
         cleaned += ']'
     
     return cleaned
+
+def deepseek_batch_translate(texts, src_lang, dest_lang, max_retries=3):
+    """Batch translate a list of texts using DeepSeek API via OpenAI compatible interface with retry logic."""
+    # Check if DeepSeek is available
+    if not OPENAI_AVAILABLE:
+        print("ERROR: OpenAI library not available. Cannot use DeepSeek fallback.")
+        return texts
+        
+    if not DASHSCOPE_API_KEY:
+        print("ERROR: Missing DASHSCOPE_API_KEY. DeepSeek fallback will return original text.")
+        return texts
+    
+    # Store original count for validation
+    original_count = len(texts)
+    
+    # Initialize OpenAI client for DeepSeek
+    try:
+        client = OpenAI(
+            api_key=DASHSCOPE_API_KEY,
+            base_url=DEEPSEEK_API_URL
+        )
+    except Exception as e:
+        print(f"ERROR: Failed to initialize DeepSeek client: {e}")
+        return texts
+    
+    # Join texts as a JSON list to preserve order and mapping
+    joined = json.dumps(texts, ensure_ascii=False)
+    
+    # Create the translation prompt
+    prompt = f"""Translate the following JSON array from {src_lang} to {dest_lang}. 
+
+IMPORTANT INSTRUCTIONS:
+1. Return ONLY a valid JSON array, no explanations or extra text
+2. Preserve the exact number of elements in the array ({original_count} elements)
+3. Maintain the exact same order as the input array
+4. Properly escape all quotes and special characters in the JSON strings
+5. Do not add any markdown formatting or code blocks
+6. If you cannot translate a specific element, return the original text for that element
+
+Input JSON array:
+{joined}
+
+Output (valid JSON array with exactly {original_count} elements):"""
+    
+    def build_position_mapped_result(translated_list, original_texts):
+        """Build result array with position-perfect mapping."""
+        result = []
+        
+        for i in range(len(original_texts)):
+            # Check if we have a translation for this position
+            if (isinstance(translated_list, list) and 
+                i < len(translated_list) and 
+                translated_list[i] is not None and 
+                isinstance(translated_list[i], str) and 
+                translated_list[i].strip() != ""):
+                
+                # Use the translated text
+                result.append(translated_list[i])
+                if i == 0:  # Log first few successful translations
+                    print(f"DeepSeek Position {i}: '{original_texts[i][:50]}...' -> '{translated_list[i][:50]}...'")
+            else:
+                # Use original text as fallback
+                result.append(original_texts[i])
+                if i < 3:  # Log first few fallbacks
+                    print(f"DeepSeek Position {i}: Using original text (translation failed/missing)")
+        
+        # Validate final result
+        if len(result) != len(original_texts):
+            print(f"ERROR: DeepSeek result length mismatch! Expected {len(original_texts)}, got {len(result)}")
+            return original_texts
+        
+        translated_count = sum(1 for i in range(len(result)) if result[i] != original_texts[i])
+        print(f"DeepSeek translation summary: {translated_count}/{len(original_texts)} elements successfully translated")
+        
+        return result
+    
+    # Retry logic for temporary errors
+    for attempt in range(max_retries + 1):  # 0, 1, 2, 3 (total of 4 attempts)
+        try:
+            completion = client.chat.completions.create(
+                model=DEEPSEEK_MODEL,
+                messages=[
+                    {'role': 'user', 'content': prompt}
+                ],
+                timeout=60
+            )
+            
+            if completion.choices and len(completion.choices) > 0:
+                translated_json = completion.choices[0].message.content
+                
+                # Clean the JSON response to handle common issues
+                cleaned_json = clean_json_response(translated_json)
+                
+                # Try to parse the cleaned JSON
+                try:
+                    parsed_result = json.loads(cleaned_json)
+                    final_result = build_position_mapped_result(parsed_result, texts)
+                    
+                    # Check if the translation actually did anything
+                    translation_success_count = sum(1 for orig, trans in zip(texts, final_result) if orig != trans)
+                    translation_success_rate = translation_success_count / len(texts) if texts else 0
+                    
+                    # If translation success rate is extremely low, it might be an API issue
+                    if translation_success_rate < 0.05 and len(texts) > 10 and attempt < max_retries:
+                        print(f"DeepSeek: Very low translation success rate ({translation_success_rate:.1%}) on attempt {attempt + 1}, might be API issues")
+                        delay = 2 ** attempt
+                        print(f"Retrying in {delay}s due to suspected API issues...")
+                        time.sleep(delay)
+                        continue
+                    
+                    return final_result
+                    
+                except Exception as e:
+                    print(f"Error parsing DeepSeek JSON: {e}")
+                    print(f"Cleaned JSON sample: {cleaned_json[:200]}...")
+                    
+                    # Try additional fallback methods
+                    try:
+                        # Extract individual string elements from the array using regex
+                        if cleaned_json.startswith('[') and cleaned_json.endswith(']'):
+                            pattern = r'"((?:[^"\\]|\\.)*)"|\'((?:[^\'\\]|\\.)*)\''
+                            matches = re.findall(pattern, cleaned_json)
+                            
+                            if matches:
+                                # Extract the actual string content
+                                extracted_strings = []
+                                for match in matches:
+                                    # Each match is a tuple, get the first non-empty group
+                                    string_content = match[0] if match[0] else match[1]
+                                    # Unescape the string content
+                                    string_content = string_content.replace('\\"', '"').replace("\\'", "'").replace('\\\\', '\\')
+                                    extracted_strings.append(string_content)
+                                
+                                print(f"DeepSeek regex extraction: Found {len(extracted_strings)} strings for {len(texts)} inputs")
+                                final_result = build_position_mapped_result(extracted_strings, texts)
+                                return final_result
+                        
+                        # Try ast.literal_eval as a fallback
+                        parsed_result = ast.literal_eval(cleaned_json)
+                        final_result = build_position_mapped_result(parsed_result, texts)
+                        return final_result
+                        
+                    except Exception as e2:
+                        print(f"All DeepSeek JSON parsing methods failed: {e2}")
+                        print(f"Falling back to original texts to maintain position mapping")
+                        return texts
+            else:
+                # No response from DeepSeek
+                if attempt < max_retries:
+                    delay = 2 ** attempt
+                    print(f"DeepSeek: No response on attempt {attempt + 1}/{max_retries + 1}, retrying in {delay}s...")
+                    time.sleep(delay)
+                    continue
+                else:
+                    print("DeepSeek: Max retries exceeded for no response, returning original texts")
+                    return texts
+                    
+        except Exception as e:
+            print(f"DeepSeek error on attempt {attempt + 1}: {e}")
+            
+            # Check if this is a server error (similar to Gemini 503)
+            if "503" in str(e) or "Service Unavailable" in str(e) or "timeout" in str(e).lower():
+                if attempt < max_retries:
+                    delay = 2 ** attempt  # Exponential backoff: 1s, 2s, 4s
+                    print(f"DeepSeek server error on attempt {attempt + 1}/{max_retries + 1}, retrying in {delay}s...")
+                    time.sleep(delay)
+                    continue
+                else:
+                    print("DeepSeek: Max retries exceeded for server error, returning original texts")
+                    return texts
+            else:
+                # For other errors, don't retry
+                print(f"DeepSeek: Non-retryable error: {e}")
+                return texts
+    
+    # If we get here, all attempts failed
+    print("DeepSeek: All translation attempts failed, returning original texts")
+    return texts
 
 def gemini_batch_translate(texts, src_lang, dest_lang, max_retries=3):
     """Batch translate a list of texts using Gemini API with retry logic for temporary errors."""
@@ -433,27 +620,122 @@ def gemini_batch_translate_with_size(texts, src_lang, dest_lang, batch_size=GEMI
                         break
                 
                 if translation_success:
-                    print(f"Batch {batch_number}: Translation successful")
+                    print(f"Batch {batch_number}: Gemini translation successful")
                     successful_batches += 1
+                    all_translated.extend(translated_batch)
                 else:
-                    print(f"Batch {batch_number}: Translation returned original texts (API issues)")
-                    failed_batches += 1
-                
-                all_translated.extend(translated_batch)
+                    print(f"Batch {batch_number}: Gemini translation returned original texts (API issues)")
+                    print(f"Trying DeepSeek fallback for batch {batch_number}...")
+                    
+                    # Try DeepSeek as fallback
+                    try:
+                        deepseek_translated_batch = deepseek_batch_translate(current_batch, src_lang, dest_lang)
+                        
+                        # Validate the DeepSeek translated batch
+                        if (isinstance(deepseek_translated_batch, list) and 
+                            len(deepseek_translated_batch) == len(current_batch)):
+                            
+                            # Check if DeepSeek actually translated anything
+                            deepseek_translation_success = False
+                            for i, (orig, trans) in enumerate(zip(current_batch, deepseek_translated_batch)):
+                                if orig != trans:  # At least one element was translated
+                                    deepseek_translation_success = True
+                                    break
+                            
+                            if deepseek_translation_success:
+                                print(f"Batch {batch_number}: DeepSeek fallback translation successful")
+                                successful_batches += 1
+                                all_translated.extend(deepseek_translated_batch)
+                            else:
+                                print(f"Batch {batch_number}: DeepSeek fallback also returned original texts")
+                                failed_batches += 1
+                                all_translated.extend(original_batch)
+                        else:
+                            print(f"Batch {batch_number}: DeepSeek fallback returned invalid format")
+                            failed_batches += 1
+                            all_translated.extend(original_batch)
+                    
+                    except Exception as deepseek_error:
+                        print(f"Batch {batch_number}: DeepSeek fallback failed: {deepseek_error}")
+                        failed_batches += 1
+                        all_translated.extend(original_batch)
                 
             else:
-                # Translation returned wrong format/length
-                print(f"Batch {batch_number}: Translation returned invalid format, using original texts")
+                # Gemini translation returned wrong format/length, try DeepSeek
+                print(f"Batch {batch_number}: Gemini translation returned invalid format")
                 print(f"Expected {len(current_batch)} elements, got {len(translated_batch) if isinstance(translated_batch, list) else 'non-list'}")
-                failed_batches += 1
-                all_translated.extend(original_batch)
+                print(f"Trying DeepSeek fallback for batch {batch_number}...")
+                
+                try:
+                    deepseek_translated_batch = deepseek_batch_translate(current_batch, src_lang, dest_lang)
+                    
+                    # Validate the DeepSeek translated batch
+                    if (isinstance(deepseek_translated_batch, list) and 
+                        len(deepseek_translated_batch) == len(current_batch)):
+                        
+                        # Check if DeepSeek actually translated anything
+                        deepseek_translation_success = False
+                        for i, (orig, trans) in enumerate(zip(current_batch, deepseek_translated_batch)):
+                            if orig != trans:  # At least one element was translated
+                                deepseek_translation_success = True
+                                break
+                        
+                        if deepseek_translation_success:
+                            print(f"Batch {batch_number}: DeepSeek fallback translation successful")
+                            successful_batches += 1
+                            all_translated.extend(deepseek_translated_batch)
+                        else:
+                            print(f"Batch {batch_number}: DeepSeek fallback also returned original texts")
+                            failed_batches += 1
+                            all_translated.extend(original_batch)
+                    else:
+                        print(f"Batch {batch_number}: DeepSeek fallback returned invalid format")
+                        failed_batches += 1
+                        all_translated.extend(original_batch)
+                
+                except Exception as deepseek_error:
+                    print(f"Batch {batch_number}: DeepSeek fallback failed: {deepseek_error}")
+                    failed_batches += 1
+                    all_translated.extend(original_batch)
                 
         except Exception as e:
-            # Catch any unexpected errors in batch processing
-            print(f"Batch {batch_number}: Unexpected error during translation: {e}")
-            print(f"Using original texts for this batch and continuing with next batch")
-            failed_batches += 1
-            all_translated.extend(original_batch)
+            # Catch any unexpected errors in batch processing (including HTTP 503 errors)
+            print(f"Batch {batch_number}: Gemini translation error: {e}")
+            print(f"Trying DeepSeek fallback for batch {batch_number}...")
+            
+            # Try DeepSeek as fallback when Gemini fails with exception
+            try:
+                deepseek_translated_batch = deepseek_batch_translate(current_batch, src_lang, dest_lang)
+                
+                # Validate the DeepSeek translated batch
+                if (isinstance(deepseek_translated_batch, list) and 
+                    len(deepseek_translated_batch) == len(current_batch)):
+                    
+                    # Check if DeepSeek actually translated anything
+                    deepseek_translation_success = False
+                    for i, (orig, trans) in enumerate(zip(current_batch, deepseek_translated_batch)):
+                        if orig != trans:  # At least one element was translated
+                            deepseek_translation_success = True
+                            break
+                    
+                    if deepseek_translation_success:
+                        print(f"Batch {batch_number}: DeepSeek fallback translation successful")
+                        successful_batches += 1
+                        all_translated.extend(deepseek_translated_batch)
+                    else:
+                        print(f"Batch {batch_number}: DeepSeek fallback also returned original texts")
+                        failed_batches += 1
+                        all_translated.extend(original_batch)
+                else:
+                    print(f"Batch {batch_number}: DeepSeek fallback returned invalid format")
+                    failed_batches += 1
+                    all_translated.extend(original_batch)
+            
+            except Exception as deepseek_error:
+                print(f"Batch {batch_number}: DeepSeek fallback also failed: {deepseek_error}")
+                print(f"Using original texts for this batch and continuing with next batch")
+                failed_batches += 1
+                all_translated.extend(original_batch)
         
         # Update the batch start for the next iteration
         batch_start += len(current_batch)

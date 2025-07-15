@@ -57,6 +57,9 @@ def create_app():
     if not os.getenv('GEMINI_API_KEY'):
         print("WARNING: GEMINI_API_KEY not found in environment variables")
         
+    if not os.getenv('DASHSCOPE_API_KEY'):
+        print("WARNING: DASHSCOPE_API_KEY not found in environment variables (DeepSeek fallback will be disabled)")
+        
     # Initialize extensions
     db.init_app(app)
     jwt = JWTManager(app)
