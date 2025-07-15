@@ -88,9 +88,9 @@ GEMINI_API_BATCH_SIZE = 50  # Keeping for backward compatibility
 
 # DeepSeek API settings (fallback for Gemini)
 DEEPSEEK_API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1'
-DEEPSEEK_MODEL = 'deepseek-v3'
-DEEPSEEK_API_CHARACTER_BATCH_SIZE = 15000  # Conservative batch size for DeepSeek
-DEEPSEEK_API_BATCH_SIZE = 30  # Conservative batch size for DeepSeek
+DEEPSEEK_MODEL = 'deepseek-v3'  # Fixed model name
+DEEPSEEK_API_CHARACTER_BATCH_SIZE = 15000   # Smaller batch size for slow responses
+DEEPSEEK_API_BATCH_SIZE = 30  # Smaller batch size for slow responses
 
 # Font settings for text measurement
 MIN_FONT_SIZE = 8 

@@ -153,7 +153,8 @@ def deepseek_batch_translate(texts, src_lang, dest_lang, max_retries=3):
     try:
         client = OpenAI(
             api_key=DASHSCOPE_API_KEY,
-            base_url=DEEPSEEK_API_URL
+            base_url=DEEPSEEK_API_URL,
+            timeout=120  # Increased timeout for slow responses
         )
     except Exception as e:
         print(f"ERROR: Failed to initialize DeepSeek client: {e}")
@@ -218,7 +219,7 @@ Output (valid JSON array with exactly {original_count} elements):"""
                 messages=[
                     {'role': 'user', 'content': prompt}
                 ],
-                timeout=60
+                timeout=120  # Increased from 60 to 120 seconds
             )
             
             if completion.choices and len(completion.choices) > 0:
@@ -294,15 +295,21 @@ Output (valid JSON array with exactly {original_count} elements):"""
         except Exception as e:
             print(f"DeepSeek error on attempt {attempt + 1}: {e}")
             
-            # Check if this is a server error (similar to Gemini 503)
-            if "503" in str(e) or "Service Unavailable" in str(e) or "timeout" in str(e).lower():
+            # Check if this is a server error (similar to Gemini 503) or timeout
+            error_str = str(e).lower()
+            if ("503" in error_str or 
+                "service unavailable" in error_str or 
+                "timeout" in error_str or
+                "timed out" in error_str or
+                "connection" in error_str or
+                "network" in error_str):
                 if attempt < max_retries:
                     delay = 2 ** attempt  # Exponential backoff: 1s, 2s, 4s
-                    print(f"DeepSeek server error on attempt {attempt + 1}/{max_retries + 1}, retrying in {delay}s...")
+                    print(f"DeepSeek server/network error on attempt {attempt + 1}/{max_retries + 1}, retrying in {delay}s...")
                     time.sleep(delay)
                     continue
                 else:
-                    print("DeepSeek: Max retries exceeded for server error, returning original texts")
+                    print("DeepSeek: Max retries exceeded for server/network error, returning original texts")
                     return texts
             else:
                 # For other errors, don't retry
@@ -627,9 +634,21 @@ def gemini_batch_translate_with_size(texts, src_lang, dest_lang, batch_size=GEMI
                     print(f"Batch {batch_number}: Gemini translation returned original texts (API issues)")
                     print(f"Trying DeepSeek fallback for batch {batch_number}...")
                     
-                    # Try DeepSeek as fallback
+                    # Try DeepSeek as fallback with smaller batches
                     try:
-                        deepseek_translated_batch = deepseek_batch_translate(current_batch, src_lang, dest_lang)
+                        # Use smaller batches for DeepSeek to avoid timeouts
+                        if len(current_batch) > DEEPSEEK_API_BATCH_SIZE:
+                            # Split into smaller chunks for DeepSeek
+                            deepseek_translated_batch = []
+                            for i in range(0, len(current_batch), DEEPSEEK_API_BATCH_SIZE):
+                                chunk = current_batch[i:i + DEEPSEEK_API_BATCH_SIZE]
+                                chunk_result = deepseek_batch_translate(chunk, src_lang, dest_lang)
+                                deepseek_translated_batch.extend(chunk_result)
+                                # Add delay between chunks to avoid overwhelming DeepSeek API
+                                if i + DEEPSEEK_API_BATCH_SIZE < len(current_batch):
+                                    time.sleep(2)
+                        else:
+                            deepseek_translated_batch = deepseek_batch_translate(current_batch, src_lang, dest_lang)
                         
                         # Validate the DeepSeek translated batch
                         if (isinstance(deepseek_translated_batch, list) and 
@@ -667,7 +686,19 @@ def gemini_batch_translate_with_size(texts, src_lang, dest_lang, batch_size=GEMI
                 print(f"Trying DeepSeek fallback for batch {batch_number}...")
                 
                 try:
-                    deepseek_translated_batch = deepseek_batch_translate(current_batch, src_lang, dest_lang)
+                    # Use smaller batches for DeepSeek to avoid timeouts
+                    if len(current_batch) > DEEPSEEK_API_BATCH_SIZE:
+                        # Split into smaller chunks for DeepSeek
+                        deepseek_translated_batch = []
+                        for i in range(0, len(current_batch), DEEPSEEK_API_BATCH_SIZE):
+                            chunk = current_batch[i:i + DEEPSEEK_API_BATCH_SIZE]
+                            chunk_result = deepseek_batch_translate(chunk, src_lang, dest_lang)
+                            deepseek_translated_batch.extend(chunk_result)
+                            # Add delay between chunks to avoid overwhelming DeepSeek API
+                            if i + DEEPSEEK_API_BATCH_SIZE < len(current_batch):
+                                time.sleep(2)
+                    else:
+                        deepseek_translated_batch = deepseek_batch_translate(current_batch, src_lang, dest_lang)
                     
                     # Validate the DeepSeek translated batch
                     if (isinstance(deepseek_translated_batch, list) and 
@@ -705,7 +736,19 @@ def gemini_batch_translate_with_size(texts, src_lang, dest_lang, batch_size=GEMI
             
             # Try DeepSeek as fallback when Gemini fails with exception
             try:
-                deepseek_translated_batch = deepseek_batch_translate(current_batch, src_lang, dest_lang)
+                # Use smaller batches for DeepSeek to avoid timeouts
+                if len(current_batch) > DEEPSEEK_API_BATCH_SIZE:
+                    # Split into smaller chunks for DeepSeek
+                    deepseek_translated_batch = []
+                    for i in range(0, len(current_batch), DEEPSEEK_API_BATCH_SIZE):
+                        chunk = current_batch[i:i + DEEPSEEK_API_BATCH_SIZE]
+                        chunk_result = deepseek_batch_translate(chunk, src_lang, dest_lang)
+                        deepseek_translated_batch.extend(chunk_result)
+                        # Add delay between chunks to avoid overwhelming DeepSeek API
+                        if i + DEEPSEEK_API_BATCH_SIZE < len(current_batch):
+                            time.sleep(2)
+                else:
+                    deepseek_translated_batch = deepseek_batch_translate(current_batch, src_lang, dest_lang)
                 
                 # Validate the DeepSeek translated batch
                 if (isinstance(deepseek_translated_batch, list) and 
