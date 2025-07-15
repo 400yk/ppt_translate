@@ -92,6 +92,23 @@ def clean_json_response(json_str):
                         # Invalid unicode sequence, escape the backslash
                         result.append('\\\\')
                         i += 1
+                elif next_char == 'x':
+                    # Handle hex sequences like \x000B - convert to proper unicode
+                    if i + 5 < len(text):
+                        hex_candidate = text[i+2:i+6]
+                        # Check if it's exactly 4 hex digits
+                        if len(hex_candidate) == 4 and all(c in '0123456789abcdefABCDEF' for c in hex_candidate):
+                            # Convert \x000B to \u000B
+                            result.append(f'\\u{hex_candidate}')
+                            i += 6
+                        else:
+                            # Not a valid hex sequence, escape the backslash
+                            result.append('\\\\')
+                            i += 1
+                    else:
+                        # Not enough characters left, escape the backslash
+                        result.append('\\\\')
+                        i += 1
                 elif next_char.isdigit() or next_char.lower() in 'abcdef':
                     # Handle sequences like \3092 or \304c - these are likely meant to be unicode
                     # Look ahead to see if we have exactly 4 characters that could be hex digits
@@ -121,9 +138,27 @@ def clean_json_response(json_str):
                 i += 1
         return ''.join(result)
     
+    # Fix underscore-based hex sequences like _x000B_ to proper Unicode
+    def fix_underscore_hex_sequences(text):
+        # Replace patterns like _x000B_ with proper unicode \u000B
+        import re
+        pattern = r'_x([0-9a-fA-F]{4})_'
+        def replace_hex(match):
+            hex_code = match.group(1)
+            # Convert to proper unicode character
+            try:
+                unicode_char = chr(int(hex_code, 16))
+                return unicode_char
+            except ValueError:
+                # If conversion fails, return original
+                return match.group(0)
+        
+        return re.sub(pattern, replace_hex, text)
+    
     # Apply all cleaning steps
     cleaned = remove_repetitive_patterns(cleaned)
     cleaned = fix_unterminated_strings(cleaned)
+    cleaned = fix_underscore_hex_sequences(cleaned)
     cleaned = fix_escape_sequences(cleaned)
     
     # Remove trailing commas before ] or }
@@ -279,8 +314,16 @@ Output (valid JSON array with exactly {original_count} elements):"""
                         
                     except Exception as e2:
                         print(f"All DeepSeek JSON parsing methods failed: {e2}")
-                        print(f"Falling back to original texts to maintain position mapping")
-                        return texts
+                        
+                        # If we haven't exhausted retries, retry the LLM call
+                        if attempt < max_retries:
+                            delay = 2 ** attempt
+                            print(f"DeepSeek JSON parsing failed on attempt {attempt + 1}/{max_retries + 1}, retrying LLM call in {delay}s...")
+                            time.sleep(delay)
+                            continue
+                        else:
+                            print(f"DeepSeek: Max retries exceeded for JSON parsing, falling back to original texts")
+                            return texts
             else:
                 # No response from DeepSeek
                 if attempt < max_retries:
@@ -466,8 +509,16 @@ Output (valid JSON array with exactly {original_count} elements):"""
                         
                     except Exception as e2:
                         print(f"All JSON parsing methods failed: {e2}")
-                        print(f"Falling back to original texts to maintain position mapping")
-                        return texts
+                        
+                        # If we haven't exhausted retries, retry the LLM call
+                        if attempt < max_retries:
+                            delay = 2 ** attempt
+                            print(f"JSON parsing failed on attempt {attempt + 1}/{max_retries + 1}, retrying LLM call in {delay}s...")
+                            time.sleep(delay)
+                            continue
+                        else:
+                            print(f"Max retries exceeded for JSON parsing, falling back to original texts")
+                            return texts
                         
             elif 'error' in result:
                 error_msg = result.get('error', {}).get('message', 'Unknown error')
