@@ -410,7 +410,7 @@ def google_auth():
             if user:
                 # Link this Google account to existing user
                 user.google_id = google_id
-                user.google_access_token = google_token
+                # user.google_access_token = google_token
                 # Google OAuth users have verified emails
                 if SKIP_EMAIL_VERIFICATION_FOR_GOOGLE_AUTH:
                     user.is_email_verified = True
@@ -500,7 +500,7 @@ def google_auth():
                 username=username,
                 email=email,
                 google_id=google_id,
-                google_access_token=google_token,
+                # google_access_token=google_token,
                 invitation_code=invitation_code
             )
             

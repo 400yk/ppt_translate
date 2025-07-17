@@ -362,7 +362,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithGoogle = async (googleToken: string, invitationCode?: string) => {
     try {
               const response = await apiClient.post('/api/auth/google', { 
-          token: googleToken,
+          credential: googleToken,
           invitation_code: invitationCode 
         });
         const data = response.data;

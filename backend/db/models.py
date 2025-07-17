@@ -88,7 +88,7 @@ class User(db.Model):
     last_character_reset = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     # Google OAuth fields
     google_id = db.Column(db.String(255), nullable=True, unique=True)
-    google_access_token = db.Column(db.String(1024), nullable=True)
+    # google_access_token = db.Column(db.String(1024), nullable=True) # don't need this, maybe use refresh token instead in the future
     # Email verification fields
     is_email_verified = db.Column(db.Boolean, default=False, nullable=False)
     email_verification_token = db.Column(db.String(100), nullable=True, unique=True, index=True)
