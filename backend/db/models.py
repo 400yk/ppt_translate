@@ -38,10 +38,7 @@ class InvitationCode(db.Model):
         codes = []
         for _ in range(count):
             code = cls.generate_code()
-            invitation = cls(code=code)
-            db.session.add(invitation)
             codes.append(code)
-        db.session.commit()
         return codes
     
     def mark_as_used(self):
@@ -98,6 +95,8 @@ class User(db.Model):
     referral_code = db.Column(db.String(20), unique=True, nullable=True, index=True)  # User's personal referral code
     referred_by_code = db.Column(db.String(20), nullable=True, index=True)  # Code that referred this user
     bonus_membership_days = db.Column(db.Integer, default=0)  # Extra days earned from referrals
+    # Admin role field
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
     
     def set_password(self, password):
         """Hash the password and store it."""
@@ -113,19 +112,25 @@ class User(db.Model):
         """Get the number of translations performed by this user."""
         return self.translations.count()
     
-    def record_translation(self, filename, src_lang, dest_lang, character_count=0):
+    def record_translation(self, filename, src_lang, dest_lang, character_count=0, status='success', error_message=None, processing_time=None):
         """Record a translation performed by this user."""
         translation = TranslationRecord(
             user_id=self.id,
             filename=filename,
             source_language=src_lang,
             target_language=dest_lang,
-            character_count=character_count
+            character_count=character_count,
+            status=status,
+            error_message=error_message,
+            processing_time=processing_time,
+            started_at=datetime.datetime.utcnow() - datetime.timedelta(seconds=processing_time or 0),
+            completed_at=datetime.datetime.utcnow()
         )
         db.session.add(translation)
         
-        # Update character usage
-        self.update_character_usage(character_count)
+        # Update character usage only for successful translations
+        if status == 'success':
+            self.update_character_usage(character_count)
         
         db.session.commit()
         return translation
@@ -360,6 +365,10 @@ class User(db.Model):
         
         cooldown_period = datetime.timedelta(minutes=cooldown_minutes)
         return datetime.datetime.utcnow() > (self.email_verification_sent_at + cooldown_period)
+    
+    def is_administrator(self):
+        """Check if the user is an administrator."""
+        return self.is_admin or self.id == 1  # Backward compatibility with existing admin check
 
 class TranslationRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -369,6 +378,13 @@ class TranslationRecord(db.Model):
     source_language = db.Column(db.String(10))
     target_language = db.Column(db.String(10))
     character_count = db.Column(db.Integer, default=0)
+    # Translation status tracking
+    status = db.Column(db.Enum('processing', 'success', 'failed', name='translation_status'), 
+                      default='processing', nullable=False)
+    error_message = db.Column(db.Text, nullable=True)
+    processing_time = db.Column(db.Float, nullable=True)  # in seconds
+    started_at = db.Column(db.DateTime, nullable=True)
+    completed_at = db.Column(db.DateTime, nullable=True)
     
     @classmethod
     def get_recent(cls, limit=10):

@@ -1,5 +1,6 @@
 import io
 import os
+import datetime
 from celery_init import celery_app # Import from celery_init
 from services.translate_service import translate_pptx as original_translate_pptx
 from services.s3_service import s3_service
@@ -40,6 +41,7 @@ def process_translation_task(self, user_id: int, original_file_content_bytes: by
         src_lang: Source language code
         dest_lang: Destination language code
     """
+    start_time = time.time()
     print(f"Celery task {self.request.id}: Starting translation for user {user_id}, file {original_filename} ({src_lang} → {dest_lang}) (attempt {self.request.retries + 1})")
     
     try:
@@ -113,19 +115,83 @@ def process_translation_task(self, user_id: int, original_file_content_bytes: by
             # Retry the task with exponential backoff
             raise self.retry(countdown=delay, exc=Exception(error_msg))
         
-        # Fetch the user (ensure app context if not using ContextTask from make_celery)
+        # Calculate processing time
+        processing_time = time.time() - start_time
+        
+        # Fetch the user and update the existing processing record
         user = User.query.get(user_id)
         if not user:
             error_msg = f"User with ID {user_id} not found. Cannot record translation."
             print(f"Celery task {self.request.id}: {error_msg}")
-            # Decide how to handle this - fail the task or just log?
-            # For now, we'll let it proceed but the translation won't be recorded for the user.
-            # raise FictionalTaskError(error_msg) # if you want to mark task as failed
+            # Update existing processing record to failed
+            try:
+                from db.models import TranslationRecord
+                processing_record = TranslationRecord.query.filter_by(
+                    user_id=user_id,
+                    filename=original_filename,
+                    source_language=src_lang,
+                    target_language=dest_lang,
+                    status='processing'
+                ).order_by(TranslationRecord.created_at.desc()).first()
+                
+                if processing_record:
+                    processing_record.status = 'failed'
+                    processing_record.error_message = error_msg
+                    processing_record.processing_time = processing_time
+                    processing_record.completed_at = datetime.datetime.utcnow()
+                    db.session.commit()
+                    print(f"Celery task {self.request.id}: Updated processing record to failed for user {user_id}")
+                else:
+                    # Fallback: create a new failed record
+                    failed_translation = TranslationRecord(
+                        user_id=user_id,
+                        filename=original_filename,
+                        source_language=src_lang,
+                        target_language=dest_lang,
+                        character_count=0,
+                        status='failed',
+                        error_message=error_msg,
+                        processing_time=processing_time,
+                        started_at=datetime.datetime.utcnow() - datetime.timedelta(seconds=processing_time),
+                        completed_at=datetime.datetime.utcnow()
+                    )
+                    db.session.add(failed_translation)
+                    db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                print(f"Celery task {self.request.id}: Error recording failed translation: {e}")
         else:
             try:
-                user.record_translation(original_filename, src_lang, dest_lang, character_count)
-                db.session.commit() # Commit after recording
-                print(f"Celery task {self.request.id}: Translation recorded for user {user_id}")
+                # Find and update the existing processing record
+                from db.models import TranslationRecord
+                processing_record = TranslationRecord.query.filter_by(
+                    user_id=user_id,
+                    filename=original_filename,
+                    source_language=src_lang,
+                    target_language=dest_lang,
+                    status='processing'
+                ).order_by(TranslationRecord.created_at.desc()).first()
+                
+                if processing_record:
+                    # Update the existing processing record
+                    processing_record.status = 'success'
+                    processing_record.character_count = character_count
+                    processing_record.processing_time = processing_time
+                    processing_record.completed_at = datetime.datetime.utcnow()
+                    db.session.commit()
+                    print(f"Celery task {self.request.id}: Updated processing record to success for user {user_id}")
+                else:
+                    # Fallback: create a new success record
+                    user.record_translation(
+                        original_filename, 
+                        src_lang, 
+                        dest_lang, 
+                        character_count,
+                        status='success',
+                        processing_time=processing_time
+                    )
+                    db.session.commit()
+                    print(f"Celery task {self.request.id}: Created new success record for user {user_id}")
             except Exception as e:
                 db.session.rollback()
                 print(f"Celery task {self.request.id}: Error recording translation for user {user_id}: {e}")
@@ -194,13 +260,53 @@ def process_translation_task(self, user_id: int, original_file_content_bytes: by
         # Re-raise Retry exceptions to let Celery handle them
         raise
     except Exception as e:
-        print(f"Celery task {self.request.id}: Error during translation: {e}")
+        processing_time = time.time() - start_time
+        error_msg = f"Translation failed: {str(e)}"
+        print(f"Celery task {self.request.id}: {error_msg}")
         import traceback
         traceback.print_exc()
-        # Optionally, re-raise to mark the task as FAILED in Celery
-        # For now, it returns an error structure
-        # self.update_state(state='FAILURE', meta={'exc_type': type(e).__name__, 'exc_message': str(e)})
-        raise # Re-raising will mark task as FAILED 
+        
+        # Update existing processing record to failed
+        try:
+            from db.models import TranslationRecord
+            processing_record = TranslationRecord.query.filter_by(
+                user_id=user_id,
+                filename=original_filename,
+                source_language=src_lang,
+                target_language=dest_lang,
+                status='processing'
+            ).order_by(TranslationRecord.created_at.desc()).first()
+            
+            if processing_record:
+                processing_record.status = 'failed'
+                processing_record.error_message = error_msg
+                processing_record.processing_time = processing_time
+                processing_record.completed_at = datetime.datetime.utcnow()
+                db.session.commit()
+                print(f"Celery task {self.request.id}: Updated processing record to failed")
+            else:
+                # Fallback: create a new failed record
+                failed_translation = TranslationRecord(
+                    user_id=user_id,
+                    filename=original_filename,
+                    source_language=src_lang,
+                    target_language=dest_lang,
+                    character_count=0,
+                    status='failed',
+                    error_message=error_msg,
+                    processing_time=processing_time,
+                    started_at=datetime.datetime.utcnow() - datetime.timedelta(seconds=processing_time),
+                    completed_at=datetime.datetime.utcnow()
+                )
+                db.session.add(failed_translation)
+                db.session.commit()
+                print(f"Celery task {self.request.id}: Created new failed translation record")
+        except Exception as record_error:
+            db.session.rollback()
+            print(f"Celery task {self.request.id}: Error recording failed translation: {record_error}")
+        
+        # Re-raise to mark task as FAILED
+        raise 
 
 @celery_app.task(bind=True, autoretry_for=(Exception,), retry_kwargs={'max_retries': 2, 'countdown': 30}, retry_backoff=True)
 def process_guest_translation_task(self, client_ip: str, original_file_content_bytes: bytes, original_filename: str, src_lang: str, dest_lang: str, estimated_character_count: int):

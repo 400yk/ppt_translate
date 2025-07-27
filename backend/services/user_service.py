@@ -446,7 +446,7 @@ class UserService:
         # Check basic permissions
         can_translate = user.is_membership_active() or user.has_character_quota_available(1)
         can_generate_referrals = user.can_generate_referral_codes()
-        is_admin = user.id == 1  # Simple admin check (can be enhanced)
+        is_admin = user.is_administrator()
         
         # Character limits
         character_limit = user.get_character_limit()

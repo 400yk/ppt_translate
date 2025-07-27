@@ -135,8 +135,8 @@ def get_admin_feedback():
                 'errorKey': 'errors.user_not_found'
             }), 404
         
-        # Simple admin check (first user or specific admin role)
-        is_admin = user.id == 1  # You can enhance this with proper role checking
+        # Use the new admin role system
+        is_admin = user.is_administrator()
         
         if not is_admin:
             return jsonify({

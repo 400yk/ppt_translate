@@ -13,6 +13,7 @@ const isBrowser = typeof window !== 'undefined';
 interface User {
   username: string;
   email: string;
+  is_admin?: boolean;
 }
 
 interface AuthContextType {
@@ -21,7 +22,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   registeredWithInvitation: boolean | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<any>;
   register: (username: string, email: string, password: string, invitationCode: string) => Promise<void>;
   logout: (navigateCallback?: () => void) => void;
   signInWithGoogle: (googleToken: string, invitationCode?: string) => Promise<any>;
@@ -125,16 +126,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Save auth data
       setToken(data.access_token);
-      setUser({ username, email: '' }); // Email isn't returned from login
+      setUser({ 
+        username, 
+        email: '', // Email isn't returned from login
+        is_admin: data.is_admin || false
+      });
       
       // Store in localStorage for persistence (only in browser)
       if (isBrowser) {
         localStorage.setItem('auth_token', data.access_token);
-        localStorage.setItem('auth_user', JSON.stringify({ username, email: '' }));
+        localStorage.setItem('auth_user', JSON.stringify({ 
+          username, 
+          email: '',
+          is_admin: data.is_admin || false
+        }));
       }
       
       // Don't clear guest session - this prevents abuse where users could
       // log in, use quota, log out, and use guest translation again
+      
+      return data; // Return the response data
     } catch (error) {
       console.error('Login error:', error);
       throw error;

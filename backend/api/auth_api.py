@@ -368,11 +368,15 @@ def login():
     # Check if the user has a valid invitation code
     has_invitation = user.invitation_code is not None and user.invitation_code.is_valid()
     
+    # Check admin status
+    is_admin = user.is_administrator()
+    
     return jsonify({
         'message': 'Login successful',
         'messageKey': 'auth.login_success',
         'has_invitation': has_invitation,
-        'access_token': access_token
+        'access_token': access_token,
+        'is_admin': is_admin
     }), 200
 
 @auth_bp.route('/api/auth/google', methods=['POST'])
@@ -670,11 +674,22 @@ def generate_invitation_codes():
         }), 404
     
     # Generate 50 invitation codes
-    codes = InvitationCode.generate_batch(count=50)
+    codes_batch = InvitationCode.generate_batch(count=50)
+    created_codes = []
+    
+    for code_value in codes_batch:
+        new_code = InvitationCode(
+            code=code_value,
+            active=True
+        )
+        db.session.add(new_code)
+        created_codes.append(new_code)
+    
+    db.session.commit()
     
     return jsonify({
         'message': 'Invitation codes generated successfully',
-        'codes': codes
+        'codes': [code.code for code in created_codes]
     }), 201
 
 @auth_bp.route('/api/verify-invitation', methods=['POST'])
@@ -751,9 +766,8 @@ def get_all_invitation_codes():
     if not user:
         return jsonify({'error': 'User not found'}), 404
     
-    # This is a simplified admin check - in a real application, you would have proper roles
-    # For now, we'll make the first user in the database an admin
-    is_admin = user.id == 1  # Simple admin check
+    # Use the new admin role system
+    is_admin = user.is_administrator()
     
     if not is_admin:
         return jsonify({'error': 'Unauthorized access'}), 403
@@ -788,8 +802,8 @@ def update_invitation_code(code_id):
     if not user:
         return jsonify({'error': 'User not found'}), 404
         
-    # Simple admin check
-    is_admin = user.id == 1
+    # Use the new admin role system
+    is_admin = user.is_administrator()
     
     if not is_admin:
         return jsonify({'error': 'Unauthorized access'}), 403

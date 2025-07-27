@@ -96,16 +96,16 @@ DEEPSEEK_API_BATCH_SIZE = 30  # Smaller batch size for slow responses
 MIN_FONT_SIZE = 8 
 
 # User translation limits
-GUEST_TRANSLATION_LIMIT = 1  # Number of translations allowed for guest users
-FREE_USER_TRANSLATION_LIMIT = 1  # Number of translations allowed for free users
+GUEST_TRANSLATION_LIMIT = 1
+FREE_USER_TRANSLATION_LIMIT = 1
 FREE_USER_TRANSLATION_PERIOD = 'weekly'  # 'daily', 'weekly', or 'monthly'
-FREE_USER_CHARACTER_PER_FILE_LIMIT = 50000  # Number of characters allowed for free users
-FREE_USER_CHARACTER_MONTHLY_LIMIT = 200000  # Number of characters allowed for free users
-INVITATION_MEMBERSHIP_MONTHS = 3  # Default duration for invitation-based membership in months
+FREE_USER_CHARACTER_PER_FILE_LIMIT = 50000
+FREE_USER_CHARACTER_MONTHLY_LIMIT = 200000
+INVITATION_MEMBERSHIP_MONTHS = 3
 PAID_MEMBERSHIP_MONTHLY = 1  # Duration for monthly paid membership
 PAID_MEMBERSHIP_YEARLY = 12  # Duration for yearly paid membership
-PAID_USER_CHARACTER_MONTHLY_LIMIT = 5000000  # Number of characters allowed for paid users
-GUEST_USER_MAX_FILE_SIZE = 50  # 50MB
+PAID_USER_CHARACTER_MONTHLY_LIMIT = 5000000
+GUEST_USER_MAX_FILE_SIZE = 50
 GUEST_USER_CHARACTER_MONTHLY_LIMIT = 100000  # Number of characters allowed for guest users
 
 # Frontend and API URLs
@@ -122,12 +122,12 @@ STRIPE_CANCEL_URL = os.getenv('STRIPE_CANCEL_URL', f'{FRONTEND_URL}/payment/canc
 PRICING = {
     "monthly": {
         "usd": 7.99,
-        "discount": 0,  # No discount for monthly subscription
+        "discount": 0,
     },
     "yearly": {
-        "usd": 81.48,  # $6.79 per month * 12 months
-        "discount": 15,  # 15% discount compared to monthly price
-    }
+        "usd": 81.48,
+        "discount": 15,
+    },
 }
 
 # Currency conversion rates (relative to USD)
@@ -161,16 +161,16 @@ LOCALE_TO_CURRENCY = {
 } 
 
 # Referral System Configuration
-REFERRAL_REWARD_DAYS = 3  # Reward days for BOTH referrer and referee
+REFERRAL_REWARD_DAYS = 3
 INVITATION_CODE_REWARD_DAYS = 3  # Reward days for invitation codes - current user only
 REFERRAL_CODE_LENGTH = 12  # Length of referral codes
-REFERRAL_EXPIRY_DAYS = 30  # Referral link expiry in days
+REFERRAL_EXPIRY_DAYS = 30
 MAX_REFERRALS_PER_USER = 100  # Anti-spam limit for referrals per user
 REFERRAL_FEATURE_PAID_MEMBERS_ONLY = True  # Only paid members can generate referral codes
 
 # Email Verification Configuration
 EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS = 24  # Email verification token expiry in hours
-REQUIRE_EMAIL_VERIFICATION = True  # Enable for testing - set to False to disable
+REQUIRE_EMAIL_VERIFICATION = True
 SKIP_EMAIL_VERIFICATION_FOR_GOOGLE_AUTH = True  # Skip verification for Google OAuth users
 
 # Email Service Configuration

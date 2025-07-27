@@ -55,6 +55,22 @@ def translate_async_start_endpoint():
         file_bytes = file.read()
         file.stream.seek(0) # Reset stream position if file object is used elsewhere, though not strictly needed here as we use bytes
 
+        # Create initial processing record
+        from db.models import TranslationRecord
+        import datetime
+        
+        processing_record = TranslationRecord(
+            user_id=user.id,
+            filename=file.filename,
+            source_language=src_lang,
+            target_language=dest_lang,
+            character_count=0,  # Will be updated when task completes
+            status='processing',
+            started_at=datetime.datetime.utcnow()
+        )
+        db.session.add(processing_record)
+        db.session.commit()
+        
         # Dispatch the Celery task
         task = process_translation_task.delay(
             user_id=user.id, 
