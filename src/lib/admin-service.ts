@@ -131,6 +131,37 @@ export interface ReferralAnalytics {
   }>;
 }
 
+export interface RevenueAnalytics {
+  total_revenue_usd: number;
+  mrr_usd: number;
+  arr_usd: number;
+  arpu_usd: number;
+  clv_usd: number;
+  total_paid_users: number;
+  revenue_by_period: {
+    today: number;
+    this_week: number;
+    this_month: number;
+  };
+  revenue_by_currency: {
+    USD: number;
+    EUR: number;
+    GBP: number;
+  };
+  revenue_by_plan: {
+    monthly: number;
+    yearly: number;
+  };
+  subscription_breakdown: {
+    monthly_subscribers: number;
+    yearly_subscribers: number;
+  };
+  growth_data: Array<{
+    date: string;
+    revenue: number;
+  }>;
+}
+
 export interface TranslationLog {
   id: number;
   filename: string;
@@ -234,6 +265,11 @@ export class AdminService {
 
   static async getReferralAnalytics(days: number = 30): Promise<ReferralAnalytics> {
     const response = await apiClient.get(`/api/admin/analytics/referrals?days=${days}`);
+    return response.data;
+  }
+
+  static async getRevenueAnalytics(days: number = 30): Promise<RevenueAnalytics> {
+    const response = await apiClient.get(`/api/admin/analytics/revenue?days=${days}`);
     return response.data;
   }
 

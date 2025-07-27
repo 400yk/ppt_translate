@@ -15,7 +15,8 @@ import {
   Menu,
   X,
   BarChart3,
-  Activity
+  Activity,
+  DollarSign
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -30,6 +31,7 @@ const navigation = [
   { name: 'Translations', href: '/admin/translations', icon: FileText },
   { name: 'Referrals', href: '/admin/referrals', icon: Share2 },
   { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+  { name: 'Revenue', href: '/admin/revenue', icon: DollarSign },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 

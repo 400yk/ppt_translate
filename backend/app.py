@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -6,7 +7,7 @@ from db.models import db
 from api import register_blueprints
 from flask_migrate import Migrate
 from celery import Task, Celery # Import Celery here
-from celery_init import celery_app # Import celery_app from celery_init
+from celery_init import celery_app # Import celery_app from celery_app
 
 # Environment loading is now handled in config.py
 import config
@@ -81,6 +82,15 @@ def create_app():
 
     # Configure the imported celery_app instance
     configure_celery(app, celery_app)
+
+    # Add health check endpoint
+    @app.route('/api/health', methods=['GET'])
+    def health_check():
+        return jsonify({
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'version': '1.0.0'
+        })
 
     return app
 

@@ -519,6 +519,135 @@ def get_referral_analytics():
     except Exception as e:
         return jsonify({'error': f'Error fetching referral analytics: {str(e)}'}), 500
 
+@admin_bp.route('/api/admin/analytics/revenue', methods=['GET'])
+@jwt_required()
+def get_revenue_analytics():
+    """Get revenue analytics for admin dashboard."""
+    # Check admin access
+    admin_check = check_admin_access()
+    if admin_check:
+        return admin_check
+    
+    try:
+        # Get date range from query parameters
+        days = request.args.get('days', 30, type=int)
+        end_date = datetime.utcnow()
+        start_date = end_date - timedelta(days=days)
+        
+        # For now, we'll calculate revenue based on Stripe customers and pricing
+        # In a real implementation, you'd want to track actual payments in a separate table
+        from config import PRICING, CURRENCY_RATES
+        
+        # Get all users with Stripe customer IDs (paid users)
+        stripe_users = User.query.filter(User.stripe_customer_id.isnot(None)).all()
+        
+        # Calculate revenue metrics
+        total_paid_users = len(stripe_users)
+        
+        # Estimate revenue based on pricing (this is simplified - in production you'd track actual payments)
+        monthly_price_usd = PRICING.get('monthly', {}).get('usd', 0)
+        yearly_price_usd = PRICING.get('yearly', {}).get('usd', 0)
+        
+        # Assume 70% monthly, 30% yearly subscriptions (this would be tracked in real implementation)
+        estimated_monthly_subscribers = int(total_paid_users * 0.7)
+        estimated_yearly_subscribers = total_paid_users - estimated_monthly_subscribers
+        
+        # Calculate estimated revenue
+        monthly_revenue_usd = estimated_monthly_subscribers * monthly_price_usd
+        yearly_revenue_usd = estimated_yearly_subscribers * yearly_price_usd
+        total_revenue_usd = monthly_revenue_usd + yearly_revenue_usd
+        
+        # Monthly Recurring Revenue (MRR)
+        mrr_usd = estimated_monthly_subscribers * monthly_price_usd + (estimated_yearly_subscribers * yearly_price_usd / 12)
+        
+        # Annual Recurring Revenue (ARR)
+        arr_usd = mrr_usd * 12
+        
+        # Average Revenue Per User (ARPU)
+        arpu_usd = total_revenue_usd / total_paid_users if total_paid_users > 0 else 0
+        
+        # Revenue by period
+        # For now, we'll estimate based on user growth
+        new_paid_users_today = User.query.filter(
+            User.stripe_customer_id.isnot(None),
+            User.created_at >= end_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        ).count()
+        
+        new_paid_users_week = User.query.filter(
+            User.stripe_customer_id.isnot(None),
+            User.created_at >= end_date - timedelta(days=7)
+        ).count()
+        
+        new_paid_users_month = User.query.filter(
+            User.stripe_customer_id.isnot(None),
+            User.created_at >= end_date - timedelta(days=30)
+        ).count()
+        
+        # Estimate revenue for these periods
+        revenue_today = new_paid_users_today * arpu_usd
+        revenue_week = new_paid_users_week * arpu_usd
+        revenue_month = new_paid_users_month * arpu_usd
+        
+        # Revenue growth over time (based on user growth)
+        daily_revenue_data = db.session.query(
+            func.date(User.created_at).label('date'),
+            func.count(User.id).label('new_users')
+        ).filter(
+            User.stripe_customer_id.isnot(None),
+            User.created_at >= start_date
+        ).group_by(
+            func.date(User.created_at)
+        ).order_by(
+            func.date(User.created_at)
+        ).all()
+        
+        # Revenue by currency (estimate based on user location)
+        # For now, we'll assume all revenue is in USD
+        revenue_by_currency = {
+            'USD': total_revenue_usd,
+            'EUR': total_revenue_usd * CURRENCY_RATES.get('EUR', 1),
+            'GBP': total_revenue_usd * CURRENCY_RATES.get('GBP', 1)
+        }
+        
+        # Revenue by subscription plan
+        revenue_by_plan = {
+            'monthly': monthly_revenue_usd,
+            'yearly': yearly_revenue_usd
+        }
+        
+        # Customer Lifetime Value (CLV) - simplified calculation
+        # In production, this would be based on actual payment history
+        clv_usd = arpu_usd * 12  # Assume 12 months average subscription
+        
+        return jsonify({
+            'total_revenue_usd': round(total_revenue_usd, 2),
+            'mrr_usd': round(mrr_usd, 2),
+            'arr_usd': round(arr_usd, 2),
+            'arpu_usd': round(arpu_usd, 2),
+            'clv_usd': round(clv_usd, 2),
+            'total_paid_users': total_paid_users,
+            'revenue_by_period': {
+                'today': round(revenue_today, 2),
+                'this_week': round(revenue_week, 2),
+                'this_month': round(revenue_month, 2)
+            },
+            'revenue_by_currency': revenue_by_currency,
+            'revenue_by_plan': revenue_by_plan,
+            'subscription_breakdown': {
+                'monthly_subscribers': estimated_monthly_subscribers,
+                'yearly_subscribers': estimated_yearly_subscribers
+            },
+            'growth_data': [
+                {
+                    'date': str(day.date),
+                    'revenue': round(day.new_users * arpu_usd, 2)
+                } for day in daily_revenue_data
+            ]
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': f'Error fetching revenue analytics: {str(e)}'}), 500
+
 @admin_bp.route('/api/admin/translations/logs', methods=['GET'])
 @jwt_required()
 def get_translation_logs():
