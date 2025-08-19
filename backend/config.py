@@ -110,13 +110,16 @@ GUEST_USER_CHARACTER_MONTHLY_LIMIT = 100000  # Number of characters allowed for 
 
 # Frontend and API URLs
 FLASK_API_URL = os.getenv('FLASK_API_URL', 'http://localhost:5000/api')
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:9002')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:9003')
 
 # Stripe payment settings
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')  # No default value to avoid committed secrets
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')  # No default value
 STRIPE_SUCCESS_URL = os.getenv('STRIPE_SUCCESS_URL', f'{FRONTEND_URL}/payment/success')
 STRIPE_CANCEL_URL = os.getenv('STRIPE_CANCEL_URL', f'{FRONTEND_URL}/payment/cancel')
+
+# Alipay payment settings
+ALIPAY_PUBLIC_KEY = os.getenv('ALIPAY_PUBLIC_KEY')
 
 # Pricing configuration (in USD)
 PRICING = {
@@ -134,7 +137,7 @@ PRICING = {
 # These rates should be updated regularly via an external API
 CURRENCY_RATES = {
     "usd": 1.0,     # US Dollar (base currency)
-    "cny": 6.2565,    # Chinese Yuan, made discount to achieve 49.99CNY/month
+    "cny": 0.01, #6.2565,    # Chinese Yuan, made discount to achieve 49.99CNY/month
     # "cny": 0.01,    # Price for testing
     "eur": 0.93,    # Euro (for French and German)
     "jpy": 159.40,  # Japanese Yen

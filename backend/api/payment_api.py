@@ -4,14 +4,28 @@ API endpoints for handling payment processing with Stripe.
 
 import os
 import json
+import time
+import requests
 import stripe
 import logging
 from flask import Blueprint, jsonify, request, redirect, url_for, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from db.models import User, db
+from db.models import User, PaymentTransaction, db
 from services.user_service import get_membership_status, process_membership_purchase
 from config import PRICING, CURRENCY_RATES, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, FLASK_API_URL, FRONTEND_URL
 from utils.api_utils import error_response, success_response
+from utils.payment_utils import (
+    verify_alipay_signature, 
+    generate_order_number, 
+    parse_alipay_order_number,
+    calculate_payment_amount,
+    validate_payment_parameters,
+    validate_payment_amount,
+    get_expected_amount,
+    create_signed_payment_data,
+    verify_payment_signature,
+    generate_payment_signature
+)
 
 payment_bp = Blueprint('payment', __name__)
 
@@ -49,6 +63,7 @@ except ImportError:
     }
     CURRENCY_RATES = {'usd': 1.0}
 
+########## Stripe endpoints ##########
 @payment_bp.route('/api/payment/test', methods=['GET'])
 def test_endpoint():
     """A simple endpoint to test if the payment API is accessible."""
@@ -205,6 +220,32 @@ def create_checkout_session():
             
             print(f"Using fallback price ID after error: {price_id}")
         
+        # Calculate amount for transaction record
+        amount = calculate_payment_amount(PRICING[plan_type]['usd'], currency, CURRENCY_RATES)
+        
+        # Generate order number for tracking
+        order_number = generate_order_number('stripe', plan_type, user.email)
+        
+        # Create PaymentTransaction record
+        try:
+            transaction = PaymentTransaction.create_pending_transaction(
+                user_id=user.id,
+                order_number=order_number,
+                payment_method='stripe',
+                amount=amount,
+                currency=currency,
+                plan_type=plan_type,
+                metadata={
+                    'stripe_price_id': price_id,
+                    'user_email': user.email,
+                    'username': username
+                }
+            )
+            print(f"Created payment transaction: {transaction.order_number}")
+        except Exception as e:
+            print(f"Error creating payment transaction: {str(e)}")
+            # Continue with checkout session creation even if transaction record fails
+        
         # Create a new checkout session
         checkout_session = stripe.checkout.Session.create(
             success_url=f"{success_url}?session_id={{CHECKOUT_SESSION_ID}}",
@@ -216,7 +257,8 @@ def create_checkout_session():
             metadata={
                 'user_id': username,
                 'plan_type': plan_type,
-                'currency': currency
+                'currency': currency,
+                'order_number': order_number  # Include order number for webhook processing
             },
             line_items=[
                 {
@@ -230,7 +272,8 @@ def create_checkout_session():
         
         # Return the session URL to the client
         return jsonify({
-            'url': checkout_session.url
+            'url': checkout_session.url,
+            'order_number': order_number
         })
         
     except Exception as e:
@@ -385,14 +428,13 @@ def create_payment_intent():
         # Get pricing based on plan type and currency
         from config import PRICING, CURRENCY_RATES
         
-        # Calculate price in selected currency
+        # Calculate price in selected currency using utility function
         base_price = PRICING[plan_type]['usd']
-        rate = CURRENCY_RATES.get(currency, 1.0)
-        price_in_currency = base_price * rate
+        price_in_currency = calculate_payment_amount(base_price, currency, CURRENCY_RATES)
         
-        # Convert to cents/smallest currency unit
+        # Convert to cents/smallest currency unit for Stripe
         if currency == 'jpy':  # JPY doesn't use cents
-            amount = int(round(price_in_currency, 0))
+            amount = int(price_in_currency)
         else:
             amount = int(round(price_in_currency * 100, 0))
             
@@ -422,56 +464,6 @@ def create_payment_intent():
         return error_response(
             'Failed to create payment intent',
             'errors.failed_create_payment_intent',
-            500
-        )
-
-@payment_bp.route('/api/payment/success', methods=['GET'])
-def payment_success():
-    """
-    Handle successful Checkout session completion.
-    """
-    session_id = request.args.get('session_id')
-    if not session_id:
-        return error_response('No session ID provided', 'errors.no_session_id', 400)
-    
-    try:
-        # Retrieve the session to get customer information
-        checkout_session = stripe.checkout.Session.retrieve(session_id)
-        
-        # Get user ID from client_reference_id or metadata
-        username = checkout_session.client_reference_id or checkout_session.metadata.get('user_id')
-        plan_type = checkout_session.metadata.get('plan_type')
-        
-        if not username:
-            return error_response('Invalid session metadata', 'errors.invalid_session_metadata', 400)
-        
-        # Find the user
-        user = User.query.filter_by(username=username).first()
-        if not user:
-            return error_response('User not found', 'errors.user_not_found', 404)
-        
-        # Store the Stripe customer ID if not already stored
-        if checkout_session.customer and not user.stripe_customer_id:
-            user.stripe_customer_id = checkout_session.customer
-            db.session.commit()
-        
-        # Update user membership status
-        if plan_type:
-            result = process_membership_purchase(username, plan_type)
-        else:
-            result = get_membership_status(user)
-        
-        return jsonify({
-            'success': True,
-            'message': f'Successfully purchased membership',
-            'membership': result
-        })
-        
-    except Exception as e:
-        print(f"Error handling payment success: {str(e)}")
-        return error_response(
-            'Failed to process successful payment',
-            'errors.failed_process_payment',
             500
         )
 
@@ -618,6 +610,7 @@ def webhook():
             
             # Get user ID from client_reference_id or metadata
             username = session.get('client_reference_id') or session.get('metadata', {}).get('user_id')
+            order_number = session.get('metadata', {}).get('order_number')
             
             if username:
                 # Find the user
@@ -629,6 +622,23 @@ def webhook():
                     if customer_id and not user.stripe_customer_id:
                         user.stripe_customer_id = customer_id
                         db.session.commit()
+                    
+                    # Update PaymentTransaction record if order_number is available
+                    if order_number:
+                        transaction = PaymentTransaction.get_by_order_number(order_number)
+                        if transaction:
+                            transaction.mark_successful(
+                                transaction_id=session.get('id'),
+                                metadata={
+                                    'stripe_session_id': session.get('id'),
+                                    'stripe_customer_id': customer_id,
+                                    'payment_intent_id': session.get('payment_intent'),
+                                    'subscription_id': session.get('subscription')
+                                }
+                            )
+                            print(f"Updated payment transaction: {order_number}")
+                        else:
+                            print(f"Payment transaction not found: {order_number}")
                     
                     # Update user membership status
                     plan_type = session.get('metadata', {}).get('plan_type')
@@ -723,3 +733,774 @@ def webhook():
     except Exception as e:
         print(f"Webhook error: {str(e)}")
         return error_response('Webhook handling failed', 'errors.webhook_handling_failed', 500) 
+
+########## End of Stripe endpoints ##########
+
+
+########## Alipay endpoints ##########
+def handle_alipay_success():
+    """
+    Handle Alipay payment success return.
+    Note: The return URL does not include trade_status. This is only for user redirection.
+    The actual payment verification should be done via the asynchronous notification.
+    """
+    try:
+        # Get Alipay return parameters
+        out_trade_no = request.args.get('out_trade_no')
+        trade_no = request.args.get('trade_no')
+        total_amount = request.args.get('total_amount')
+        
+        print(f"Alipay return parameters: {dict(request.args)}")
+        print(f"Processing Alipay return: out_trade_no={out_trade_no}")
+        
+        if not out_trade_no:
+            print("Error: No order number provided")
+            return error_response('No order number provided', 'errors.no_order_number', 400)
+        
+        # URL decode the out_trade_no if needed (Flask should handle this automatically, but just in case)
+        import urllib.parse
+        if '%' in out_trade_no:
+            out_trade_no = urllib.parse.unquote(out_trade_no)
+            print(f"URL decoded out_trade_no: {out_trade_no}")
+        
+        # Note: We don't check trade_status here because it's not included in return URL
+        # The actual payment status will be verified via the asynchronous notification
+        
+        # Parse order number to extract user and plan info
+        order_info = parse_alipay_order_number(out_trade_no)
+        if not order_info:
+            print(f"Error: Invalid order number format: {out_trade_no}")
+            return error_response('Invalid order number format', 'errors.invalid_order_number', 400)
+        
+        plan_type = order_info['plan_type']  # monthly or yearly
+        user_email = order_info['user_email']    # user email
+        
+        print(f"Parsed order: plan_type={plan_type}, user_email={user_email}")
+        
+        # Find user by email
+        user = User.query.filter_by(email=user_email).first()
+        if not user:
+            print(f"Error: User not found with email: {user_email}")
+            return error_response('User not found', 'errors.user_not_found', 404)
+        
+        print(f"Found user: {user.username}")
+        
+        # For return URL, we don't update membership here
+        # The actual membership update is done via the asynchronous notification
+        # This is just for user redirection and display
+        
+        return jsonify({
+            'success': True,
+            'message': f'Alipay payment initiated. Please wait for confirmation.',
+            'order_no': out_trade_no,
+            'note': 'Payment verification is being processed asynchronously'
+        })
+        
+    except Exception as e:
+        print(f"Error handling Alipay success: {str(e)}")
+        return error_response(
+            'Failed to process Alipay payment',
+            'errors.failed_process_alipay_payment',
+            500
+        )
+
+@payment_bp.route('/api/payment/alipay/notify', methods=['POST'])
+def alipay_notify():
+    """
+    Handle Alipay asynchronous notification (webhook).
+    This endpoint receives POST data from Alipay with payment status updates.
+    """
+    try:
+        # Get all POST data from Alipay
+        notify_data = request.form.to_dict()
+        print(f"Alipay notify data: {notify_data}")
+        
+        # Extract key parameters
+        out_trade_no = notify_data.get('out_trade_no')
+        trade_no = notify_data.get('trade_no')
+        trade_status = notify_data.get('trade_status')
+        total_amount = notify_data.get('total_amount')
+        
+        print(f"Processing Alipay notification: out_trade_no={out_trade_no}, trade_status={trade_status}")
+        
+        # Verify the notification signature
+        if not verify_alipay_signature(notify_data):
+            print("验签失败 (Signature verification failed)")
+            return 'fail'
+        
+        print("验签成功 (Signature verification successful)")
+        
+        if not out_trade_no:
+            print("Error: No order number in notification")
+            return 'fail'
+        
+        # Parse order number to extract user and plan info
+        order_info = parse_alipay_order_number(out_trade_no)
+        if not order_info:
+            print(f"Error: Invalid order number format: {out_trade_no}")
+            return 'fail'
+        
+        plan_type = order_info['plan_type']  # monthly or yearly
+        user_email = order_info['user_email']    # user email
+        
+        # Validate payment amount if total_amount is provided
+        if total_amount:
+            try:
+                actual_amount = float(total_amount)
+                expected_amount = get_expected_amount(plan_type, 'cny', PRICING, CURRENCY_RATES)
+                
+                if not validate_payment_amount(actual_amount, expected_amount):
+                    print(f"Error: Payment amount mismatch. Expected: {expected_amount}, Actual: {actual_amount}")
+                    return 'fail'
+                    
+            except (ValueError, TypeError) as e:
+                print(f"Error: Invalid amount format: {total_amount}")
+                return 'fail'
+        
+        # Find user by email
+        user = User.query.filter_by(email=user_email).first()
+        if not user:
+            print(f"Error: User not found with email: {user_email}")
+            return 'fail'
+        
+        # Find and update PaymentTransaction record
+        transaction = PaymentTransaction.get_by_order_number(out_trade_no)
+        if not transaction:
+            print(f"Payment transaction not found: {out_trade_no}")
+            # Create a new transaction record if not found (for backward compatibility)
+            try:
+                # Calculate amount from total_amount
+                amount = float(total_amount) if total_amount else 0.0
+                transaction = PaymentTransaction.create_pending_transaction(
+                    user_id=user.id,
+                    order_number=out_trade_no,
+                    payment_method='alipay',
+                    amount=amount,
+                    currency='cny',  # Alipay typically uses CNY
+                    plan_type=plan_type,
+                    metadata={
+                        'user_email': user_email,
+                        'username': user.username
+                    }
+                )
+                print(f"Created missing payment transaction: {out_trade_no}")
+            except Exception as e:
+                print(f"Error creating missing transaction: {str(e)}")
+        
+        # Handle different trade statuses
+        if trade_status == 'TRADE_SUCCESS':
+            # Payment successful - update membership
+            result = process_membership_purchase(user.username, plan_type)
+            print(f"Alipay payment successful for user {user.username}: {result}")
+            
+            # Update PaymentTransaction record
+            if transaction:
+                transaction.mark_successful(
+                    transaction_id=trade_no,
+                    metadata={
+                        'alipay_trade_no': trade_no,
+                        'total_amount': total_amount,
+                        'trade_status': trade_status
+                    }
+                )
+                print(f"Updated payment transaction: {out_trade_no}")
+            
+        elif trade_status == 'TRADE_CLOSED':
+            # Payment failed or was closed
+            print(f"Alipay payment closed for user {user.username}")
+            
+            # Update PaymentTransaction record
+            if transaction:
+                transaction.mark_failed(
+                    error_message=f"Payment closed by Alipay: {trade_status}",
+                    metadata={
+                        'alipay_trade_no': trade_no,
+                        'total_amount': total_amount,
+                        'trade_status': trade_status
+                    }
+                )
+                print(f"Marked payment transaction as failed: {out_trade_no}")
+            
+        elif trade_status == 'TRADE_FINISHED':
+            # Payment finished (for some payment methods)
+            result = process_membership_purchase(user.username, plan_type)
+            print(f"Alipay payment finished for user {user.username}: {result}")
+            
+            # Update PaymentTransaction record
+            if transaction:
+                transaction.mark_successful(
+                    transaction_id=trade_no,
+                    metadata={
+                        'alipay_trade_no': trade_no,
+                        'total_amount': total_amount,
+                        'trade_status': trade_status
+                    }
+                )
+                print(f"Updated payment transaction: {out_trade_no}")
+        
+        # Return success to Alipay to stop asynchronous notifications
+        # 验签成功返回 success,支付宝将停止此订单的异步推送否则将会一共推送8次
+        return 'success'
+        
+    except Exception as e:
+        print(f"Error handling Alipay notification: {str(e)}")
+        return 'fail'
+
+@payment_bp.route('/api/payment/alipay/signed-data', methods=['POST'])
+@jwt_required()
+def create_signed_alipay_payment():
+    """
+    Create signed Alipay payment data for secure payment processing.
+    
+    Request body:
+    {
+        "plan_type": "monthly" or "yearly",
+        "currency": "cny" (optional, defaults to cny)
+    }
+    
+    Returns:
+    {
+        "success": true,
+        "payment_data": {
+            "service": "translide",
+            "payment_method": "alipay",
+            "plan": "monthly",
+            "currency": "cny",
+            "price": "9.99",
+            "user_id": "123",
+            "user_email": "user@example.com",
+            "timestamp": "1234567890",
+            "return_url": "...",
+            "cancel_url": "...",
+            "signature": "abc123..."
+        }
+    }
+    """
+    try:
+        username = get_jwt_identity()
+        print(f"Creating signed Alipay payment for user: {username}")
+        
+        # Find user by username
+        user = User.query.filter_by(username=username).first()
+        
+        if not user:
+            print(f"User not found: {username}")
+            return error_response('User not found', 'errors.user_not_found', 404)
+        
+        # Get request data
+        if not request.is_json:
+            print("Error: Request data is not JSON")
+            return error_response(
+                'Request must be in JSON format',
+                'errors.request_must_be_json',
+                400
+            )
+            
+        data = request.get_json()
+        print(f"Request data: {data}")
+        
+        if not data:
+            print("Error: Empty request data")
+            return error_response(
+                'No data provided in request',
+                'errors.no_data_provided',
+                400
+            )
+            
+        plan_type = data.get('plan_type')
+        currency = data.get('currency', 'cny').lower()
+        
+        print(f"Plan type: {plan_type}, Currency: {currency}")
+        
+        if not plan_type:
+            print("Error: Missing plan_type")
+            return error_response(
+                'Plan type must be specified',
+                'errors.plan_type_required',
+                400
+            )
+            
+        if plan_type not in ['monthly', 'yearly']:
+            print(f"Error: Invalid plan type: {plan_type}")
+            return error_response(
+                'Plan type must be either "monthly" or "yearly"',
+                'errors.plan_type_monthly_yearly',
+                400
+            )
+        
+        # Create signed payment data
+        secret_key = os.environ.get('ALIPAY_PHP_SIGN_SECRET_KEY', 'your-secret-key-change-this')
+        return_url = os.environ.get('ALIPAY_PHP_RETURN_URL', 'https://long-agi.cn/pay/index.php')
+        payment_data = create_signed_payment_data(
+            plan_type=plan_type,
+            currency=currency,
+            user_email=user.email,
+            user_id=str(user.id),
+            pricing=PRICING,
+            currency_rates=CURRENCY_RATES,
+            secret_key=secret_key
+        )
+        
+        # Create PaymentTransaction record
+        try:
+            amount = float(payment_data['price'])
+            order_number = generate_order_number('alipay', plan_type, user.email)
+            
+            transaction = PaymentTransaction.create_pending_transaction(
+                user_id=user.id,
+                order_number=order_number,
+                payment_method='alipay',
+                amount=amount,
+                currency=currency,
+                plan_type=plan_type,
+                metadata={
+                    'user_email': user.email,
+                    'username': username,
+                    'signed_payment_data': payment_data
+                }
+            )
+            print(f"Created Alipay payment transaction: {transaction.order_number}")
+        except Exception as e:
+            print(f"Error creating Alipay payment transaction: {str(e)}")
+            return error_response(
+                'Failed to create payment transaction',
+                'errors.failed_create_transaction',
+                500
+            )
+        
+        return success_response(
+            'Signed payment data created successfully',
+            'payment.signed_data_created',
+            {
+                'payment_data': payment_data,
+                'order_number': order_number,
+                'return_url': return_url
+            }
+        )
+        
+    except Exception as e:
+        print(f"Error creating signed Alipay payment: {str(e)}")
+        return error_response(
+            'Failed to create signed payment data',
+            'errors.failed_create_signed_payment',
+            500
+        )
+
+@payment_bp.route('/api/payment/alipay/create', methods=['POST'])
+@jwt_required()
+def create_alipay_payment():
+    """
+    Create an Alipay payment transaction record.
+    
+    Request body:
+    {
+        "plan_type": "monthly" or "yearly",
+        "currency": "cny" (optional, defaults to cny)
+    }
+    
+    Returns:
+    {
+        "order_number": "alipay_monthly_1234567890_user@email.com",
+        "amount": 9.99,
+        "currency": "cny"
+    }
+    """
+    try:
+        username = get_jwt_identity()
+        print(f"Creating Alipay payment for user: {username}")
+        
+        # Find user by username
+        user = User.query.filter_by(username=username).first()
+        
+        if not user:
+            print(f"User not found: {username}")
+            return error_response('User not found', 'errors.user_not_found', 404)
+        
+        # Get request data
+        if not request.is_json:
+            print("Error: Request data is not JSON")
+            return error_response(
+                'Request must be in JSON format',
+                'errors.request_must_be_json',
+                400
+            )
+            
+        data = request.get_json()
+        print(f"Request data: {data}")
+        
+        if not data:
+            print("Error: Empty request data")
+            return error_response(
+                'No data provided in request',
+                'errors.no_data_provided',
+                400
+            )
+            
+        plan_type = data.get('plan_type')
+        currency = data.get('currency', 'cny').lower()
+        
+        print(f"Plan type: {plan_type}, Currency: {currency}")
+        
+        if not plan_type:
+            print("Error: Missing plan_type")
+            return error_response(
+                'Plan type must be specified',
+                'errors.plan_type_required',
+                400
+            )
+            
+        if plan_type not in ['monthly', 'yearly']:
+            print(f"Error: Invalid plan type: {plan_type}")
+            return error_response(
+                'Plan type must be either "monthly" or "yearly"',
+                'errors.plan_type_monthly_yearly',
+                400
+            )
+        
+        # Calculate amount based on plan type and currency
+        amount = calculate_payment_amount(PRICING[plan_type]['usd'], currency, CURRENCY_RATES)
+        
+        # Generate order number for Alipay
+        order_number = generate_order_number('alipay', plan_type, user.email)
+        
+        # Create PaymentTransaction record
+        try:
+            transaction = PaymentTransaction.create_pending_transaction(
+                user_id=user.id,
+                order_number=order_number,
+                payment_method='alipay',
+                amount=amount,
+                currency=currency,
+                plan_type=plan_type,
+                metadata={
+                    'user_email': user.email,
+                    'username': username
+                }
+            )
+            print(f"Created Alipay payment transaction: {transaction.order_number}")
+        except Exception as e:
+            print(f"Error creating Alipay payment transaction: {str(e)}")
+            return error_response(
+                'Failed to create payment transaction',
+                'errors.failed_create_transaction',
+                500
+            )
+        
+        # Return the order information for frontend to use with Alipay
+        return jsonify({
+            'order_number': order_number,
+            'amount': float(amount),
+            'currency': currency,
+            'plan_type': plan_type,
+            'user_email': user.email
+        })
+        
+    except Exception as e:
+        print(f"Error creating Alipay payment: {str(e)}")
+        return error_response(
+            'Failed to create Alipay payment',
+            'errors.failed_create_alipay_payment',
+            500
+        )
+
+
+
+@payment_bp.route('/api/payment/alipay/status', methods=['GET'])
+def check_alipay_payment_status():
+    """
+    Check the status of an Alipay payment.
+    This endpoint can be called by the frontend to check if payment was processed.
+    """
+    try:
+        out_trade_no = request.args.get('out_trade_no')
+
+        if not out_trade_no:
+            return error_response('No order number provided', 'errors.no_order_number', 400)
+
+        # Prefer authoritative source: PaymentTransaction row
+        transaction = PaymentTransaction.get_by_order_number(out_trade_no)
+        if transaction:
+            # Retrieve membership info for context
+            user = User.query.get(transaction.user_id)
+            membership_status = get_membership_status(user) if user else {}
+
+            return jsonify({
+                'success': True,
+                'payment_processed': transaction.status == 'success',
+                'membership': membership_status,
+                'order_no': out_trade_no
+            })
+
+        # Fallback for legacy orders where a transaction row might not exist
+        order_info = parse_alipay_order_number(out_trade_no)
+        if not order_info:
+            return error_response('Invalid order number format', 'errors.invalid_order_number', 400)
+
+        user_email = order_info['user_email']
+
+        user = User.query.filter_by(email=user_email).first()
+        if not user:
+            return error_response('User not found', 'errors.user_not_found', 404)
+
+        membership_status = get_membership_status(user)
+
+        return jsonify({
+            'success': True,
+            'payment_processed': False,
+            'membership': membership_status,
+            'order_no': out_trade_no
+        })
+        
+    except Exception as e:
+        print(f"Error checking Alipay payment status: {str(e)}")
+        return error_response(
+            'Failed to check payment status',
+            'errors.failed_check_payment_status',
+            500
+        ) 
+    
+
+@payment_bp.route('/api/payment/alipay/query', methods=['GET'])
+def alipay_trade_query():
+    """
+    Fallback endpoint to query Alipay trade status via trusted PHP proxy.
+    - Uses HMAC signature with shared secret to authorize the proxy call
+    - Updates PaymentTransaction and membership based on query result
+    """
+    try:
+        out_trade_no = request.args.get('out_trade_no')
+        if not out_trade_no:
+            return error_response('No order number provided', 'errors.no_order_number', 400)
+
+        transaction = PaymentTransaction.get_by_order_number(out_trade_no)
+        if not transaction:
+            return error_response('Transaction not found', 'errors.transaction_not_found', 404)
+
+        # If already successful, short-circuit
+        if transaction.status == 'success':
+            user = User.query.get(transaction.user_id)
+            membership_status = get_membership_status(user) if user else {}
+            return jsonify({
+                'success': True,
+                'payment_processed': True,
+                'membership': membership_status,
+                'order_no': out_trade_no
+            })
+
+        php_query_url = os.environ.get('ALIPAY_PHP_QUERY_URL', 'https://long-agi.cn/pay/query.php')
+        secret_key = os.environ.get('ALIPAY_PHP_SIGN_SECRET_KEY', 'your-secret-key-change-this')
+
+        payload = {
+            'service': 'translide',
+            'action': 'trade_query',
+            'out_trade_no': out_trade_no,
+            'timestamp': str(int(time.time()))
+        }
+        signature = generate_payment_signature(payload, secret_key)
+        params = dict(payload)
+        params['signature'] = signature
+
+        resp = requests.get(php_query_url, params=params, timeout=8)
+        if not resp.ok:
+            return error_response('Alipay query failed', 'errors.alipay_query_failed', 502)
+
+        data = resp.json()
+        trade_status = data.get('trade_status')
+        trade_no = data.get('trade_no')
+        total_amount = data.get('total_amount')
+
+        # Update transaction and membership accordingly
+        user = User.query.get(transaction.user_id)
+
+        if trade_status in ('TRADE_SUCCESS', 'TRADE_FINISHED'):
+            if user:
+                process_membership_purchase(user.username, transaction.plan_type)
+            transaction.mark_successful(
+                transaction_id=trade_no,
+                metadata={
+                    'alipay_trade_no': trade_no,
+                    'total_amount': total_amount,
+                    'trade_status': trade_status,
+                    'queried_via': 'php_proxy'
+                }
+            )
+            membership_status = get_membership_status(user) if user else {}
+            return jsonify({
+                'success': True,
+                'payment_processed': True,
+                'membership': membership_status,
+                'order_no': out_trade_no
+            })
+        elif trade_status == 'TRADE_CLOSED':
+            transaction.mark_failed(
+                error_message='Payment closed (queried via PHP proxy)',
+                metadata={
+                    'alipay_trade_no': trade_no,
+                    'total_amount': total_amount,
+                    'trade_status': trade_status,
+                    'queried_via': 'php_proxy'
+                }
+            )
+            membership_status = get_membership_status(user) if user else {}
+            return jsonify({
+                'success': True,
+                'payment_processed': False,
+                'membership': membership_status,
+                'order_no': out_trade_no
+            })
+
+        # Unknown or pending status
+        membership_status = get_membership_status(user) if user else {}
+        return jsonify({
+            'success': True,
+            'payment_processed': False,
+            'membership': membership_status,
+            'order_no': out_trade_no,
+            'trade_status': trade_status
+        })
+    except Exception as e:
+        print(f"Error in alipay_trade_query: {str(e)}")
+        return error_response('Failed to query Alipay trade', 'errors.failed_query_alipay', 500)
+
+########## End of Alipay endpoints ##########
+
+########## Common endpoints ##########
+@payment_bp.route('/api/payment/success', methods=['GET'])
+def payment_success():
+    """
+    Handle successful payment completion for both Stripe and Alipay.
+    """
+    session_id = request.args.get('session_id')
+    payment_method = request.args.get('method', 'stripe')
+    
+    # Debug logging
+    print(f"Payment success called with method: {payment_method}")
+    print(f"All request args: {dict(request.args)}")
+    
+    # Handle Alipay payment return - check for various Alipay method patterns or Alipay-specific parameters
+    if (payment_method and ('alipay' in payment_method.lower() or 'trade' in payment_method.lower())) or \
+       request.args.get('out_trade_no') or request.args.get('trade_no'):
+        print(f"Detected Alipay payment method: {payment_method}")
+        return handle_alipay_success()
+    
+    # Handle Stripe payment return
+    if not session_id:
+        return error_response('No session ID provided', 'errors.no_session_id', 400)
+    
+    try:
+        # Retrieve the session to get customer information
+        checkout_session = stripe.checkout.Session.retrieve(session_id)
+        
+        # Get user ID from client_reference_id or metadata
+        username = checkout_session.client_reference_id or checkout_session.metadata.get('user_id')
+        plan_type = checkout_session.metadata.get('plan_type')
+        
+        if not username:
+            return error_response('Invalid session metadata', 'errors.invalid_session_metadata', 400)
+        
+        # Find the user
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            return error_response('User not found', 'errors.user_not_found', 404)
+        
+        # Store the Stripe customer ID if not already stored
+        if checkout_session.customer and not user.stripe_customer_id:
+            user.stripe_customer_id = checkout_session.customer
+            db.session.commit()
+        
+        # Update user membership status
+        if plan_type:
+            result = process_membership_purchase(username, plan_type)
+        else:
+            result = get_membership_status(user)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Successfully purchased membership',
+            'membership': result
+        })
+        
+    except Exception as e:
+        print(f"Error handling payment success: {str(e)}")
+        return error_response(
+            'Failed to process successful payment',
+            'errors.failed_process_payment',
+            500
+        )
+
+@payment_bp.route('/api/payment/transactions', methods=['GET'])
+@jwt_required()
+def get_user_transactions():
+    """
+    Get payment transaction history for the authenticated user.
+    
+    Query parameters:
+    - status: Filter by status (pending, success, failed, cancelled)
+    - limit: Number of transactions to return (default: 10)
+    
+    Returns:
+    {
+        "transactions": [
+            {
+                "id": 1,
+                "order_number": "stripe_monthly_1234567890_user@email.com",
+                "payment_method": "stripe",
+                "amount": 9.99,
+                "currency": "usd",
+                "plan_type": "monthly",
+                "status": "success",
+                "created_at": "2023-12-01T12:00:00Z",
+                "processed_at": "2023-12-01T12:05:00Z"
+            }
+        ]
+    }
+    """
+    try:
+        username = get_jwt_identity()
+        
+        # Find user by username
+        user = User.query.filter_by(username=username).first()
+        
+        if not user:
+            return error_response('User not found', 'errors.user_not_found', 404)
+        
+        # Get query parameters
+        status = request.args.get('status')
+        limit = request.args.get('limit', 10, type=int)
+        
+        # Get transactions for the user
+        transactions = PaymentTransaction.get_user_transactions(
+            user_id=user.id,
+            status=status,
+            limit=limit
+        )
+        
+        # Format transaction data
+        transaction_data = []
+        for transaction in transactions:
+            transaction_data.append({
+                'id': transaction.id,
+                'order_number': transaction.order_number,
+                'payment_method': transaction.payment_method,
+                'amount': float(transaction.amount),
+                'currency': transaction.currency,
+                'plan_type': transaction.plan_type,
+                'status': transaction.status,
+                'created_at': transaction.created_at.isoformat() if transaction.created_at else None,
+                'processed_at': transaction.processed_at.isoformat() if transaction.processed_at else None,
+                'error_message': transaction.error_message,
+                'transaction_id': transaction.transaction_id
+            })
+        
+        return jsonify({
+            'transactions': transaction_data,
+            'total': len(transaction_data)
+        })
+        
+    except Exception as e:
+        print(f"Error getting user transactions: {str(e)}")
+        return error_response(
+            'Failed to get transaction history',
+            'errors.failed_get_transactions',
+            500
+        )

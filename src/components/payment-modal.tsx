@@ -15,6 +15,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import apiClient, { getApiErrorMessage } from '@/lib/api-client';
+import Image from 'next/image';
 
 // Initialize Stripe with your publishable key
 // Replace with your actual publishable key
@@ -72,8 +73,8 @@ const cardStyle = {
   },
 };
 
-// Payment methods enum
-type PaymentMethod = 'elements' | 'checkout';
+// Payment methods enum (no longer needed for state, but kept for type safety)
+type PaymentMethod = 'checkout' | 'alipay'; // 'wechat' commented out for now
 
 // Internal Payment form component using Elements
 function CheckoutForm({ 
@@ -206,48 +207,59 @@ function CheckoutForm({
   );
 }
 
-// Checkout redirect component
-function CheckoutRedirect({
+// Individual payment method components for direct payment
+function PaymentMethodButton({
   selectedPlan,
   onSuccessfulPayment,
   price,
-  currency
+  currency,
+  paymentMethod,
+  children
 }: {
   selectedPlan: 'monthly' | 'yearly',
   onSuccessfulPayment: () => void,
   price: string,
-  currency: string
+  currency: string,
+  paymentMethod: 'checkout' | 'alipay', // 'wechat' commented out for now
+  children: React.ReactNode
 }) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleCheckout = async () => {
+  const handlePaymentClick = async () => {
     setIsProcessing(true);
-    setErrorMessage(null);
     
     try {
-      console.log(`Creating checkout session for plan: ${selectedPlan}`);
-      
-      // Create a checkout session
-      const response = await apiClient.post('/api/payment/checkout-session', { 
-        plan_type: selectedPlan,
-        currency: currency,
-        success_url: `${window.location.origin}/payment/success`,
-        cancel_url: `${window.location.origin}/payment/cancel`
-      });
-      
-      console.log(`Checkout response status: ${response.status}`);
-      
-      // Redirect to Stripe Checkout
-      window.location.href = response.data.url;
+      if (paymentMethod === 'checkout') {
+        // Handle Stripe checkout
+        const response = await apiClient.post('/api/payment/checkout-session', { 
+          plan_type: selectedPlan,
+          currency: currency,
+          success_url: `${window.location.origin}/payment/success`,
+          cancel_url: `${window.location.origin}/payment/cancel`
+        });
+        
+        window.location.href = response.data.url;
+      } else if (paymentMethod === 'alipay') {
+        // Handle Alipay payment with signed data
+        const signedResponse = await apiClient.post('/api/payment/alipay/signed-data', {
+          plan_type: selectedPlan,
+          currency: currency
+        });
+        
+        const paymentData = signedResponse.data.payment_data;
+        
+        // Build URL with signed data
+        const redirectParams = new URLSearchParams(paymentData);
+        const redirectUrl = signedResponse.data.return_url + `?${redirectParams.toString()}`;
+        console.log('Redirecting to:', redirectUrl);
+        window.location.href = redirectUrl;
+      }
     } catch (error: any) {
-      console.error('Checkout error:', error);
+      console.error('Payment error:', error);
       
       const errorMessage = getApiErrorMessage(error);
-      
-      setErrorMessage(errorMessage);
       toast({
         title: t('payment.error'),
         description: errorMessage,
@@ -259,37 +271,27 @@ function CheckoutRedirect({
   };
 
   return (
-    <div className="space-y-4">
-      {errorMessage && (
-        <div className="text-sm text-red-500">{errorMessage}</div>
+    <Button 
+      className="w-full h-24 flex flex-col gap-2 relative border-2 hover:border-primary hover:shadow-lg transition-all duration-200" 
+      variant="outline"
+      onClick={handlePaymentClick}
+      disabled={isProcessing}
+    >
+      {isProcessing && (
+        <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-md">
+          <Icons.spinner className="h-5 w-5 animate-spin" />
+        </div>
       )}
-      
-      <Button 
-        className="w-full" 
-        onClick={handleCheckout}
-        disabled={isProcessing}
-      >
-        {isProcessing ? (
-          <>
-            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            {t('payment.processing')}
-          </>
-        ) : (
-          <>
-            <Icons.payment className="mr-2 h-4 w-4" />
-            {t('payment.pay')} {price}
-          </>
-        )}
-      </Button>
-    </div>
+      {children}
+    </Button>
   );
 }
+
 
 export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) {
   const { t, locale } = useTranslation();
   const { pricing, isLoading, updateCurrency } = usePricing();
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('checkout');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('');
   const [characterLimit, setCharacterLimit] = useState<number>(5000000); // Default value until fetched
 
@@ -463,42 +465,78 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
               {t('payment.secure_info')}
             </div>
             
-            {/* Payment option tabs - uncomment to enable both payment methods
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              <Button 
-                variant={paymentMethod === 'elements' ? 'default' : 'outline'}
-                onClick={() => setPaymentMethod('elements')}
-                className="w-full"
-              >
-                Card Payment
-              </Button>
-              <Button 
-                variant={paymentMethod === 'checkout' ? 'default' : 'outline'}
-                onClick={() => setPaymentMethod('checkout')}
-                className="w-full"
-              >
-                Checkout
-              </Button>
-            </div>
-            */}
-            
-            {paymentMethod === 'elements' ? (
-              <Elements stripe={stripePromise}>
-                <CheckoutForm 
-                  selectedPlan={selectedPlan} 
-                  onSuccessfulPayment={handleSuccessfulPayment} 
+            {/* Payment method selection with direct payment */}
+            <div className="space-y-4">
+              <div className="text-center">
+                <h3 className="font-medium text-lg mb-2">
+                  Total Amount: {selectedPlan === 'monthly' ? pricing.monthly.display : pricing.yearly.display_total}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Click on a payment method below to proceed
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Stripe Payment */}
+                <PaymentMethodButton
+                  selectedPlan={selectedPlan}
+                  onSuccessfulPayment={handleSuccessfulPayment}
                   price={selectedPlan === 'monthly' ? pricing.monthly.display : pricing.yearly.display_total}
                   currency={selectedCurrency}
-                />
-              </Elements>
-            ) : (
-              <CheckoutRedirect
-                selectedPlan={selectedPlan}
-                onSuccessfulPayment={handleSuccessfulPayment}
-                price={selectedPlan === 'monthly' ? pricing.monthly.display : pricing.yearly.display_total}
-                currency={selectedCurrency}
-              />
-            )}
+                  paymentMethod="checkout"
+                >
+                  <Image 
+                    src="/Stripe.png" 
+                    alt="Stripe" 
+                    width={60} 
+                    height={30}
+                    className="object-contain"
+                  />
+                  <span className="text-sm font-medium">Stripe</span>
+                  <span className="text-xs text-muted-foreground">Credit/Debit Card</span>
+                </PaymentMethodButton>
+
+                {/* WeChat Pay - Commented out for now */}
+                {/* 
+                <PaymentMethodButton
+                  selectedPlan={selectedPlan}
+                  onSuccessfulPayment={handleSuccessfulPayment}
+                  price={selectedPlan === 'monthly' ? pricing.monthly.display : pricing.yearly.display_total}
+                  currency={selectedCurrency}
+                  paymentMethod="wechat"
+                >
+                  <Image 
+                    src="/微信支付600x600.png" 
+                    alt="WeChat Pay" 
+                    width={40} 
+                    height={40}
+                    className="object-contain"
+                  />
+                  <span className="text-sm font-medium">微信支付</span>
+                  <span className="text-xs text-muted-foreground">WeChat Pay</span>
+                </PaymentMethodButton>
+                */}
+
+                {/* Alipay */}
+                <PaymentMethodButton
+                  selectedPlan={selectedPlan}
+                  onSuccessfulPayment={handleSuccessfulPayment}
+                  price={selectedPlan === 'monthly' ? pricing.monthly.display : pricing.yearly.display_total}
+                  currency={selectedCurrency}
+                  paymentMethod="alipay"
+                >
+                  <Image 
+                    src="/支付宝.png" 
+                    alt="Alipay" 
+                    width={40} 
+                    height={40}
+                    className="object-contain"
+                  />
+                  <span className="text-sm font-medium">支付宝</span>
+                  <span className="text-xs text-muted-foreground">Alipay</span>
+                </PaymentMethodButton>
+              </div>
+            </div>
           </div>
         </div>
       </DialogContent>

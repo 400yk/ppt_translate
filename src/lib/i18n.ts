@@ -475,7 +475,11 @@ export const getTranslation = (key: TranslationKey, params?: Record<string, any>
   // Replace parameters if provided
   if (params) {
     Object.entries(params).forEach(([paramKey, paramValue]) => {
-      translation = translation.replace(new RegExp(`{${paramKey}}`, 'g'), String(paramValue));
+      if (paramKey && paramValue !== undefined) {
+        // Escape paramKey for safe use in RegExp
+        const escapedKey = paramKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        translation = translation.replace(new RegExp(`{${escapedKey}}`, 'g'), String(paramValue));
+      }
     });
   }
   
@@ -542,7 +546,11 @@ export function useTranslation() {
     // Replace parameters if provided
     if (params) {
       Object.entries(params).forEach(([paramKey, paramValue]) => {
-        translation = translation.replace(new RegExp(`{${paramKey}}`, 'g'), String(paramValue));
+        if (paramKey && paramValue !== undefined) {
+          // Escape paramKey for safe use in RegExp
+          const escapedKey = paramKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          translation = translation.replace(new RegExp(`{${escapedKey}}`, 'g'), String(paramValue));
+        }
       });
     }
     

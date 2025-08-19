@@ -31,7 +31,9 @@ import {
   CreditCard,
   Menu,
   Info,
-  AlertCircle
+  AlertCircle,
+  Smartphone,
+  Wallet
 } from 'lucide-react';
 
 const Icons = {
@@ -70,7 +72,9 @@ const Icons = {
   upload: Upload,
   user: User,
   x: X,
-  alertCircle: AlertCircle
+  alertCircle: AlertCircle,
+  wechat: Smartphone,
+  alipay: Wallet
 };
 
 export {Icons};

@@ -34,8 +34,9 @@ def create_app():
     # Configure CORS to allow frontend origins
     cors_origins = [
         "https://translide-42ac7178fd60.herokuapp.com",  # Production frontend
-        "http://localhost:9002",  # Local development frontend
-        "http://127.0.0.1:9002",
+        "http://localhost:9003",  # Local development frontend
+        "http://127.0.0.1:9003",
+        config.FRONTEND_URL,
         "https://translide.s3.amazonaws.com", # Added this for S3 presigned URL
         "https://translide.co"
     ]

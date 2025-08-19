@@ -513,6 +513,99 @@ class Referral(db.Model):
             query = query.filter_by(status=status)
         return query.order_by(cls.created_at.desc()).all()
 
+class PaymentTransaction(db.Model):
+    """
+    Stores payment transaction records for tracking all payment attempts.
+    Provides complete audit trail and payment history.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    order_number = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    payment_method = db.Column(db.String(50), nullable=False)  # 'stripe', 'alipay'
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    currency = db.Column(db.String(10), nullable=False, default='usd')
+    plan_type = db.Column(db.String(20), nullable=False)  # 'monthly', 'yearly'
+    status = db.Column(db.Enum('pending', 'success', 'failed', 'cancelled', name='payment_status'), 
+                      default='pending', nullable=False)
+    transaction_id = db.Column(db.String(255), nullable=True)  # External transaction ID
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    processed_at = db.Column(db.DateTime, nullable=True)
+    error_message = db.Column(db.Text, nullable=True)
+    payment_metadata = db.Column(db.JSON, nullable=True)  # Store additional payment-specific data
+    
+    # Relationship
+    user = db.relationship('User', backref=db.backref('payment_transactions', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f'<PaymentTransaction {self.order_number}: {self.status}>'
+    
+    @classmethod
+    def create_pending_transaction(cls, user_id, order_number, payment_method, amount, 
+                                 currency, plan_type, metadata=None):
+        """Create a new pending payment transaction."""
+        transaction = cls(
+            user_id=user_id,
+            order_number=order_number,
+            payment_method=payment_method,
+            amount=amount,
+            currency=currency,
+            plan_type=plan_type,
+            status='pending',
+            payment_metadata=metadata or {}
+        )
+        db.session.add(transaction)
+        db.session.commit()
+        return transaction
+    
+    def mark_successful(self, transaction_id=None, metadata=None):
+        """Mark the transaction as successful."""
+        self.status = 'success'
+        self.transaction_id = transaction_id
+        self.processed_at = datetime.datetime.utcnow()
+        if metadata:
+            self.payment_metadata = metadata
+        db.session.commit()
+        return self
+    
+    def mark_failed(self, error_message=None, metadata=None):
+        """Mark the transaction as failed."""
+        self.status = 'failed'
+        self.error_message = error_message
+        if metadata:
+            self.payment_metadata = metadata
+        db.session.commit()
+        return self
+    
+    def mark_cancelled(self, metadata=None):
+        """Mark the transaction as cancelled."""
+        self.status = 'cancelled'
+        if metadata:
+            self.payment_metadata = metadata
+        db.session.commit()
+        return self
+    
+    @classmethod
+    def get_by_order_number(cls, order_number):
+        """Get transaction by order number."""
+        return cls.query.filter_by(order_number=order_number).first()
+    
+    @classmethod
+    def get_user_transactions(cls, user_id, status=None, limit=None):
+        """Get transactions for a specific user."""
+        query = cls.query.filter_by(user_id=user_id)
+        if status:
+            query = query.filter_by(status=status)
+        query = query.order_by(cls.created_at.desc())
+        if limit:
+            query = query.limit(limit)
+        return query.all()
+    
+    @classmethod
+    def get_recent_transactions(cls, limit=50):
+        """Get recent transactions for admin dashboard."""
+        return cls.query.order_by(cls.created_at.desc()).limit(limit).all()
+
 class Feedback(db.Model):
     """
     Stores user feedback submitted through the application.

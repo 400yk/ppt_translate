@@ -601,12 +601,13 @@ def get_revenue_analytics():
             func.date(User.created_at)
         ).all()
         
-        # Revenue by currency (estimate based on user location)
         # For now, we'll assume all revenue is in USD
+        from utils.payment_utils import calculate_payment_amount
+        
         revenue_by_currency = {
             'USD': total_revenue_usd,
-            'EUR': total_revenue_usd * CURRENCY_RATES.get('EUR', 1),
-            'GBP': total_revenue_usd * CURRENCY_RATES.get('GBP', 1)
+            'EUR': calculate_payment_amount(total_revenue_usd, 'eur', CURRENCY_RATES),
+            'GBP': calculate_payment_amount(total_revenue_usd, 'gbp', CURRENCY_RATES)
         }
         
         # Revenue by subscription plan

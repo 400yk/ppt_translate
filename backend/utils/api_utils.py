@@ -25,7 +25,7 @@ def error_response(message, error_key=None, status_code=400):
     
     return jsonify(response), status_code
 
-def success_response(data=None, message=None, message_key=None, status_code=200):
+def success_response(message=None, message_key=None, data=None, status_code=200):
     """
     Create a consistent success response with translation key support.
     
