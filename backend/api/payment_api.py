@@ -24,7 +24,8 @@ from utils.payment_utils import (
     get_expected_amount,
     create_signed_payment_data,
     verify_payment_signature,
-    generate_payment_signature
+    generate_payment_signature,
+    verify_alipay_response_signature
 )
 
 payment_bp = Blueprint('payment', __name__)
@@ -1304,13 +1305,50 @@ def alipay_trade_query():
         if not resp.ok:
             return error_response('Alipay query failed', 'errors.alipay_query_failed', 502)
 
-        data = resp.json()
-        trade_status = data.get('trade_status')
-        trade_no = data.get('trade_no')
-        total_amount = data.get('total_amount')
+        raw_json = resp.text
+
+        # Verify RSA2 signature on the raw JSON response (strongest integrity)
+        if not verify_alipay_response_signature(raw_json, 'alipay_trade_query_response'):
+            return error_response('Invalid Alipay response signature', 'errors.invalid_alipay_response_signature', 502)
+
+        data_json = json.loads(raw_json)
+        response_obj = data_json.get('alipay_trade_query_response', {})
+        trade_status = response_obj.get('trade_status')
+        trade_no = response_obj.get('trade_no')
+        total_amount = response_obj.get('total_amount')
+        alipay_code = response_obj.get('code')
+        alipay_sub_code = response_obj.get('sub_code')
+        alipay_sub_msg = response_obj.get('sub_msg')
 
         # Update transaction and membership accordingly
         user = User.query.get(transaction.user_id)
+
+        # Handle Alipay response code failures (e.g., ACQ.TRADE_NOT_EXIST)
+        if alipay_code and str(alipay_code) != '10000':
+            # Mark as failed for definite not-exist/closed cases
+            if alipay_sub_code in ('ACQ.TRADE_NOT_EXIST', 'ACQ.TRADE_CLOSED'):
+                transaction.mark_failed(
+                    error_message=f"Alipay query failed: {alipay_sub_code} ({alipay_sub_msg})",
+                    metadata={
+                        'alipay_trade_no': trade_no,
+                        'total_amount': total_amount,
+                        'trade_status': trade_status,
+                        'queried_via': 'php_proxy',
+                        'alipay_code': alipay_code,
+                        'alipay_sub_code': alipay_sub_code,
+                        'alipay_sub_msg': alipay_sub_msg
+                    }
+                )
+            membership_status = get_membership_status(user) if user else {}
+            return jsonify({
+                'success': True,
+                'payment_processed': False,
+                'membership': membership_status,
+                'order_no': out_trade_no,
+                'trade_status': trade_status,
+                'alipay_code': alipay_code,
+                'alipay_sub_code': alipay_sub_code
+            })
 
         if trade_status in ('TRADE_SUCCESS', 'TRADE_FINISHED'):
             if user:
@@ -1346,7 +1384,8 @@ def alipay_trade_query():
                 'success': True,
                 'payment_processed': False,
                 'membership': membership_status,
-                'order_no': out_trade_no
+                'order_no': out_trade_no,
+                'trade_status': trade_status
             })
 
         # Unknown or pending status
@@ -1356,7 +1395,9 @@ def alipay_trade_query():
             'payment_processed': False,
             'membership': membership_status,
             'order_no': out_trade_no,
-            'trade_status': trade_status
+            'trade_status': trade_status,
+            'alipay_code': alipay_code,
+            'alipay_sub_code': alipay_sub_code
         })
     except Exception as e:
         print(f"Error in alipay_trade_query: {str(e)}")

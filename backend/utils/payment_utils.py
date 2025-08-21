@@ -3,6 +3,7 @@ Payment utility functions for handling payment processing across different payme
 """
 
 import logging
+import json
 import hashlib
 import hmac
 import time
@@ -130,6 +131,102 @@ def verify_payment_signature(payment_data: Dict[str, Any], signature: str, secre
         
     except Exception as e:
         logger.error(f"Error verifying payment signature: {str(e)}")
+        return False
+
+def _extract_json_object(raw_json: str, object_key: str) -> Optional[str]:
+    """
+    Extract the exact substring (including braces) of a JSON object value by key from a raw JSON string.
+
+    This preserves the original whitespace and ordering so it can be used for RSA signature verification.
+    """
+    try:
+        # Locate the key in the raw string
+        key_token = f'"{object_key}"'
+        key_index = raw_json.find(key_token)
+        if key_index == -1:
+            return None
+
+        # Find the colon following the key
+        colon_index = raw_json.find(":", key_index + len(key_token))
+        if colon_index == -1:
+            return None
+
+        # Find the start of the JSON object
+        obj_start = raw_json.find("{", colon_index)
+        if obj_start == -1:
+            return None
+
+        # Walk the string to find the matching closing brace for this object
+        depth = 0
+        in_string = False
+        escape = False
+        for i in range(obj_start, len(raw_json)):
+            ch = raw_json[i]
+            if in_string:
+                if escape:
+                    escape = False
+                elif ch == "\\":
+                    escape = True
+                elif ch == '"':
+                    in_string = False
+                continue
+            else:
+                if ch == '"':
+                    in_string = True
+                    continue
+                if ch == '{':
+                    depth += 1
+                elif ch == '}':
+                    depth -= 1
+                    if depth == 0:
+                        # Include closing brace
+                        return raw_json[obj_start:i + 1]
+        return None
+    except Exception as e:
+        logger.error(f"Failed to extract JSON object '{object_key}': {str(e)}")
+        return None
+
+def verify_alipay_response_signature(raw_json: str, response_key: str = 'alipay_trade_query_response') -> bool:
+    """
+    Verify RSA2 signature of an Alipay API response JSON (proxied/raw) using the Alipay public key.
+
+    The signature covers the exact JSON string of the response node value (e.g., alipay_trade_query_response).
+    """
+    try:
+        from alipay.aop.api.util.SignatureUtils import verify_with_rsa
+        from config import ALIPAY_PUBLIC_KEY
+
+        # Parse sign value from JSON (structure is { "<response_key>": {...}, "sign": "..." })
+        parsed = json.loads(raw_json)
+        signature = parsed.get('sign')
+        if not signature:
+            logger.warning("Alipay response missing 'sign' field")
+            return False
+
+        # Extract exact response content substring for verification
+        signed_content = _extract_json_object(raw_json, response_key)
+        if not signed_content:
+            logger.warning(f"Failed to locate '{response_key}' content for signature verification")
+            return False
+
+        # Verify
+        message = signed_content.encode('utf-8')
+        try:
+            ok = verify_with_rsa(ALIPAY_PUBLIC_KEY, message, signature)
+            if ok:
+                logger.info("Alipay response signature verification successful")
+            else:
+                logger.warning("Alipay response signature verification failed")
+            return ok
+        except Exception as e:
+            logger.error(f"Error during Alipay signature verification: {str(e)}")
+            return False
+
+    except ImportError:
+        logger.warning("alipay-sdk-python not installed, skipping response signature verification")
+        return True
+    except Exception as e:
+        logger.error(f"Error verifying Alipay response signature: {str(e)}")
         return False
 
 def generate_order_number(payment_method: str, plan_type: str, user_email: str) -> str:
