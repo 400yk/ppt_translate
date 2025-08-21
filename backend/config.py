@@ -137,7 +137,7 @@ PRICING = {
 # These rates should be updated regularly via an external API
 CURRENCY_RATES = {
     "usd": 1.0,     # US Dollar (base currency)
-    "cny": 0.01, #6.2565,    # Chinese Yuan, made discount to achieve 49.99CNY/month
+    "cny": 6.2565,    # Chinese Yuan, made discount to achieve 49.99CNY/month
     # "cny": 0.01,    # Price for testing
     "eur": 0.93,    # Euro (for French and German)
     "jpy": 159.40,  # Japanese Yen
