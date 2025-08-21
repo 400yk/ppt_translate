@@ -308,9 +308,17 @@
     "benefits": "あなたが受け取るもの",
     "cancel_description": "支払いはキャンセルされました。準備ができたらもう一度お試しください。",
     "success_description": "支払いは正常に完了しました。これですべての機能に完全にアクセスできます。",
+    "alipay_success_description": "お支払いが正常に処理されました。メンバーシップがアップグレードされました！",
+    "invalid_payment_session": "無効な支払いセッション",
+    "no_order_number": "注文番号が提供されていません",
+    "payment_not_confirmed": "支払いが確認されていません",
+    "payment_verification_timeout": "支払い確認がタイムアウトしました。後でメンバーシップステータスを確認してください。",
+    "no_session_id": "セッションIDが提供されていません",
     "currency": "通貨を選択",
     "month_abbr": "月",
-    "year_abbr": "年"
+    "year_abbr": "年",
+    "total_amount": "合計金額",
+    "click_payment_method": "下の支払い方法をクリックして続行してください"
   },
   "progress": {
     "loading": "読み込み中...",

@@ -309,9 +309,17 @@
     "benefits": "Vous recevrez",
     "cancel_description": "Le paiement a été annulé. Vous pouvez réessayer quand vous serez prêt.",
     "success_description": "Votre paiement a réussi. Vous avez maintenant un accès complet à toutes les fonctionnalités.",
+    "alipay_success_description": "Votre paiement a été traité avec succès. Votre adhésion a été mise à niveau !",
+    "invalid_payment_session": "Session de paiement invalide",
+    "no_order_number": "Aucun numéro de commande fourni",
+    "payment_not_confirmed": "Paiement non confirmé",
+    "payment_verification_timeout": "Délai d'attente de vérification du paiement. Veuillez vérifier votre statut d'adhésion plus tard.",
+    "no_session_id": "Aucun ID de session fourni",
     "currency": "Sélectionner la devise",
     "month_abbr": "mois",
-    "year_abbr": "an"
+    "year_abbr": "an",
+    "total_amount": "Montant Total",
+    "click_payment_method": "Cliquez sur une méthode de paiement ci-dessous pour continuer"
   },
   "progress": {
     "loading": "Chargement...",

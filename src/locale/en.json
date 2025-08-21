@@ -310,9 +310,17 @@
     "benefits": "You will receive",
     "cancel_description": "Payment has been canceled. You can try again when you're ready.",
     "success_description": "Your payment was successful. You now have full access to all features.",
+    "alipay_success_description": "Your payment has been processed successfully. Your membership has been upgraded!",
+    "invalid_payment_session": "Invalid payment session",
+    "no_order_number": "No order number provided",
+    "payment_not_confirmed": "Payment not confirmed",
+    "payment_verification_timeout": "Payment verification timeout. Please check your membership status later.",
+    "no_session_id": "No session ID provided",
     "currency": "Select Currency",
     "month_abbr": "mo",
-    "year_abbr": "yr"
+    "year_abbr": "yr",
+    "total_amount": "Total Amount",
+    "click_payment_method": "Click on a payment method below to proceed"
   },
   "progress": {
     "loading": "Loading...",

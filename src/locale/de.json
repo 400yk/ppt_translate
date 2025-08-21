@@ -308,9 +308,17 @@
     "benefits": "Sie erhalten",
     "cancel_description": "Die Zahlung wurde abgebrochen. Sie können es erneut versuchen, wenn Sie bereit sind.",
     "success_description": "Ihre Zahlung war erfolgreich. Sie haben jetzt vollen Zugriff auf alle Funktionen.",
+    "alipay_success_description": "Ihre Zahlung wurde erfolgreich verarbeitet. Ihre Mitgliedschaft wurde aktualisiert!",
+    "invalid_payment_session": "Ungültige Zahlungssitzung",
+    "no_order_number": "Keine Bestellnummer angegeben",
+    "payment_not_confirmed": "Zahlung nicht bestätigt",
+    "payment_verification_timeout": "Zahlungsverifizierung abgelaufen. Bitte überprüfen Sie Ihren Mitgliedschaftsstatus später.",
+    "no_session_id": "Keine Sitzungs-ID angegeben",
     "currency": "Währung auswählen",
     "month_abbr": "Mo",
-    "year_abbr": "J"
+    "year_abbr": "J",
+    "total_amount": "Gesamtbetrag",
+    "click_payment_method": "Klicken Sie unten auf eine Zahlungsmethode, um fortzufahren"
   },
   "progress": {
     "loading": "Wird geladen...",

@@ -308,9 +308,17 @@
     "benefits": "받게 될 혜택",
     "cancel_description": "결제가 취소되었습니다. 준비가 되면 다시 시도하세요.",
     "success_description": "결제가 성공적으로 완료되었습니다. 이제 모든 기능에 완전히 접근할 수 있습니다.",
+    "alipay_success_description": "결제가 성공적으로 처리되었습니다. 멤버십이 업그레이드되었습니다!",
+    "invalid_payment_session": "잘못된 결제 세션",
+    "no_order_number": "주문 번호가 제공되지 않았습니다",
+    "payment_not_confirmed": "결제가 확인되지 않았습니다",
+    "payment_verification_timeout": "결제 확인 시간 초과. 나중에 멤버십 상태를 확인해 주세요.",
+    "no_session_id": "세션 ID가 제공되지 않았습니다",
     "currency": "통화 선택",
     "month_abbr": "월",
-    "year_abbr": "년"
+    "year_abbr": "년",
+    "total_amount": "총 금액",
+    "click_payment_method": "아래의 결제 방법을 클릭하여 진행하세요"
   },
   "progress": {
     "loading": "로딩 중...",

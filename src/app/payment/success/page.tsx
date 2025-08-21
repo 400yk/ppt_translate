@@ -65,7 +65,7 @@ function PaymentSuccessContent() {
           });
           
           if (!outTradeNo) {
-            throw new Error('No order number provided');
+            throw new Error(t('payment.no_order_number'));
           }
           
           // Note: trade_status is not included in the return URL
@@ -107,17 +107,17 @@ function PaymentSuccessContent() {
                 setSuccess(true);
                 paymentProcessed = true;
               } else {
-                throw new Error('Payment not confirmed');
+                throw new Error(t('payment.payment_not_confirmed'));
               }
             } catch (err) {
               console.error('Alipay trade query fallback failed', err);
-              throw new Error('Payment verification timeout. Please check your membership status later.');
+              throw new Error(t('payment.payment_verification_timeout'));
             }
           }
         } else {
           // Handle Stripe payment verification
           if (!sessionId) {
-            throw new Error('No session ID provided');
+            throw new Error(t('payment.no_session_id'));
           }
           
           console.log('Stripe payment verification:', { sessionId, paymentMethod });
@@ -147,7 +147,7 @@ function PaymentSuccessContent() {
       verifyPayment();
     } else {
       setLoading(false);
-      setError('Invalid payment session');
+      setError(t('payment.invalid_payment_session'));
     }
   }, [searchParams, isClient]);
   
@@ -184,7 +184,7 @@ function PaymentSuccessContent() {
               </div>
               <p className="text-center text-muted-foreground">
                 {paymentMethod === 'alipay' 
-                  ? 'Your payment has been processed successfully. Your membership has been upgraded!'
+                  ? t('payment.alipay_success_description')
                   : t('payment.success_description')
                 }
               </p>

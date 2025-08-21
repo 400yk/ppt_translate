@@ -271,19 +271,27 @@ function PaymentMethodButton({
   };
 
   return (
-    <Button 
-      className="w-full h-24 flex flex-col gap-2 relative border-2 hover:border-primary hover:shadow-lg transition-all duration-200" 
-      variant="outline"
+    <div 
+      className="w-full h-20 flex items-center justify-center gap-3 relative border-2 border-border hover:border-primary hover:shadow-md transition-all duration-200 bg-background rounded-md cursor-pointer select-none" 
       onClick={handlePaymentClick}
-      disabled={isProcessing}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handlePaymentClick();
+        }
+      }}
     >
+      <div className="flex items-center justify-center gap-3 pointer-events-none">
+        {children}
+      </div>
       {isProcessing && (
-        <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-md">
+        <div className="absolute inset-0 bg-background/90 flex items-center justify-center rounded-md z-10">
           <Icons.spinner className="h-5 w-5 animate-spin" />
         </div>
       )}
-      {children}
-    </Button>
+    </div>
   );
 }
 
@@ -391,7 +399,9 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
                 <div className="flex justify-between items-center">
                   <CardTitle>{t('pricing.monthly')}</CardTitle>
                   {selectedPlan === 'monthly' && (
-                    <Icons.check className="h-5 w-5 text-primary" />
+                    <div className="bg-primary rounded-full p-1">
+                      <Icons.check className="h-6 w-6 text-white" />
+                    </div>
                   )}
                 </div>
                 <CardDescription>{t('payment.billed_monthly')}</CardDescription>
@@ -422,7 +432,9 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
                     </Badge>
                   </CardTitle>
                   {selectedPlan === 'yearly' && (
-                    <Icons.check className="h-5 w-5 text-primary" />
+                    <div className="bg-primary rounded-full p-1">
+                      <Icons.check className="h-6 w-6 text-white" />
+                    </div>
                   )}
                 </div>
                 <CardDescription>{t('payment.billed_yearly')}</CardDescription>
@@ -469,10 +481,10 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
             <div className="space-y-4">
               <div className="text-center">
                 <h3 className="font-medium text-lg mb-2">
-                  Total Amount: {selectedPlan === 'monthly' ? pricing.monthly.display : pricing.yearly.display_total}
+                  {t('payment.total_amount')}: {selectedPlan === 'monthly' ? pricing.monthly.display : pricing.yearly.display_total}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Click on a payment method below to proceed
+                  {t('payment.click_payment_method')}
                 </p>
               </div>
               
@@ -488,12 +500,14 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
                   <Image 
                     src="/Stripe.png" 
                     alt="Stripe" 
-                    width={60} 
-                    height={30}
+                    width={80} 
+                    height={40}
                     className="object-contain"
                   />
-                  <span className="text-sm font-medium">Stripe</span>
-                  <span className="text-xs text-muted-foreground">Credit/Debit Card</span>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium">Stripe</span>
+                    <span className="text-xs text-muted-foreground">Credit/Debit Card</span>
+                  </div>
                 </PaymentMethodButton>
 
                 {/* WeChat Pay - Commented out for now */}
@@ -528,12 +542,14 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
                   <Image 
                     src="/支付宝.png" 
                     alt="Alipay" 
-                    width={40} 
-                    height={40}
+                    width={80} 
+                    height={80}
                     className="object-contain"
                   />
-                  <span className="text-sm font-medium">支付宝</span>
-                  <span className="text-xs text-muted-foreground">Alipay</span>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium">支付宝</span>
+                    <span className="text-xs text-muted-foreground">Alipay</span>
+                  </div>
                 </PaymentMethodButton>
               </div>
             </div>

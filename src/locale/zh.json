@@ -309,9 +309,17 @@
     "benefits": "您将获得",
     "cancel_description": "支付已取消。您可以在准备好时再次尝试。",
     "success_description": "您的支付已成功。现在您可以使用所有功能。",
+    "alipay_success_description": "您的支付已成功处理。您的会员资格已升级！",
+    "invalid_payment_session": "无效的支付会话",
+    "no_order_number": "未提供订单号",
+    "payment_not_confirmed": "支付未确认",
+    "payment_verification_timeout": "支付验证超时。请稍后检查您的会员状态。",
+    "no_session_id": "未提供会话ID",
     "currency": "选择货币",
     "month_abbr": "月",
-    "year_abbr": "年"
+    "year_abbr": "年",
+    "total_amount": "总金额",
+    "click_payment_method": "点击下面的支付方式进行付款"
   },
   "progress": {
     "loading": "加载中...",

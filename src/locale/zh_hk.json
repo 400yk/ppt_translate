@@ -308,9 +308,17 @@
     "benefits": "您將獲得",
     "cancel_description": "支付已取消。您可以在準備好時再次嘗試。",
     "success_description": "您的支付已成功。現在您可以使用所有功能。",
+    "alipay_success_description": "您的支付已成功處理。您的會員資格已升級！",
+    "invalid_payment_session": "無效的支付會話",
+    "no_order_number": "未提供訂單號",
+    "payment_not_confirmed": "支付未確認",
+    "payment_verification_timeout": "支付驗證超時。請稍後檢查您的會員狀態。",
+    "no_session_id": "未提供會話ID",
     "currency": "選擇貨幣",
     "month_abbr": "月",
-    "year_abbr": "年"
+    "year_abbr": "年",
+    "total_amount": "總金額",
+    "click_payment_method": "點擊下面的支付方式進行付款"
   },
   "progress": {
     "loading": "加載中...",
