@@ -252,6 +252,38 @@ export interface ReferralsResponse {
   };
 }
 
+export interface Order {
+  id: number;
+  order_number: string;
+  payment_method: 'stripe' | 'alipay';
+  amount: number;
+  currency: string;
+  plan_type: 'monthly' | 'yearly';
+  status: 'pending' | 'success' | 'failed' | 'cancelled';
+  transaction_id: string | null;
+  created_at: string;
+  updated_at: string | null;
+  processed_at: string | null;
+  error_message: string | null;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+  } | null;
+}
+
+export interface OrdersResponse {
+  orders: Order[];
+  pagination: {
+    page: number;
+    per_page: number;
+    total: number;
+    pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
+}
+
 export class AdminService {
   static async getUserAnalytics(days: number = 30): Promise<UserAnalytics> {
     const response = await apiClient.get(`/api/admin/analytics/users?days=${days}`);
@@ -338,6 +370,37 @@ export class AdminService {
     if (params.reward_claimed) searchParams.append('reward_claimed', params.reward_claimed);
 
     const response = await apiClient.get(`/api/admin/referrals?${searchParams.toString()}`);
+    return response.data;
+  }
+
+  static async getOrders(params: {
+    page?: number;
+    per_page?: number;
+    status?: string;
+    payment_method?: string;
+    plan_type?: string;
+    user_id?: number;
+    start_date?: string;
+    end_date?: string;
+    search?: string;
+  } = {}): Promise<OrdersResponse> {
+    const searchParams = new URLSearchParams();
+    if (params.page) searchParams.append('page', params.page.toString());
+    if (params.per_page) searchParams.append('per_page', params.per_page.toString());
+    if (params.status) searchParams.append('status', params.status);
+    if (params.payment_method) searchParams.append('payment_method', params.payment_method);
+    if (params.plan_type) searchParams.append('plan_type', params.plan_type);
+    if (params.user_id) searchParams.append('user_id', params.user_id.toString());
+    if (params.start_date) searchParams.append('start_date', params.start_date);
+    if (params.end_date) searchParams.append('end_date', params.end_date);
+    if (params.search) searchParams.append('search', params.search);
+
+    const response = await apiClient.get(`/api/admin/orders?${searchParams.toString()}`);
+    return response.data;
+  }
+
+  static async getOrderDetail(orderId: number): Promise<Order> {
+    const response = await apiClient.get(`/api/admin/orders/${orderId}`);
     return response.data;
   }
 

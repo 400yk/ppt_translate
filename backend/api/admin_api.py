@@ -4,6 +4,7 @@ API endpoints for admin dashboard functionality.
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from db.models import db, User, TranslationRecord, Referral, GuestTranslation, Feedback
+from db.models import PaymentTransaction
 from datetime import datetime, timedelta
 import sqlalchemy as sa
 from sqlalchemy import func
@@ -1272,3 +1273,122 @@ def delete_invitation_code(code_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error deleting invitation code: {str(e)}'}), 500 
+
+# Orders / Payment Transactions
+@admin_bp.route('/api/admin/orders', methods=['GET'])
+@jwt_required()
+def get_orders():
+    """Get paginated list of payment transactions with filtering and search."""
+    admin_check = check_admin_access()
+    if admin_check:
+        return admin_check
+    
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = min(request.args.get('per_page', 20, type=int), 100)
+        status = request.args.get('status')
+        payment_method = request.args.get('payment_method')
+        plan_type = request.args.get('plan_type')
+        user_id = request.args.get('user_id', type=int)
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        search = request.args.get('search')  # order_number or transaction_id
+
+        query = PaymentTransaction.query
+
+        if status and status != 'all':
+            query = query.filter(PaymentTransaction.status == status)
+        if payment_method and payment_method != 'all':
+            query = query.filter(PaymentTransaction.payment_method == payment_method)
+        if plan_type and plan_type != 'all':
+            query = query.filter(PaymentTransaction.plan_type == plan_type)
+        if user_id:
+            query = query.filter(PaymentTransaction.user_id == user_id)
+        if start_date:
+            query = query.filter(PaymentTransaction.created_at >= start_date)
+        if end_date:
+            query = query.filter(PaymentTransaction.created_at <= end_date)
+        if search:
+            like_term = f"%{search}%"
+            query = query.filter(
+                db.or_(
+                    PaymentTransaction.order_number.ilike(like_term),
+                    PaymentTransaction.transaction_id.ilike(like_term)
+                )
+            )
+
+        query = query.order_by(PaymentTransaction.created_at.desc())
+
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        orders = []
+        for tx in pagination.items:
+            user = User.query.get(tx.user_id) if tx.user_id else None
+            orders.append({
+                'id': tx.id,
+                'order_number': tx.order_number,
+                'payment_method': tx.payment_method,
+                'amount': float(tx.amount) if tx.amount is not None else 0.0,
+                'currency': tx.currency,
+                'plan_type': tx.plan_type,
+                'status': tx.status,
+                'transaction_id': tx.transaction_id,
+                'created_at': tx.created_at.isoformat() if tx.created_at else None,
+                'updated_at': tx.updated_at.isoformat() if tx.updated_at else None,
+                'processed_at': tx.processed_at.isoformat() if tx.processed_at else None,
+                'error_message': tx.error_message,
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email
+                } if user else None
+            })
+
+        return jsonify({
+            'orders': orders,
+            'pagination': {
+                'page': page,
+                'per_page': per_page,
+                'total': pagination.total,
+                'pages': pagination.pages,
+                'has_next': pagination.has_next,
+                'has_prev': pagination.has_prev
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({'error': f'Error fetching orders: {str(e)}'}), 500
+
+
+@admin_bp.route('/api/admin/orders/<int:order_id>', methods=['GET'])
+@jwt_required()
+def get_order_detail(order_id):
+    """Get a single payment transaction detail."""
+    admin_check = check_admin_access()
+    if admin_check:
+        return admin_check
+    
+    try:
+        tx = PaymentTransaction.query.get_or_404(order_id)
+        user = User.query.get(tx.user_id) if tx.user_id else None
+        return jsonify({
+            'id': tx.id,
+            'order_number': tx.order_number,
+            'payment_method': tx.payment_method,
+            'amount': float(tx.amount) if tx.amount is not None else 0.0,
+            'currency': tx.currency,
+            'plan_type': tx.plan_type,
+            'status': tx.status,
+            'transaction_id': tx.transaction_id,
+            'created_at': tx.created_at.isoformat() if tx.created_at else None,
+            'updated_at': tx.updated_at.isoformat() if tx.updated_at else None,
+            'processed_at': tx.processed_at.isoformat() if tx.processed_at else None,
+            'error_message': tx.error_message,
+            'payment_metadata': tx.payment_metadata,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            } if user else None
+        }), 200
+    except Exception as e:
+        return jsonify({'error': f'Error fetching order: {str(e)}'}), 500
