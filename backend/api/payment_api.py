@@ -8,6 +8,7 @@ import time
 import requests
 import stripe
 import logging
+import datetime
 from flask import Blueprint, jsonify, request, redirect, url_for, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from db.models import User, PaymentTransaction, db
@@ -47,6 +48,125 @@ WEBHOOK_SECRET = STRIPE_WEBHOOK_SECRET
 SUCCESS_URL = STRIPE_SUCCESS_URL
 CANCEL_URL = STRIPE_CANCEL_URL
 
+def extract_subscription_info_from_invoice(invoice):
+    """
+    Extract subscription information from a Stripe invoice object.
+    
+    Args:
+        invoice: Stripe invoice object
+        
+    Returns:
+        dict: Contains subscription_id, interval, interval_count, or None if not found
+    """
+    try:
+        # First try to get subscription ID from the invoice directly
+        subscription_id = invoice.get('subscription')
+        print(f"Initial subscription_id from invoice: {subscription_id}")
+        
+        # Then try to get more detailed info from invoice lines
+        invoice_lines = invoice.get('lines', {}).get('data', [])
+        if invoice_lines:
+            line_item = invoice_lines[0]
+            parent = line_item.get('parent', {})
+            
+            # Check if this is a subscription item
+            if parent.get('type') == 'subscription_item_details':
+                subscription_item_details = parent.get('subscription_item_details', {})
+                subscription_id_from_line = subscription_item_details.get('subscription')
+                
+                # Use the subscription ID from the line item if available
+                if subscription_id_from_line:
+                    subscription_id = subscription_id_from_line
+                    print(f"Updated subscription_id from line item: {subscription_id}")
+        
+        if not subscription_id:
+            print("No subscription ID found in invoice")
+            return None
+            
+        # Retrieve the subscription to get plan details
+        print(f"Attempting to retrieve subscription: {subscription_id}")
+        subscription = stripe.Subscription.retrieve(subscription_id)
+        print(f"Successfully retrieved subscription: {subscription.id}")
+        
+        # PRIMARY METHOD: Try to get plan info directly from subscription
+        try:
+            # Access plan directly from subscription object
+            plan_data = subscription.get('plan')
+            if plan_data:
+                print(f"Found plan data directly: {plan_data}")
+                
+                result = {
+                    'subscription_id': subscription_id,
+                    'interval': plan_data.get('interval', 'month'),
+                    'interval_count': plan_data.get('interval_count', 1),
+                    'plan_id': plan_data.get('id'),
+                    'product_id': plan_data.get('product')
+                }
+                
+                print(f"Extracted subscription info from direct plan access: {result}")
+                return result
+        except Exception as e:
+            print(f"Failed to get plan data directly: {str(e)}")
+        
+        # FALLBACK METHOD: Try to get plan info from subscription items
+        try:
+            print("Trying fallback method: subscription items")
+            subscription_items = subscription.items
+            
+            if not subscription_items:
+                print("No subscription items found")
+                return None
+                
+            # Get the first subscription item (assuming single plan)
+            subscription_item = subscription_items[0]
+            print(f"First subscription item: {subscription_item.id}")
+            
+            # Get the plan from the subscription item
+            plan = subscription_item.plan
+            print(f"Plan from subscription item: {plan.id}, interval: {plan.interval}")
+            
+            result = {
+                'subscription_id': subscription_id,
+                'interval': plan.interval,
+                'interval_count': plan.interval_count,
+                'plan_id': plan.id,
+                'product_id': plan.product
+            }
+            
+            print(f"Extracted subscription info from subscription items: {result}")
+            return result
+            
+        except Exception as e:
+            print(f"Failed to get plan from subscription items: {str(e)}")
+        
+        # ULTIMATE FALLBACK: Use default values
+        print("Using ultimate fallback with default values")
+        return {
+            'subscription_id': subscription_id,
+            'interval': 'month',  # Default to monthly
+            'interval_count': 1,
+            'plan_id': 'fallback',
+            'product_id': 'fallback'
+        }
+        
+    except stripe.error.InvalidRequestError as e:
+        print(f"Stripe InvalidRequestError: {str(e)}")
+        print(f"Failed to retrieve subscription: {subscription_id}")
+        
+        # Fallback: Use default values
+        print("Using fallback default values due to InvalidRequestError")
+        return {
+            'subscription_id': subscription_id,
+            'interval': 'month',  # Default to monthly
+            'interval_count': 1,
+            'plan_id': 'fallback',
+            'product_id': 'fallback'
+        }
+    except Exception as e:
+        print(f"Error extracting subscription info from invoice: {str(e)}")
+        return None
+    
+    
 # Stripe Price lookup keys
 MONTHLY_PRICE_LOOKUP_KEY = 'Translide-monthly'
 YEARLY_PRICE_LOOKUP_KEY = 'Translide-yearly'
@@ -587,15 +707,26 @@ def webhook():
     payload = request.data
     sig_header = request.headers.get('Stripe-Signature')
     
+    # Check if we're in development mode and should skip signature verification
+    flask_env = os.getenv('FLASK_ENV', 'production')
+    stripe_test_mode = os.getenv('STRIPE_TEST_MODE', 'false').lower() == 'true'
+    is_dev_environment = flask_env == 'development' or stripe_test_mode
+    
     try:
-        if WEBHOOK_SECRET:
-            # Verify webhook signature and extract the event
+        if WEBHOOK_SECRET and not is_dev_environment:
+            # Verify webhook signature and extract the event (production mode)
             event = stripe.Webhook.construct_event(
                 payload=payload, sig_header=sig_header, secret=WEBHOOK_SECRET
             )
             data = event['data']
         else:
-            # If there is no webhook secret, just parse the payload directly (not recommended for production)
+            # Skip signature verification in development mode or if no webhook secret
+            if is_dev_environment:
+                print(f"Development mode detected (FLASK_ENV={flask_env}, STRIPE_TEST_MODE={stripe_test_mode}) - skipping webhook signature verification")
+            else:
+                print("No webhook secret available - skipping signature verification (not recommended for production)")
+            
+            # Parse the payload directly
             data = json.loads(payload)['data']
             event = json.loads(payload)
         
@@ -691,28 +822,82 @@ def webhook():
             user = User.query.filter_by(stripe_customer_id=customer_id).first()
             
             if user:
-                # Update user membership status to free or handle as needed
-                print(f"Subscription canceled for user: {user.username}")
+                # Don't immediately revoke membership - let it expire naturally
+                # The user paid for the current period and should have access until it expires
+                print(f"Subscription canceled for user: {user.username} - membership will expire at {user.membership_end}")
+                
+                # Optionally, you could set a flag to prevent future renewals
+                # user.subscription_canceled = True
+                # db.session.commit()
             else:
                 print(f"User not found for customer.subscription.deleted: {customer_id}")
                 
         elif event_type == 'invoice.payment_succeeded':
             # Invoice payment succeeded
             invoice = data_object
+            print(f"Processing invoice.payment_succeeded: {invoice.get('id')}")
             customer_id = invoice.get('customer')
             
             # Find the user with this customer ID
             user = User.query.filter_by(stripe_customer_id=customer_id).first()
             
             if user:
-                # Update user membership status with new renewal date if needed
+                # Update user membership status with new renewal date
                 print(f"Invoice payment succeeded for user: {user.username}")
+                
+                # Get subscription details to determine renewal period
+                subscription_info = extract_subscription_info_from_invoice(invoice)
+                if subscription_info:
+                    try:
+                        interval = subscription_info['interval']
+                        interval_count = subscription_info['interval_count']
+                        
+                        print(f"Plan details: interval={interval}, interval_count={interval_count}")
+                        print(f"Subscription ID: {subscription_info['subscription_id']}")
+                        
+                        # Calculate days to add based on subscription interval
+                        if interval == 'month':
+                            # More accurate month calculation
+                            days_to_add = interval_count * 30.44  # Average days per month
+                        elif interval == 'year':
+                            days_to_add = interval_count * 365.25  # Account for leap years
+                        else:
+                            days_to_add = 30  # Default to monthly
+                        
+                        # Round to nearest day
+                        days_to_add = round(days_to_add)
+                        
+                        # Extend membership
+                        now = datetime.datetime.utcnow()
+                        if user.is_paid_user and user.membership_end and user.membership_end > now:
+                            # Extend existing membership
+                            user.membership_end = user.membership_end + datetime.timedelta(days=days_to_add)
+                            print(f"Extended existing membership for user {user.username} by {days_to_add} days")
+                        else:
+                            # Start new membership from now
+                            user.membership_start = now
+                            user.membership_end = now + datetime.timedelta(days=days_to_add)
+                            user.is_paid_user = True
+                            print(f"Started new membership for user {user.username} for {days_to_add} days")
+                        
+                        db.session.commit()
+                        print(f"Successfully updated membership for user {user.username}")
+                        
+                    except stripe.error.StripeError as e:
+                        print(f"Stripe error extending membership for user {user.username}: {str(e)}")
+                        db.session.rollback()
+                    except Exception as e:
+                        print(f"Error extending membership for user {user.username}: {str(e)}")
+                        db.session.rollback()
+                else:
+                    print(f"No subscription information found in invoice: {invoice.get('id')}")
             else:
                 print(f"User not found for invoice.payment_succeeded: {customer_id}")
                 
         elif event_type == 'invoice.payment_failed':
             # Invoice payment failed
             invoice = data_object
+            print(f"Processing invoice.payment_failed: {invoice.get('id')}")
             customer_id = invoice.get('customer')
             
             # Find the user with this customer ID
@@ -721,6 +906,11 @@ def webhook():
             if user:
                 # Handle failed payment as needed (notify user, etc.)
                 print(f"Invoice payment failed for user: {user.username}")
+                print(f"Invoice amount: {invoice.get('amount_due')} {invoice.get('currency')}")
+                print(f"Invoice status: {invoice.get('status')}")
+                
+                # You might want to send an email notification here
+                # or update user status to indicate payment issues
             else:
                 print(f"User not found for invoice.payment_failed: {customer_id}")
                 
