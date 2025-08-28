@@ -14,6 +14,7 @@ from db.models import db, User, InvitationCode
 from config import PAID_MEMBERSHIP_MONTHS
 from app import create_app
 from sqlalchemy import Column, DateTime, Boolean
+from dateutil.relativedelta import relativedelta
 
 def migrate():
     """Add membership fields to the User model and update existing invitation code users."""
@@ -58,7 +59,7 @@ def migrate():
                     now = datetime.datetime.utcnow()
                     user.is_paid_user = True
                     user.membership_start = now
-                    user.membership_end = now + datetime.timedelta(days=30 * PAID_MEMBERSHIP_MONTHS)
+                    user.membership_end = now + relativedelta(months=PAID_MEMBERSHIP_MONTHS)
                     users_updated += 1
             
             # Commit changes

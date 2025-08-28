@@ -13,6 +13,7 @@ from flask import Blueprint, jsonify, request, redirect, url_for, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from db.models import User, PaymentTransaction, db
 from services.user_service import get_membership_status, process_membership_purchase
+from dateutil.relativedelta import relativedelta
 from config import PRICING, CURRENCY_RATES, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_SUCCESS_URL, STRIPE_CANCEL_URL, FLASK_API_URL, FRONTEND_URL
 from utils.api_utils import error_response, success_response
 from utils.payment_utils import (
@@ -855,30 +856,26 @@ def webhook():
                         print(f"Plan details: interval={interval}, interval_count={interval_count}")
                         print(f"Subscription ID: {subscription_info['subscription_id']}")
                         
-                        # Calculate days to add based on subscription interval
-                        if interval == 'month':
-                            # More accurate month calculation
-                            days_to_add = interval_count * 30.44  # Average days per month
-                        elif interval == 'year':
-                            days_to_add = interval_count * 365.25  # Account for leap years
-                        else:
-                            days_to_add = 30  # Default to monthly
-                        
-                        # Round to nearest day
-                        days_to_add = round(days_to_add)
-                        
-                        # Extend membership
+                        # Extend membership using calendar months
                         now = datetime.datetime.utcnow()
                         if user.is_paid_user and user.membership_end and user.membership_end > now:
-                            # Extend existing membership
-                            user.membership_end = user.membership_end + datetime.timedelta(days=days_to_add)
-                            print(f"Extended existing membership for user {user.username} by {days_to_add} days")
+                            # Extend existing membership using calendar months
+                            if interval == 'year':
+                                user.membership_end = user.membership_end + relativedelta(years=interval_count)
+                                print(f"Extended existing membership for user {user.username} by {interval_count} year(s)")
+                            else:
+                                user.membership_end = user.membership_end + relativedelta(months=interval_count)
+                                print(f"Extended existing membership for user {user.username} by {interval_count} month(s)")
                         else:
                             # Start new membership from now
                             user.membership_start = now
-                            user.membership_end = now + datetime.timedelta(days=days_to_add)
+                            if interval == 'year':
+                                user.membership_end = now + relativedelta(years=interval_count)
+                                print(f"Started new membership for user {user.username} for {interval_count} year(s)")
+                            else:
+                                user.membership_end = now + relativedelta(months=interval_count)
+                                print(f"Started new membership for user {user.username} for {interval_count} month(s)")
                             user.is_paid_user = True
-                            print(f"Started new membership for user {user.username} for {days_to_add} days")
                         
                         db.session.commit()
                         print(f"Successfully updated membership for user {user.username}")

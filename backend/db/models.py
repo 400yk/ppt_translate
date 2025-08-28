@@ -12,6 +12,7 @@ from config import (
     REFERRAL_EXPIRY_DAYS,
     EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS
 )
+from dateutil.relativedelta import relativedelta
 
 db = SQLAlchemy()
 
@@ -198,11 +199,18 @@ class User(db.Model):
         now = datetime.datetime.utcnow()
         # If already a member, extend from current end date
         if self.is_paid_user and self.membership_end and self.membership_end > now:
-            self.membership_end = self.membership_end + datetime.timedelta(days=30*months)
+            # Extend existing membership using calendar months
+            if is_yearly:
+                self.membership_end = self.membership_end + relativedelta(years=1)
+            else:
+                self.membership_end = self.membership_end + relativedelta(months=months)
         else:
             # New membership or expired membership
             self.membership_start = now
-            self.membership_end = now + datetime.timedelta(days=30*months)
+            if is_yearly:
+                self.membership_end = now + relativedelta(years=1)
+            else:
+                self.membership_end = now + relativedelta(months=months)
             self.is_paid_user = True
             
         db.session.commit()
