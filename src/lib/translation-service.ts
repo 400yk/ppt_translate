@@ -1,5 +1,6 @@
 import { toast } from '@/hooks/use-toast';
 import apiClient from '@/lib/api-client';
+import { isCloudStorageUrl } from '@/lib/cloud-storage-config';
 
 // Define API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -342,12 +343,42 @@ export async function pollTranslationStatus(taskId: string, isGuestUser: boolean
  */
 export async function downloadTranslatedFile(downloadUrl: string, fileName: string): Promise<string> {
   try {
-    const response = await apiClient.get(downloadUrl, {
-      responseType: 'blob',
-    });
+    // Check if this is a cloud storage URL (S3, OSS, etc.)
+    const isCloudStorage = isCloudStorageUrl(downloadUrl);
+
+    let response;
     
-    const blob = response.data;
-    return URL.createObjectURL(blob);
+    if (isCloudStorage) {
+      // For cloud storage URLs, use direct fetch without apiClient
+      response = await fetch(downloadUrl);
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('authentication_error');
+        }
+        
+        if (response.status === 404) {
+          throw new Error('file_not_found');
+        }
+
+        if (response.status === 503) {
+          throw new Error('service_unavailable');
+        }
+        
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    } else {
+      // For backend URLs, use apiClient
+      response = await apiClient.get(downloadUrl, {
+        responseType: 'blob',
+      });
+      
+      const blob = response.data;
+      return URL.createObjectURL(blob);
+    }
   } catch (error: any) {
     if (error.response) {
       if (error.response.status === 401) {
