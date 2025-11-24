@@ -4,6 +4,7 @@ import datetime
 from celery_init import celery_app # Import from celery_init
 from services.translate_service import translate_pptx as original_translate_pptx
 from services.s3_service import s3_service
+from services.file_storage import delete_file as cleanup_file, cleanup_old_files
 from db.models import User, GuestTranslation, db # Assuming User and db are accessible
 from celery.exceptions import Retry
 import time
@@ -29,13 +30,13 @@ def calculate_translation_rate(original_texts, translated_texts):
     return translated_count / len(original_texts)
 
 @celery_app.task(bind=True, autoretry_for=(Exception,), retry_kwargs={'max_retries': 2, 'countdown': 30}, retry_backoff=True)
-def process_translation_task(self, user_id: int, original_file_content_bytes: bytes, original_filename: str, src_lang: str, dest_lang: str):
+def process_translation_task(self, user_id: int, original_file_path: str, original_filename: str, src_lang: str, dest_lang: str):
     """
     Celery task to translate a PPTX file.
     Now includes automatic retry logic for translation failures.
     
     Args:
-        original_file_content_bytes: The content of the uploaded file as bytes.
+        original_file_path: Path to the uploaded file on disk (instead of bytes in Redis)
         user_id: ID of the user requesting translation
         original_filename: Name of the original file
         src_lang: Source language code
@@ -44,9 +45,17 @@ def process_translation_task(self, user_id: int, original_file_content_bytes: by
     start_time = time.time()
     print(f"Celery task {self.request.id}: Starting translation for user {user_id}, file {original_filename} ({src_lang} → {dest_lang}) (attempt {self.request.retries + 1})")
     
+    # Track if we should clean up the input file
+    input_file_cleaned = False
+    
     try:
-        # Reconstruct a file-like stream from bytes
-        file_stream = io.BytesIO(original_file_content_bytes)
+        # Check if file exists
+        if not os.path.exists(original_file_path):
+            raise FileNotFoundError(f"Input file not found: {original_file_path}")
+        
+        # Open file from disk
+        with open(original_file_path, 'rb') as f:
+            file_stream = io.BytesIO(f.read())
         
         # Store original texts for comparison
         from pptx import Presentation
@@ -200,6 +209,11 @@ def process_translation_task(self, user_id: int, original_file_content_bytes: by
 
         print(f"Celery task {self.request.id}: Translation successful ({src_lang} → {dest_lang}). File at: {translated_file_path}, Chars: {character_count}")
         
+        # Clean up the input file after successful processing
+        if not input_file_cleaned:
+            cleanup_file(original_file_path)
+            input_file_cleaned = True
+        
         # Try to upload to S3 with OSS fallback
         upload_result = {'success': False, 'service': None, 'key': None, 'download_url': None}
         
@@ -266,6 +280,13 @@ def process_translation_task(self, user_id: int, original_file_content_bytes: by
         import traceback
         traceback.print_exc()
         
+        # Clean up input file only after all retries exhausted
+        if not input_file_cleaned and self.request.retries >= self.max_retries:
+            try:
+                cleanup_file(original_file_path)
+            except Exception as cleanup_error:
+                print(f"Warning: Could not clean up input file: {cleanup_error}")
+        
         # Update existing processing record to failed
         try:
             from db.models import TranslationRecord
@@ -309,16 +330,32 @@ def process_translation_task(self, user_id: int, original_file_content_bytes: by
         raise 
 
 @celery_app.task(bind=True, autoretry_for=(Exception,), retry_kwargs={'max_retries': 2, 'countdown': 30}, retry_backoff=True)
-def process_guest_translation_task(self, client_ip: str, original_file_content_bytes: bytes, original_filename: str, src_lang: str, dest_lang: str, estimated_character_count: int):
+def process_guest_translation_task(self, client_ip: str, original_file_path: str, original_filename: str, src_lang: str, dest_lang: str, estimated_character_count: int):
     """
     Celery task to translate a PPTX file for guest users.
     Now includes automatic retry logic for translation failures.
+    
+    Args:
+        original_file_path: Path to the uploaded file on disk (instead of bytes in Redis)
+        client_ip: IP address of the guest user
+        original_filename: Name of the original file
+        src_lang: Source language code
+        dest_lang: Destination language code
+        estimated_character_count: Estimated character count for permission checking
     """
     print(f"Celery guest task {self.request.id}: Starting translation for IP {client_ip}, file {original_filename} ({src_lang} → {dest_lang}) (attempt {self.request.retries + 1})")
     
+    # Track if we should clean up the input file
+    input_file_cleaned = False
+    
     try:
-        # Reconstruct a file-like stream from bytes
-        file_stream = io.BytesIO(original_file_content_bytes)
+        # Check if file exists
+        if not os.path.exists(original_file_path):
+            raise FileNotFoundError(f"Input file not found: {original_file_path}")
+        
+        # Open file from disk
+        with open(original_file_path, 'rb') as f:
+            file_stream = io.BytesIO(f.read())
         
         # Store original texts for comparison
         from pptx import Presentation
@@ -400,6 +437,11 @@ def process_guest_translation_task(self, client_ip: str, original_file_content_b
 
         print(f"Celery guest task {self.request.id}: Translation successful ({src_lang} → {dest_lang}). File at: {translated_file_path}, Chars: {character_count}")
         
+        # Clean up the input file after successful processing
+        if not input_file_cleaned:
+            cleanup_file(original_file_path)
+            input_file_cleaned = True
+        
         # Try to upload to S3 with OSS fallback
         upload_result = {'success': False, 'service': None, 'key': None, 'download_url': None}
         
@@ -463,5 +505,29 @@ def process_guest_translation_task(self, client_ip: str, original_file_content_b
         print(f"Celery guest task {self.request.id}: Error during translation: {e}")
         import traceback
         traceback.print_exc()
+        
+        # Clean up input file only after all retries exhausted
+        if not input_file_cleaned and self.request.retries >= self.max_retries:
+            try:
+                cleanup_file(original_file_path)
+            except Exception as cleanup_error:
+                print(f"Warning: Could not clean up input file: {cleanup_error}")
+        
         # Re-raising will mark task as FAILED 
+        raise
+
+@celery_app.task
+def cleanup_old_uploaded_files():
+    """
+    Periodic task to clean up old uploaded files from temporary storage.
+    Runs daily to prevent disk space issues.
+    """
+    try:
+        deleted_count = cleanup_old_files()
+        print(f"Cleanup task completed: deleted {deleted_count} old files")
+        return {'deleted_count': deleted_count}
+    except Exception as e:
+        print(f"Error in cleanup task: {e}")
+        import traceback
+        traceback.print_exc()
         raise 

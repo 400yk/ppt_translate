@@ -6,10 +6,12 @@ from flask import Blueprint, jsonify, request, send_file, make_response, redirec
 from services.user_service import get_guest_status, check_guest_permission
 from services.translate_service import translate_pptx
 from services.tasks import process_guest_translation_task
+from services.file_storage import save_uploaded_file, delete_file
 from pptx import Presentation
 from db.models import GuestTranslation, db
 from services.s3_service import s3_service
 import os
+import uuid
 
 guest_bp = Blueprint('guest', __name__)
 
@@ -191,19 +193,27 @@ def guest_translate_async_start_endpoint():
                 if not allowed:
                     return response_obj
 
-        # Read file content into bytes to pass to Celery task
+        # Generate a unique task ID before saving file
+        task_id = str(uuid.uuid4())
+        
+        # Read file content and save to disk (instead of passing through Redis)
         file_bytes = file.read()
-        file.stream.seek(0) # Reset stream position
+        file_path = save_uploaded_file(file_bytes, file.filename, task_id)
 
-        # Dispatch the Celery task for guest translation
-        task = process_guest_translation_task.delay(
-            client_ip=client_ip,
-            original_file_content_bytes=file_bytes, 
-            original_filename=file.filename, 
-            src_lang=src_lang, 
-            dest_lang=dest_lang,
-            estimated_character_count=estimated_character_count
-        )
+        # Dispatch the Celery task with file path instead of bytes
+        try:
+            task = process_guest_translation_task.delay(
+                client_ip=client_ip,
+                original_file_path=file_path,  # Pass file path instead of bytes
+                original_filename=file.filename, 
+                src_lang=src_lang, 
+                dest_lang=dest_lang,
+                estimated_character_count=estimated_character_count
+            )
+        except Exception as e:
+            # If task dispatch fails, clean up the saved file
+            delete_file(file_path)
+            raise
         
         print(f"API: Dispatched guest Celery task ID: {task.id}")
         return jsonify({'message': 'Translation task started', 'task_id': task.id}), 202

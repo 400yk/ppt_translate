@@ -3,6 +3,7 @@ Configuration values for PowerPoint translation.
 """
 
 import os
+import tempfile
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -175,6 +176,15 @@ REFERRAL_FEATURE_PAID_MEMBERS_ONLY = True  # Only paid members can generate refe
 EMAIL_VERIFICATION_TOKEN_EXPIRY_HOURS = 24  # Email verification token expiry in hours
 REQUIRE_EMAIL_VERIFICATION = True
 SKIP_EMAIL_VERIFICATION_FOR_GOOGLE_AUTH = True  # Skip verification for Google OAuth users
+
+# File Storage Configuration
+# Directory for storing uploaded files temporarily before Celery processing
+# Defaults to system temp directory, but can be set to a shared path for Docker/Kubernetes
+UPLOAD_TEMP_DIR = os.getenv('UPLOAD_TEMP_DIR', os.path.join(tempfile.gettempdir(), 'ppt_translate_uploads'))
+# Ensure the directory exists
+os.makedirs(UPLOAD_TEMP_DIR, exist_ok=True)
+# Cleanup files older than this many hours (default 24 hours)
+UPLOAD_FILE_TTL_HOURS = int(os.getenv('UPLOAD_FILE_TTL_HOURS', '24'))
 
 # Email Service Configuration
 EMAIL_SERVICE = os.environ.get('EMAIL_SERVICE', 'flask_mail')  # Use Flask-Mail for local development

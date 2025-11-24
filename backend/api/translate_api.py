@@ -7,7 +7,9 @@ from db.models import User, db
 from services.user_service import check_user_permission
 from services.tasks import process_translation_task
 from services.s3_service import s3_service
+from services.file_storage import save_uploaded_file, delete_file
 import os
+import uuid
 
 translate_bp = Blueprint('translate', __name__)
 
@@ -51,9 +53,12 @@ def translate_async_start_endpoint():
         
         # If we reach here, permission is True and permission_data is None, so proceed.
 
-        # Read file content into bytes to pass to Celery task
+        # Generate a unique task ID before saving file
+        task_id = str(uuid.uuid4())
+        
+        # Read file content and save to disk (instead of passing through Redis)
         file_bytes = file.read()
-        file.stream.seek(0) # Reset stream position if file object is used elsewhere, though not strictly needed here as we use bytes
+        file_path = save_uploaded_file(file_bytes, file.filename, task_id)
 
         # Create initial processing record
         from db.models import TranslationRecord
@@ -71,14 +76,19 @@ def translate_async_start_endpoint():
         db.session.add(processing_record)
         db.session.commit()
         
-        # Dispatch the Celery task
-        task = process_translation_task.delay(
-            user_id=user.id, 
-            original_file_content_bytes=file_bytes, 
-            original_filename=file.filename, 
-            src_lang=src_lang, 
-            dest_lang=dest_lang
-        )
+        # Dispatch the Celery task with file path instead of bytes
+        try:
+            task = process_translation_task.delay(
+                user_id=user.id, 
+                original_file_path=file_path,  # Pass file path instead of bytes
+                original_filename=file.filename, 
+                src_lang=src_lang, 
+                dest_lang=dest_lang
+            )
+        except Exception as e:
+            # If task dispatch fails, clean up the saved file
+            delete_file(file_path)
+            raise
         
         print(f"API: Dispatched Celery task ID: {task.id}")
         return jsonify({'message': 'Translation task started', 'task_id': task.id}), 202
