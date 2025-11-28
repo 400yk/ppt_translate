@@ -101,29 +101,30 @@ def check_user_permission(user):
 def get_period_start():
     """
     Get the start datetime and name of the current period based on FREE_USER_TRANSLATION_PERIOD.
+    Uses UTC time to match TranslationRecord.created_at which is stored in UTC.
     
     Returns:
         (period_start, period_name) tuple
     """
     if FREE_USER_TRANSLATION_PERIOD == 'daily':
-        # Get the start of the current day (00:00:00)
-        today = datetime.datetime.now()
+        # Get the start of the current day (00:00:00) in UTC
+        today = datetime.datetime.utcnow()
         period_start = today.replace(hour=0, minute=0, second=0, microsecond=0)
         period_name = "day"
     elif FREE_USER_TRANSLATION_PERIOD == 'weekly':
-        # Get the start of the current week (Monday 00:00:00)
-        today = datetime.datetime.now()
+        # Get the start of the current week (Monday 00:00:00) in UTC
+        today = datetime.datetime.utcnow()
         period_start = today - datetime.timedelta(days=today.weekday())
         period_start = period_start.replace(hour=0, minute=0, second=0, microsecond=0)
         period_name = "week"
     elif FREE_USER_TRANSLATION_PERIOD == 'monthly':
-        # Get the start of the current month (1st 00:00:00)
-        today = datetime.datetime.now()
+        # Get the start of the current month (1st 00:00:00) in UTC
+        today = datetime.datetime.utcnow()
         period_start = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         period_name = "month"
     else:
         # Default to weekly if the period is not recognized
-        today = datetime.datetime.now()
+        today = datetime.datetime.utcnow()
         period_start = today - datetime.timedelta(days=today.weekday())
         period_start = period_start.replace(hour=0, minute=0, second=0, microsecond=0)
         period_name = "week"
@@ -191,12 +192,15 @@ def get_membership_status(user):
             TranslationRecord.created_at >= period_start
         ).count()
         
+        # Ensure translations_remaining is never negative
+        translations_remaining = max(0, FREE_USER_TRANSLATION_LIMIT - period_count)
+        
         return {
             'user_type': 'free',
             'is_active': True,
             'translations_limit': FREE_USER_TRANSLATION_LIMIT,
             'translations_used': period_count,
-            'translations_remaining': FREE_USER_TRANSLATION_LIMIT - period_count,
+            'translations_remaining': translations_remaining,
             'period': period_name,
             'character_limit': user.get_character_limit(),
             'characters_used': user.monthly_characters_used,
