@@ -274,6 +274,24 @@ export function TranslationForm({
           return;
         }
 
+        if (error.message === 'invitation_code_invalid') {
+          toast({
+            title: t('errors.generic_error_title'),
+            description: t('errors.code_already_used'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (error.message === 'character_limit_reached') {
+          toast({
+            title: t('pricing.character_limit_title'),
+            description: getApiErrorMessage(error),
+            variant: 'destructive',
+          });
+          return;
+        }
+
         if (error.message === 'service_unavailable') {
           toast({
             title: t('errors.service_unavailable_title'),

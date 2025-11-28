@@ -127,14 +127,38 @@ export async function translateFile(
           }
           
           if (error.response.status === 403) {
-            throw new Error('weekly_limit_reached');
+            // Check the errorKey to determine the specific error type
+            let errorData = error.response.data;
+            
+            // If response data is a Blob, try to parse it as JSON
+            if (errorData instanceof Blob) {
+              try {
+                const textData = await errorData.text();
+                errorData = JSON.parse(textData);
+              } catch (parseError) {
+                // If parsing fails, default to weekly limit error for backward compatibility
+                throw new Error('weekly_limit_reached');
+              }
+            }
+            
+            // Check errorKey to determine the specific error
+            if (errorData?.errorKey === 'errors.code_already_used') {
+              throw new Error('invitation_code_invalid');
+            } else if (errorData?.errorKey === 'pricing.character_limit_title') {
+              throw new Error('character_limit_reached');
+            } else if (errorData?.errorKey === 'pricing.weekly_limit_title' || errorData?.error?.includes('limit reached')) {
+              throw new Error('weekly_limit_reached');
+            } else {
+              // Default to weekly limit for backward compatibility
+              throw new Error('weekly_limit_reached');
+            }
           }
 
           if (error.response.status === 503) {
             throw new Error('service_unavailable');
           }
           
-          // Try to parse error response if it's JSON
+          // Try to parse error response if it's JSON (for other status codes)
           if (error.response.data instanceof Blob) {
             try {
               const textData = await error.response.data.text();
@@ -175,14 +199,38 @@ export async function translateFile(
           }
           
           if (error.response.status === 403) {
-            throw new Error('weekly_limit_reached');
+            // Check the errorKey to determine the specific error type
+            let errorData = error.response.data;
+            
+            // If response data is a Blob, try to parse it as JSON
+            if (errorData instanceof Blob) {
+              try {
+                const textData = await errorData.text();
+                errorData = JSON.parse(textData);
+              } catch (parseError) {
+                // If parsing fails, default to weekly limit error for backward compatibility
+                throw new Error('weekly_limit_reached');
+              }
+            }
+            
+            // Check errorKey to determine the specific error
+            if (errorData?.errorKey === 'errors.code_already_used') {
+              throw new Error('invitation_code_invalid');
+            } else if (errorData?.errorKey === 'pricing.character_limit_title') {
+              throw new Error('character_limit_reached');
+            } else if (errorData?.errorKey === 'pricing.weekly_limit_title' || errorData?.error?.includes('limit reached')) {
+              throw new Error('weekly_limit_reached');
+            } else {
+              // Default to weekly limit for backward compatibility
+              throw new Error('weekly_limit_reached');
+            }
           }
 
           if (error.response.status === 503) {
             throw new Error('service_unavailable');
           }
           
-          // Try to parse error response if it's JSON
+          // Try to parse error response if it's JSON (for other status codes)
           if (error.response.data instanceof Blob) {
             try {
               const textData = await error.response.data.text();
@@ -279,7 +327,20 @@ export async function startAsyncTranslation(
       }
       
       if (error.response.status === 403) {
-        throw new Error('weekly_limit_reached');
+        // Check the errorKey to determine the specific error type
+        const errorData = error.response.data;
+        
+        // Check errorKey to determine the specific error
+        if (errorData?.errorKey === 'errors.code_already_used') {
+          throw new Error('invitation_code_invalid');
+        } else if (errorData?.errorKey === 'pricing.character_limit_title') {
+          throw new Error('character_limit_reached');
+        } else if (errorData?.errorKey === 'pricing.weekly_limit_title' || errorData?.error?.includes('limit reached')) {
+          throw new Error('weekly_limit_reached');
+        } else {
+          // Default to weekly limit for backward compatibility
+          throw new Error('weekly_limit_reached');
+        }
       }
 
       if (error.response.status === 503) {

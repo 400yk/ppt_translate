@@ -34,17 +34,17 @@ def check_user_permission(user):
         
         return True, None
         
-    # Check if user has a valid invitation code
-    elif user.invitation_code:
+    # Check if user has a valid invitation code (only for users who haven't used one before)
+    # If user already has membership_start, they've already used an invitation code, so skip this check
+    elif user.invitation_code and user.membership_start is None:
         # Check if the invitation code is valid
         if user.invitation_code.is_valid():
             user.invitation_code.mark_as_used()
             print(f"Marked invitation code as used: {user.invitation_code.code}")
             
-            # If this is their first use of the invitation code, activate their membership
-            if user.is_paid_user is False and user.membership_start is None:
-                user.activate_paid_membership(is_invitation=True)
-                print(f"Activated invitation-based membership for {user.username} until {user.membership_end}")
+            # Activate their membership since this is their first use
+            user.activate_paid_membership(is_invitation=True)
+            print(f"Activated invitation-based membership for {user.username} until {user.membership_end}")
             
             # Check character limit even for invitation users
             if user.monthly_characters_used >= user.get_character_limit():
@@ -63,6 +63,9 @@ def check_user_permission(user):
             )
         
     # Check free user translation limits
+    # This includes users who:
+    # - Never had an invitation code
+    # - Already used an invitation code before (membership_start is set) but membership expired
     else:
         # First check free user weekly/monthly translation limit
         print(f"Free user, checking {FREE_USER_TRANSLATION_PERIOD} limit of {FREE_USER_TRANSLATION_LIMIT}")
@@ -155,7 +158,8 @@ def get_membership_status(user):
             'characters_remaining': user.get_remaining_characters(),
             'next_character_reset': next_character_reset.isoformat() if next_character_reset else None
         }
-    elif user.invitation_code and user.invitation_code.is_valid():
+    elif user.invitation_code and user.invitation_code.is_valid() and user.membership_start is None:
+        # Only show as invitation type if they haven't used an invitation code before
         # Calculate next character reset date (30 days from last reset)
         next_character_reset = None
         if user.last_character_reset:
