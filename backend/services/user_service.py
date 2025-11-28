@@ -141,13 +141,21 @@ def get_membership_status(user):
         A dictionary with membership status details
     """
     if user.is_membership_active():
+        # Determine user_type based on is_paid_user and invitation_code
+        if user.is_paid_user:
+            user_type = 'paid'
+        elif user.invitation_code_id:
+            user_type = 'invitation'
+        else:
+            user_type = 'member'  # Has membership from referral bonus or other source
+        
         # Calculate next character reset date (30 days from last reset)
         next_character_reset = None
         if user.last_character_reset:
             next_character_reset = user.last_character_reset + datetime.timedelta(days=30)
             
         return {
-            'user_type': 'paid',
+            'user_type': user_type,
             'is_active': True,
             'membership_start': user.membership_start.isoformat() if user.membership_start else None,
             'membership_end': user.membership_end.isoformat() if user.membership_end else None,

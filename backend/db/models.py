@@ -187,8 +187,11 @@ class User(db.Model):
         
         Args:
             months: Number of months for membership duration
-            is_invitation: Whether this is an invitation-based membership
+            is_invitation: Whether this is an invitation-based membership (NOT a paid membership)
             is_yearly: Whether this is a yearly subscription (vs monthly)
+        
+        Note: is_paid_user is only set to True for actual payments (Alipay/Stripe),
+        not for invitation codes or referral bonuses.
         """
         if months is None:
             if is_invitation:
@@ -197,13 +200,18 @@ class User(db.Model):
                 months = PAID_MEMBERSHIP_YEARLY if is_yearly else PAID_MEMBERSHIP_MONTHLY
             
         now = datetime.datetime.utcnow()
-        # If already a member, extend from current end date
-        if self.is_paid_user and self.membership_end and self.membership_end > now:
-            # Extend existing membership using calendar months
+        
+        # Check if user has active membership (regardless of is_paid_user)
+        if self.membership_end and self.membership_end > now:
+            # Extend existing membership
             if is_yearly:
                 self.membership_end = self.membership_end + relativedelta(years=1)
             else:
                 self.membership_end = self.membership_end + relativedelta(months=months)
+            
+            # If this is a real payment (not invitation), set is_paid_user=True
+            if not is_invitation:
+                self.is_paid_user = True
         else:
             # New membership or expired membership
             self.membership_start = now
@@ -211,36 +219,51 @@ class User(db.Model):
                 self.membership_end = now + relativedelta(years=1)
             else:
                 self.membership_end = now + relativedelta(months=months)
-            self.is_paid_user = True
+            
+            # Only set is_paid_user=True for actual payments, not invitations
+            if not is_invitation:
+                self.is_paid_user = True
             
         db.session.commit()
         return True
         
     def cancel_membership(self):
-        """Cancel the user's paid membership."""
+        """
+        Cancel the user's paid membership (e.g., when they cancel their subscription).
+        
+        Note: This sets is_paid_user=False, which is different from membership expiration.
+        Expired memberships should keep is_paid_user=True as a historical record that
+        the user was once a paying customer.
+        """
         self.is_paid_user = False
+        # Optionally set membership_end to now to immediately expire membership
+        # self.membership_end = datetime.datetime.utcnow()
         db.session.commit()
         return True
         
     def is_membership_active(self):
-        """Check if the user has an active paid membership."""
-        if not self.is_paid_user:
-            return False
-            
+        """
+        Check if the user has an active membership (regardless of source).
+        Membership can come from:
+        - Paid membership (Alipay/Stripe) - is_paid_user=True
+        - Invitation codes - is_paid_user=False
+        - Referral bonuses - is_paid_user=False
+        
+        Note: is_paid_user is a historical flag indicating if user ever paid with money.
+        It does NOT determine if membership is currently active.
+        """
         now = datetime.datetime.utcnow()
+        
+        # Simply check if membership_end is in the future
+        # Do NOT modify is_paid_user here - it's a historical flag
         if self.membership_end and self.membership_end > now:
             return True
-            
-        # Membership has expired
-        if self.membership_end and self.membership_end <= now:
-            self.is_paid_user = False
-            db.session.commit()
-            
+        
         return False
         
     def get_membership_days_remaining(self):
         """Get the number of days remaining in the membership."""
-        if not self.is_paid_user or not self.membership_end:
+        if not self.membership_end:
             return 0
             
         now = datetime.datetime.utcnow()
@@ -251,20 +274,23 @@ class User(db.Model):
         return delta.days
     
     def add_bonus_membership_days(self, days):
-        """Add bonus membership days to the user's account."""
+        """
+        Add bonus membership days to the user's account (e.g., from referrals).
+        Note: This does NOT set is_paid_user=True, as bonus days are not from actual payment.
+        """
         now = datetime.datetime.utcnow()
         
         # Track bonus days
         self.bonus_membership_days = (self.bonus_membership_days or 0) + days
         
         # If user has an active membership, extend it
-        if self.is_paid_user and self.membership_end and self.membership_end > now:
+        if self.membership_end and self.membership_end > now:
             self.membership_end = self.membership_end + datetime.timedelta(days=days)
         else:
             # Give user new membership starting now
             self.membership_start = now
             self.membership_end = now + datetime.timedelta(days=days)
-            self.is_paid_user = True
+            # Do NOT set is_paid_user=True for bonus days
         
         db.session.commit()
         return True

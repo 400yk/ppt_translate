@@ -129,6 +129,9 @@ export default function ProfilePage() {
         return <Badge className="bg-green-500">{t('profile.paid_member')}</Badge>;
       case 'invitation':
         return <Badge className="bg-blue-500">{t('profile.invitation_member')}</Badge>;
+      case 'member':
+        // Members with referral bonuses or other sources get same badge as paid members
+        return <Badge className="bg-green-500">{t('profile.paid_member')}</Badge>;
       default:
         return <Badge variant="outline">{t('profile.free_user')}</Badge>;
     }
