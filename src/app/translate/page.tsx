@@ -270,7 +270,7 @@ export default function TranslationPage() {
             <TranslationForm
               isGuestUser={isGuestUser}
               maxFileSizeMB={maxFileSizeMB}
-              isPaidUser={membershipStatus?.user_type === 'paid'}
+              isPaidUser={membershipStatus?.user_type && ['paid', 'invitation', 'member'].includes(membershipStatus.user_type)}
               membershipStatus={membershipStatus}
               onFileSizeExceeded={() => setFileSizeExceeded(true)}
               onWeeklyLimitReached={() => setWeeklyLimitReached(true)}

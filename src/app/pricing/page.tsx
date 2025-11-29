@@ -60,7 +60,9 @@ export default function PricingPage() {
       
       try {
         const response = await apiClient.get('/api/membership/status');
-        setIsPaidUser(response.data.user_type === 'paid');
+        // Users with active membership (paid, invitation, or member) should have paid user benefits
+        // Note: invitation users should experience everything as paid users except is_paid_user flag
+        setIsPaidUser(response.data.user_type && ['paid', 'invitation', 'member'].includes(response.data.user_type));
       } catch (error) {
         console.error('Error checking membership status:', error);
       }

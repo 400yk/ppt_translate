@@ -201,13 +201,24 @@ class User(db.Model):
             
         now = datetime.datetime.utcnow()
         
+        # Handle fractional months by converting to days
+        # relativedelta doesn't support fractional months, so we use timedelta for those
+        if not is_yearly and months is not None and months != int(months):
+            # Convert fractional months to days (assuming 30 days per month)
+            days = int(months * 30)
+            duration = datetime.timedelta(days=days)
+        else:
+            duration = None
+        
         # Check if user has active membership (regardless of is_paid_user)
         if self.membership_end and self.membership_end > now:
             # Extend existing membership
             if is_yearly:
                 self.membership_end = self.membership_end + relativedelta(years=1)
+            elif duration is not None:
+                self.membership_end = self.membership_end + duration
             else:
-                self.membership_end = self.membership_end + relativedelta(months=months)
+                self.membership_end = self.membership_end + relativedelta(months=int(months))
             
             # If this is a real payment (not invitation), set is_paid_user=True
             if not is_invitation:
@@ -217,8 +228,10 @@ class User(db.Model):
             self.membership_start = now
             if is_yearly:
                 self.membership_end = now + relativedelta(years=1)
+            elif duration is not None:
+                self.membership_end = now + duration
             else:
-                self.membership_end = now + relativedelta(months=months)
+                self.membership_end = now + relativedelta(months=int(months))
             
             # Only set is_paid_user=True for actual payments, not invitations
             if not is_invitation:

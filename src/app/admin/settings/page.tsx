@@ -15,7 +15,9 @@ import {
   RefreshCw,
   Plus,
   Trash2,
-  Edit
+  Edit,
+  Copy,
+  Check
 } from 'lucide-react';
 import { 
   Card, 
@@ -35,14 +37,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -117,7 +111,7 @@ export default function AdminSettingsPage() {
       referral_feature_paid_members_only: false
     },
     invitation_settings: {
-      invitation_membership_months: 3,
+      invitation_membership_months: 0.5,
     },
     security_settings: {
       email_verification_required: true,
@@ -129,11 +123,11 @@ export default function AdminSettingsPage() {
     }
   });
   const [invitationCodes, setInvitationCodes] = useState<InvitationCode[]>([]);
-  const [isInvitationModalOpen, setIsInvitationModalOpen] = useState(false);
-  const [newInvitationCode, setNewInvitationCode] = useState('');
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
-  const [numCodes, setNumCodes] = useState(1);
+  const [numCodes, setNumCodes] = useState(5);
   const [generatedCodes, setGeneratedCodes] = useState<string[]>([]);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [useChinese, setUseChinese] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -196,6 +190,7 @@ export default function AdminSettingsPage() {
     try {
       setIsGeneratingCode(true);
       setGeneratedCodes([]);
+      setCopiedCode(null);
       const response = await AdminService.createInvitationCodeWithCount(numCodes);
       if (response.codes) {
         setGeneratedCodes(response.codes.map((c: any) => c.code));
@@ -216,6 +211,33 @@ export default function AdminSettingsPage() {
       });
     } finally {
       setIsGeneratingCode(false);
+    }
+  };
+
+  const getInvitationText = (code: string, isChinese: boolean) => {
+    return isChinese 
+      ? `网站：translide.co，邀请码：${code}`
+      : `Website: translide.co, Invitation Code: ${code}`;
+  };
+
+  const copyInvitationText = async (code: string) => {
+    const textToCopy = getInvitationText(code, useChinese);
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setCopiedCode(code);
+      toast({
+        title: 'Copied',
+        description: 'Invitation text copied to clipboard',
+      });
+      // Reset copied state after 2 seconds
+      setTimeout(() => setCopiedCode(null), 2000);
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to copy to clipboard',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -423,22 +445,23 @@ export default function AdminSettingsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Shield className="h-5 w-5" />
-                  Invitation Settings
+                  Send Invitation
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
                     <Label htmlFor="invitation_membership_months">Invitation Membership Months</Label>
                     <Input
                       id="invitation_membership_months"
                       type="number"
+                      step="0.1"
                       value={config.invitation_settings.invitation_membership_months}
                       onChange={(e) => setConfig(prev => ({ 
                         ...prev, 
                         invitation_settings: { 
                           ...prev.invitation_settings, 
-                          invitation_membership_months: parseInt(e.target.value) 
+                          invitation_membership_months: parseFloat(e.target.value) || 0 
                         } 
                       }))}
                     />
@@ -446,9 +469,87 @@ export default function AdminSettingsPage() {
                       Number of months of paid membership for users who register with invitation codes
                     </p>
                   </div>
+                  <div className="flex items-end gap-4">
+                    <div className="flex-1">
+                      <Label htmlFor="num_codes">Number of Codes</Label>
+                      <Input
+                        id="num_codes"
+                        type="number"
+                        min={1}
+                        value={numCodes}
+                        onChange={e => setNumCodes(Math.max(1, parseInt(e.target.value) || 1))}
+                      />
+                    </div>
+                    <Button onClick={handleGenerateInvitationCode} disabled={isGeneratingCode}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      {isGeneratingCode ? 'Generating...' : 'Generate Code'}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Generated Codes Display */}
+            {generatedCodes.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Shield className="h-5 w-5" />
+                      Generated Codes
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="language-toggle" className="text-sm font-normal cursor-pointer">
+                        English
+                      </Label>
+                      <Switch
+                        id="language-toggle"
+                        checked={useChinese}
+                        onCheckedChange={setUseChinese}
+                      />
+                      <Label htmlFor="language-toggle" className="text-sm font-normal cursor-pointer">
+                        中文
+                      </Label>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="border rounded-md overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Invitation Text</TableHead>
+                          <TableHead className="w-[80px]">Action</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {generatedCodes.map((code) => (
+                          <TableRow key={code}>
+                            <TableCell className="font-mono text-sm">
+                              {getInvitationText(code, useChinese)}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => copyInvitationText(code)}
+                                className="h-8 w-8 p-0"
+                              >
+                                {copiedCode === code ? (
+                                  <Check className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardHeader>
@@ -464,10 +565,7 @@ export default function AdminSettingsPage() {
                       Manage invitation codes for user registration
                     </p>
                   </div>
-                  <Button onClick={() => setIsInvitationModalOpen(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Generate Code
-                  </Button>
+
                 </div>
 
                 <Table>
@@ -532,51 +630,6 @@ export default function AdminSettingsPage() {
               </CardContent>
             </Card>
 
-            {/* Generate Invitation Code Modal */}
-            <Dialog open={isInvitationModalOpen} onOpenChange={setIsInvitationModalOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Generate Invitation Code</DialogTitle>
-                  <DialogDescription>
-                    Create new invitation codes for user registration
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="num_codes">Number of Codes</Label>
-                    <Input
-                      id="num_codes"
-                      type="number"
-                      min={1}
-                      value={numCodes}
-                      onChange={e => setNumCodes(Math.max(1, parseInt(e.target.value) || 1))}
-                    />
-                  </div>
-                  {generatedCodes.length > 0 && (
-                    <div>
-                      <Label>Generated Codes</Label>
-                      <div className="bg-gray-100 dark:bg-gray-800 rounded p-2 max-h-40 overflow-y-auto text-sm">
-                        {generatedCodes.map((code) => (
-                          <div key={code}>{code}</div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={handleGenerateInvitationCode}
-                    disabled={isGeneratingCode}
-                  >
-                    {isGeneratingCode ? 'Generating...' : 'Generate Code(s)'}
-                  </Button>
-                  <Button onClick={() => setIsInvitationModalOpen(false)}>
-                    Close
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
           </TabsContent>
 
           {/* Referral Settings */}
