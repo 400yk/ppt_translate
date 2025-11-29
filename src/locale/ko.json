@@ -49,6 +49,8 @@
     "service_unavailable_message": "번역 서비스를 현재 이용할 수 없습니다. 나중에 다시 시도해 주세요.",
     "task_not_found_message": "번역 작업을 찾을 수 없습니다. 다시 시도해 주세요.",
     "file_not_found_message": "번역된 파일을 찾을 수 없습니다. 다시 시도해 주세요.",
+    "upload_timeout_title": "업로드 시간 초과",
+    "upload_timeout_message": "업로드 요청이 시간 초과되었습니다. 인터넷 연결이 느리거나 파일이 너무 클 수 있습니다. 연결을 확인하고 가능한 경우 더 작은 파일로 다시 시도해 주세요.",
     "no_download_url": "다운로드 URL이 제공되지 않았습니다",
     "translation_failed_fallback": "번역에 실패했습니다",
     "user_not_found": "사용자를 찾을 수 없습니다",
@@ -336,6 +338,9 @@
     "starting_translation": "번역 시작 중...",
     "translation_in_progress": "번역 진행 중...",
     "processing": "처리 중...",
+    "uploading_file": "파일 업로드 중...",
+    "uploading_file": "파일 업로드 중...",
+    "preparing_download": "다운로드 준비 중...",
     "downloading_file": "파일 다운로드 중...",
     "timeout_error": "번역 시간 초과 - 다시 시도해 주세요"
   },

@@ -154,6 +154,11 @@ export async function translateFile(
             }
           }
 
+          if (error.response.status === 502) {
+            // 502 Bad Gateway from Traefik usually indicates a timeout
+            throw new Error('upload_timeout');
+          }
+
           if (error.response.status === 503) {
             throw new Error('service_unavailable');
           }
@@ -224,6 +229,11 @@ export async function translateFile(
               // Default to weekly limit for backward compatibility
               throw new Error('weekly_limit_reached');
             }
+          }
+
+          if (error.response.status === 502) {
+            // 502 Bad Gateway from Traefik usually indicates a timeout
+            throw new Error('upload_timeout');
           }
 
           if (error.response.status === 503) {
@@ -341,6 +351,11 @@ export async function startAsyncTranslation(
           // Default to weekly limit for backward compatibility
           throw new Error('weekly_limit_reached');
         }
+      }
+
+      if (error.response.status === 502) {
+        // 502 Bad Gateway from Traefik usually indicates a timeout
+        throw new Error('upload_timeout');
       }
 
       if (error.response.status === 503) {
@@ -483,9 +498,11 @@ export async function translateFileAsync(
   onProgress: (progress: number) => void,
   onStatusUpdate?: (status: string) => void,
   statusMessages?: {
+    uploading: string;
     starting: string;
     inProgress: string;
     processing: string;
+    preparingDownload: string;
     downloading: string;
     complete: string;
     timeout: string;
@@ -497,9 +514,11 @@ export async function translateFileAsync(
 ): Promise<string> {
   // Use provided messages or fallback to English
   const messages = statusMessages || {
+    uploading: 'Uploading file...',
     starting: 'Starting translation...',
     inProgress: 'Translation in progress...',
     processing: 'Processing...',
+    preparingDownload: 'Preparing for download...',
     downloading: 'Downloading file...',
     complete: 'Complete!',
     timeout: 'Translation timeout - please try again'
@@ -510,13 +529,14 @@ export async function translateFileAsync(
     translationFailed: 'Translation failed'
   };
 
-  // Start the translation task
-  onStatusUpdate?.(messages.starting);
+  // Upload the file first
+  onStatusUpdate?.(messages.uploading);
   onProgress(10);
   
   const taskId = await startAsyncTranslation(file, srcLang, destLang, isGuestUser);
   
-  onStatusUpdate?.(messages.inProgress);
+  // File upload complete, translation is starting
+  onStatusUpdate?.(messages.starting);
   onProgress(20);
   
   // Poll for completion
@@ -540,7 +560,13 @@ export async function translateFileAsync(
         if (status.status === 'PENDING') {
           const progressValue = Math.min(20 + (attempts * 2), 80);
           onProgress(progressValue);
-          onStatusUpdate?.(messages.processing);
+          
+          // Show "preparing for download" when progress is high (likely uploading to S3)
+          if (progressValue >= 70) {
+            onStatusUpdate?.(messages.preparingDownload);
+          } else {
+            onStatusUpdate?.(messages.processing);
+          }
         }
         
         if (status.status === 'SUCCESS') {

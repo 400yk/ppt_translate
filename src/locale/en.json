@@ -28,6 +28,8 @@
     "service_unavailable_message": "The translation service is currently unavailable. Please try again later.",
     "task_not_found_message": "Translation task not found. Please try again.",
     "file_not_found_message": "Translated file not found. Please try again.",
+    "upload_timeout_title": "Upload Timeout",
+    "upload_timeout_message": "The upload request timed out. This may be due to slow internet connection or the file being too large. Please check your connection and try again with a smaller file if possible.",
     "required_fields": "Required Fields",
     "fill_all_fields": "Please fill out all required fields.",
     "login_failed": "Login Failed",
@@ -338,6 +340,8 @@
     "starting_translation": "Starting translation...",
     "translation_in_progress": "Translation in progress...",
     "processing": "Processing...",
+    "uploading_file": "Uploading file...",
+    "preparing_download": "Preparing for download...",
     "downloading_file": "Downloading file...",
     "timeout_error": "Translation timeout - please try again"
   },

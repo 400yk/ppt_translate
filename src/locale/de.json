@@ -28,6 +28,8 @@
     "service_unavailable_message": "Der Übersetzungsservice ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.",
     "task_not_found_message": "Übersetzungsaufgabe nicht gefunden. Bitte versuchen Sie es erneut.",
     "file_not_found_message": "Übersetzte Datei nicht gefunden. Bitte versuchen Sie es erneut.",
+    "upload_timeout_title": "Upload-Zeitüberschreitung",
+    "upload_timeout_message": "Die Upload-Anfrage hat das Zeitlimit überschritten. Dies kann auf eine langsame Internetverbindung oder eine zu große Datei zurückzuführen sein. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut mit einer kleineren Datei, falls möglich.",
     "required_fields": "Erforderliche Felder",
     "fill_all_fields": "Bitte füllen Sie alle erforderlichen Felder aus.",
     "login_failed": "Anmeldung fehlgeschlagen",
@@ -336,6 +338,9 @@
     "starting_translation": "Übersetzung wird gestartet...",
     "translation_in_progress": "Übersetzung läuft...",
     "processing": "Verarbeitung...",
+    "uploading_file": "Datei wird hochgeladen...",
+    "uploading_file": "Datei wird hochgeladen...",
+    "preparing_download": "Vorbereitung des Downloads...",
     "downloading_file": "Datei wird heruntergeladen...",
     "timeout_error": "Übersetzungszeitlimit überschritten - bitte erneut versuchen"
   },

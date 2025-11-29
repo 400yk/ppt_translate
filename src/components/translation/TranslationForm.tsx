@@ -223,9 +223,11 @@ export function TranslationForm({
     try {
       // Prepare translated status messages
       const statusMessages = {
+        uploading: t('progress.uploading_file'),
         starting: t('progress.starting_translation'),
         inProgress: t('progress.translation_in_progress'),
         processing: t('progress.processing'),
+        preparingDownload: t('progress.preparing_download'),
         downloading: t('progress.downloading_file'),
         complete: t('progress.complete'),
         timeout: t('progress.timeout_error')
@@ -296,6 +298,15 @@ export function TranslationForm({
           toast({
             title: t('errors.service_unavailable_title'),
             description: t('errors.service_unavailable_message'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        if (error.message === 'upload_timeout') {
+          toast({
+            title: t('errors.upload_timeout_title'),
+            description: t('errors.upload_timeout_message'),
             variant: 'destructive',
           });
           return;

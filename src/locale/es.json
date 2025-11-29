@@ -49,6 +49,8 @@
     "service_unavailable_message": "El servicio de traducción no está disponible actualmente. Por favor, inténtelo más tarde.",
     "task_not_found_message": "Tarea de traducción no encontrada. Por favor, inténtelo de nuevo.",
     "file_not_found_message": "Archivo traducido no encontrado. Por favor, inténtelo de nuevo.",
+    "upload_timeout_title": "Tiempo de espera de carga agotado",
+    "upload_timeout_message": "La solicitud de carga ha excedido el tiempo de espera. Esto puede deberse a una conexión a Internet lenta o a que el archivo es demasiado grande. Por favor, verifique su conexión e intente nuevamente con un archivo más pequeño si es posible.",
     "no_download_url": "No se proporcionó URL de descarga",
     "translation_failed_fallback": "Traducción fallida",
     "user_not_found": "Usuario no encontrado",
@@ -337,6 +339,9 @@
     "starting_translation": "Iniciando traducción...",
     "translation_in_progress": "Traducción en progreso...",
     "processing": "Procesando...",
+    "uploading_file": "Subiendo archivo...",
+    "uploading_file": "Subiendo archivo...",
+    "preparing_download": "Preparando descarga...",
     "downloading_file": "Descargando archivo...",
     "timeout_error": "Tiempo de espera de traducción agotado - por favor intente de nuevo"
   },

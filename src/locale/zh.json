@@ -28,6 +28,8 @@
     "service_unavailable_message": "翻译服务当前不可用，请稍后再试。",
     "task_not_found_message": "未找到翻译任务，请重试。",
     "file_not_found_message": "未找到已翻译文件，请重试。",
+    "upload_timeout_title": "上传超时",
+    "upload_timeout_message": "上传请求超时。这可能是由于网络连接较慢或文件过大。请检查您的网络连接，如果可能，请尝试使用较小的文件重试。",
     "required_fields": "必填字段",
     "fill_all_fields": "请填写所有必填字段。",
     "login_failed": "登录失败",
@@ -337,6 +339,8 @@
     "starting_translation": "开始翻译...",
     "translation_in_progress": "翻译进行中...",
     "processing": "处理中...",
+    "uploading_file": "文件上传中...",
+    "preparing_download": "准备下载中...",
     "downloading_file": "下载文件中...",
     "timeout_error": "翻译超时 - 请重试"
   },

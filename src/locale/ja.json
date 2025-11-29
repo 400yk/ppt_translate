@@ -49,6 +49,8 @@
     "service_unavailable_message": "翻訳サービスは現在利用できません。後でもう一度お試しください。",
     "task_not_found_message": "翻訳タスクが見つかりません。もう一度お試しください。",
     "file_not_found_message": "翻訳されたファイルが見つかりません。もう一度お試しください。",
+    "upload_timeout_title": "アップロードタイムアウト",
+    "upload_timeout_message": "アップロードリクエストがタイムアウトしました。インターネット接続が遅いか、ファイルが大きすぎる可能性があります。接続を確認し、可能であればより小さなファイルで再試行してください。",
     "no_download_url": "ダウンロードURLが提供されていません",
     "translation_failed_fallback": "翻訳に失敗しました",
     "user_not_found": "ユーザーが見つかりません",
@@ -336,6 +338,9 @@
     "starting_translation": "翻訳を開始中...",
     "translation_in_progress": "翻訳進行中...",
     "processing": "処理中...",
+    "uploading_file": "ファイルをアップロード中...",
+    "uploading_file": "ファイルをアップロード中...",
+    "preparing_download": "ダウンロード準備中...",
     "downloading_file": "ファイルをダウンロード中...",
     "timeout_error": "翻訳タイムアウト - もう一度お試しください"
   },

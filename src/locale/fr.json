@@ -49,6 +49,8 @@
     "service_unavailable_message": "Le service de traduction est actuellement indisponible. Veuillez réessayer plus tard.",
     "task_not_found_message": "Tâche de traduction introuvable. Veuillez réessayer.",
     "file_not_found_message": "Fichier traduit introuvable. Veuillez réessayer.",
+    "upload_timeout_title": "Délai d'attente de téléchargement expiré",
+    "upload_timeout_message": "La requête de téléchargement a expiré. Cela peut être dû à une connexion Internet lente ou à un fichier trop volumineux. Veuillez vérifier votre connexion et réessayer avec un fichier plus petit si possible.",
     "no_download_url": "Aucune URL de téléchargement fournie",
     "translation_failed_fallback": "Échec de la traduction",
     "user_not_found": "Utilisateur non trouvé",
@@ -337,6 +339,9 @@
     "starting_translation": "Démarrage de la traduction...",
     "translation_in_progress": "Traduction en cours...",
     "processing": "Traitement...",
+    "uploading_file": "Téléversement du fichier...",
+    "uploading_file": "Téléversement du fichier...",
+    "preparing_download": "Préparation du téléchargement...",
     "downloading_file": "Téléchargement du fichier...",
     "timeout_error": "Délai de traduction expiré - veuillez réessayer"
   },

@@ -81,6 +81,8 @@ export type TranslationKey =
   | 'errors.service_unavailable_message'
   | 'errors.task_not_found_message'
   | 'errors.file_not_found_message'
+  | 'errors.upload_timeout_title'
+  | 'errors.upload_timeout_message'
   | 'errors.required_fields'
   | 'errors.fill_all_fields'
   | 'errors.login_failed'
