@@ -210,6 +210,7 @@ export interface User {
   invitation_code?: string;
   referred_by_code?: string;
   bonus_membership_days: number;
+  membership_end?: string | null;
 }
 
 export interface UsersResponse {

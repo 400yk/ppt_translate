@@ -146,12 +146,26 @@ export default function UserManagementPage() {
       case 'total_characters':
         return multiplier * (a.total_characters - b.total_characters);
       case 'created_at':
-        return multiplier * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        // Sort by actual date values, not formatted strings
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return multiplier * (dateA - dateB);
       case 'last_login':
+        // Sort by actual date values, handling nulls properly
         if (!a.last_login && !b.last_login) return 0;
-        if (!a.last_login) return 1;
-        if (!b.last_login) return -1;
-        return multiplier * (new Date(a.last_login).getTime() - new Date(b.last_login).getTime());
+        if (!a.last_login) return 1; // null values go to end
+        if (!b.last_login) return -1; // null values go to end
+        const loginA = new Date(a.last_login).getTime();
+        const loginB = new Date(b.last_login).getTime();
+        return multiplier * (loginA - loginB);
+      case 'membership_end':
+        // Sort by actual date values, handling nulls properly
+        if (!a.membership_end && !b.membership_end) return 0;
+        if (!a.membership_end) return 1; // null values go to end
+        if (!b.membership_end) return -1; // null values go to end
+        const endA = new Date(a.membership_end).getTime();
+        const endB = new Date(b.membership_end).getTime();
+        return multiplier * (endA - endB);
       case 'membership_status':
         return multiplier * a.membership_status.localeCompare(b.membership_status);
       default:
@@ -372,6 +386,15 @@ export default function UserManagementPage() {
                       </th>
                       <th className="text-left py-3 px-4 font-medium">
                         <button 
+                          onClick={() => handleSort('membership_end')}
+                          className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+                        >
+                          Membership End
+                          {getSortIcon('membership_end')}
+                        </button>
+                      </th>
+                      <th className="text-left py-3 px-4 font-medium">
+                        <button 
                           onClick={() => handleSort('translation_count')}
                           className="flex items-center gap-1 hover:text-blue-600 transition-colors"
                         >
@@ -430,6 +453,9 @@ export default function UserManagementPage() {
                         </td>
                         <td className="py-3 px-4">
                           {getMembershipBadge(user)}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-500">
+                          {user.membership_end ? formatDate(user.membership_end) : '-'}
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-500">
                           {user.translation_count}
@@ -574,6 +600,11 @@ export default function UserManagementPage() {
                       <div>
                         <span className="font-medium">Type:</span> {selectedUser.membership_type}
                       </div>
+                      {selectedUser.membership_end && (
+                        <div>
+                          <span className="font-medium">Membership End:</span> {formatDateTime(selectedUser.membership_end)}
+                        </div>
+                      )}
                       {selectedUser.stripe_customer_id && (
                         <div>
                           <span className="font-medium">Stripe Customer ID:</span> {selectedUser.stripe_customer_id}

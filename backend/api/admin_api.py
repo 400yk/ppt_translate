@@ -872,7 +872,8 @@ def get_users():
                 'total_characters': total_characters,
                 'invitation_code': user.invitation_code.code if user.invitation_code else None,
                 'referred_by_code': user.referred_by_code,
-                'bonus_membership_days': user.bonus_membership_days
+                'bonus_membership_days': user.bonus_membership_days,
+                'membership_end': user.membership_end.isoformat() if user.membership_end else None
             })
         
         return jsonify({

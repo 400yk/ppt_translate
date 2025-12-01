@@ -319,11 +319,19 @@ export default function ProfilePage() {
                     {membershipStatus.user_type === 'paid' && (
                       <>
                         <div className="grid grid-cols-2 gap-2">
-                          <div className="text-muted-foreground">{t('profile.membership_start')}</div>
-                          <div>{new Date(membershipStatus.membership_start).toLocaleDateString()}</div>
+                          {membershipStatus.membership_start && (
+                            <>
+                              <div className="text-muted-foreground">{t('profile.membership_start')}</div>
+                              <div>{new Date(membershipStatus.membership_start).toLocaleDateString()}</div>
+                            </>
+                          )}
                           
-                          <div className="text-muted-foreground">{t('profile.membership_end')}</div>
-                          <div>{new Date(membershipStatus.membership_end).toLocaleDateString()}</div>
+                          {membershipStatus.membership_end && (
+                            <>
+                              <div className="text-muted-foreground">{t('profile.membership_end')}</div>
+                              <div>{new Date(membershipStatus.membership_end).toLocaleDateString()}</div>
+                            </>
+                          )}
                           
                           <div className="text-muted-foreground">{t('profile.translations')}</div>
                           <div>{t('profile.unlimited')}</div>
@@ -350,8 +358,65 @@ export default function ProfilePage() {
                     {membershipStatus.user_type === 'invitation' && (
                       <>
                         <div className="grid grid-cols-2 gap-2">
-                          <div className="text-muted-foreground">{t('profile.invitation_code')}</div>
-                          <div>{membershipStatus.invitation_code}</div>
+                          {membershipStatus.invitation_code && (
+                            <>
+                              <div className="text-muted-foreground">{t('profile.invitation_code')}</div>
+                              <div>{membershipStatus.invitation_code}</div>
+                            </>
+                          )}
+                          
+                          {membershipStatus.membership_start && (
+                            <>
+                              <div className="text-muted-foreground">{t('profile.membership_start')}</div>
+                              <div>{new Date(membershipStatus.membership_start).toLocaleDateString()}</div>
+                            </>
+                          )}
+                          
+                          {membershipStatus.membership_end && (
+                            <>
+                              <div className="text-muted-foreground">{t('profile.membership_end')}</div>
+                              <div>{new Date(membershipStatus.membership_end).toLocaleDateString()}</div>
+                            </>
+                          )}
+                          
+                          <div className="text-muted-foreground">{t('profile.translations')}</div>
+                          <div>{t('profile.unlimited')}</div>
+                          
+                          <div className="text-muted-foreground">{t('profile.monthly_character_limit')}</div>
+                          <div>{membershipStatus.character_limit?.toLocaleString()}</div>
+                          
+                          <div className="text-muted-foreground">{t('profile.characters_used')}</div>
+                          <div>{membershipStatus.characters_used?.toLocaleString() || 0}</div>
+                          
+                          <div className="text-muted-foreground">{t('profile.characters_remaining')}</div>
+                          <div>{membershipStatus.characters_remaining?.toLocaleString() || 0}</div>
+                          
+                          {membershipStatus.next_character_reset && (
+                            <>
+                              <div className="text-muted-foreground">{t('profile.next_character_reset')}</div>
+                              <div>{new Date(membershipStatus.next_character_reset).toLocaleDateString()}</div>
+                            </>
+                          )}
+                        </div>
+                      </>
+                    )}
+                    
+                    {membershipStatus.user_type === 'member' && (
+                      <>
+                        <div className="grid grid-cols-2 gap-2">
+                          {membershipStatus.membership_start && (
+                            <>
+                              <div className="text-muted-foreground">{t('profile.membership_start')}</div>
+                              <div>{new Date(membershipStatus.membership_start).toLocaleDateString()}</div>
+                            </>
+                          )}
+                          
+                          {membershipStatus.membership_end && (
+                            <>
+                              <div className="text-muted-foreground">{t('profile.membership_end')}</div>
+                              <div>{new Date(membershipStatus.membership_end).toLocaleDateString()}</div>
+                            </>
+                          )}
                           
                           <div className="text-muted-foreground">{t('profile.translations')}</div>
                           <div>{t('profile.unlimited')}</div>
