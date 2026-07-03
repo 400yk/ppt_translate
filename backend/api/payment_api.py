@@ -368,13 +368,23 @@ def create_checkout_session():
             print(f"Error creating payment transaction: {str(e)}")
             # Continue with checkout session creation even if transaction record fails
         
+        # Reuse the existing Stripe customer when the user already has one so
+        # that re-subscriptions and renewal invoices always map back to the
+        # same customer (and therefore the same user). Only fall back to
+        # customer_email for brand-new customers. Stripe rejects passing both
+        # `customer` and `customer_email`.
+        if user.stripe_customer_id:
+            customer_kwargs = {'customer': user.stripe_customer_id}
+        else:
+            customer_kwargs = {'customer_email': user.email}
+
         # Create a new checkout session
         checkout_session = stripe.checkout.Session.create(
             success_url=f"{success_url}?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=cancel_url,
             payment_method_types=['card'],
             mode='subscription',
-            customer_email=user.email,  # Pre-fill customer email
+            **customer_kwargs,  # Reuse existing customer, else pre-fill email
             client_reference_id=username,  # Store username as reference ID
             metadata={
                 'user_id': username,
@@ -750,9 +760,12 @@ def webhook():
                 user = User.query.filter_by(username=username).first()
                 
                 if user:
-                    # Store the Stripe customer ID
+                    # Store / refresh the Stripe customer ID. Always keep it
+                    # current: if a re-subscribe produced a new customer id,
+                    # overwrite the stale one so later invoice/customer lookups
+                    # (which match on stripe_customer_id) can't go stale.
                     customer_id = session.get('customer')
-                    if customer_id and not user.stripe_customer_id:
+                    if customer_id and user.stripe_customer_id != customer_id:
                         user.stripe_customer_id = customer_id
                         db.session.commit()
                     
@@ -838,10 +851,29 @@ def webhook():
             invoice = data_object
             print(f"Processing invoice.payment_succeeded: {invoice.get('id')}")
             customer_id = invoice.get('customer')
-            
+
             # Find the user with this customer ID
             user = User.query.filter_by(stripe_customer_id=customer_id).first()
-            
+
+            # Fallback: if no user matches this customer id (e.g. a re-subscribe
+            # created a NEW Stripe customer while the user row still holds the
+            # old one), resolve the customer's email via Stripe and match by
+            # email, then re-point the user to the current customer id so this
+            # and future invoices map correctly. Prevents Stripe billing a
+            # customer whose payment never activates membership.
+            if not user and customer_id:
+                try:
+                    stripe_customer = stripe.Customer.retrieve(customer_id)
+                    customer_email = stripe_customer.get('email')
+                    if customer_email:
+                        user = User.query.filter_by(email=customer_email).first()
+                        if user and user.stripe_customer_id != customer_id:
+                            user.stripe_customer_id = customer_id
+                            db.session.commit()
+                            print(f"Re-linked user {user.username} to current Stripe customer {customer_id}")
+                except Exception as e:
+                    print(f"Error resolving customer {customer_id} for invoice fallback: {str(e)}")
+
             if user:
                 # Update user membership status with new renewal date
                 print(f"Invoice payment succeeded for user: {user.username}")
@@ -1631,8 +1663,9 @@ def payment_success():
         if not user:
             return error_response('User not found', 'errors.user_not_found', 404)
         
-        # Store the Stripe customer ID if not already stored
-        if checkout_session.customer and not user.stripe_customer_id:
+        # Store / refresh the Stripe customer ID (overwrite a stale one from a
+        # previous subscription so lookups keyed on stripe_customer_id match).
+        if checkout_session.customer and user.stripe_customer_id != checkout_session.customer:
             user.stripe_customer_id = checkout_session.customer
             db.session.commit()
         
