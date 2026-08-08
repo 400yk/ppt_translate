@@ -7,6 +7,7 @@ import uuid
 import time
 from datetime import datetime, timedelta
 import config
+from utils.storage_utils import build_content_disposition
 
 try:
     import oss2
@@ -93,7 +94,7 @@ class OSSService:
                         f,
                         headers={
                             'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                            'Content-Disposition': f'attachment; filename="{original_filename}"'
+                            'Content-Disposition': build_content_disposition(original_filename)
                         }
                     )
                 

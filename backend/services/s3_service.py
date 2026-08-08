@@ -9,6 +9,7 @@ import time
 from datetime import datetime, timedelta
 from botocore.exceptions import ClientError, NoCredentialsError
 import config
+from utils.storage_utils import build_content_disposition
 
 # Import OSS service for fallback
 try:
@@ -81,7 +82,7 @@ class S3Service:
                     s3_key,
                     ExtraArgs={
                         'ContentType': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                        'ContentDisposition': f'attachment; filename="{original_filename}"'
+                        'ContentDisposition': build_content_disposition(original_filename)
                     }
                 )
                 
