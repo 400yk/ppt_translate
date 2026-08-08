@@ -8,7 +8,7 @@ from pptx.enum.dml import MSO_THEME_COLOR_INDEX
 from services.llm_service import gemini_batch_translate_with_size
 from utils.pptx_utils import measure_text_bbox, fit_font_size_to_bbox, fit_font_size_for_title
 from config import (
-    DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, DEFAULT_TITLE_FONT_SIZE
+    DEFAULT_FONT_NAME, DEFAULT_FONT_SIZE, DEFAULT_TITLE_FONT_SIZE, UPLOAD_TEMP_DIR
 )
 
 def is_translatable_text(text):
@@ -150,8 +150,10 @@ def translate_pptx(input_stream, src_lang, dest_lang):
     
     if not all_texts:
         print("No translatable text found in presentation")
-        # Save the original presentation without changes
-        output_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx')
+        # Save the original presentation without changes.
+        # Written to the shared volume, not the worker's own /tmp, so the API
+        # container can still serve it if the S3/OSS upload fails.
+        output_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx', dir=UPLOAD_TEMP_DIR)
         prs.save(output_file)
         output_file.close()
         return output_file.name, 0
@@ -470,8 +472,10 @@ def translate_pptx(input_stream, src_lang, dest_lang):
             except Exception as fallback_error:
                 print(f"Error: Could not update cell text at all: {fallback_error}")
     
-    # Save the translated presentation to a temporary file
-    output_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx')
+    # Save the translated presentation to a temporary file.
+    # Written to the shared volume, not the worker's own /tmp, so the API
+    # container can still serve it if the S3/OSS upload fails.
+    output_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pptx', dir=UPLOAD_TEMP_DIR)
     try:
         prs.save(output_file)
         output_file.close()

@@ -266,7 +266,12 @@ def process_translation_task(self, user_id: int, original_file_path: str, origin
             if upload_result['service'] == 's3':
                 result['s3_key'] = upload_result['key']
         else:
-            result['translated_file_path'] = translated_file_path  # Path on the WORKER dyno
+            # Both uploads failed. The file is on the shared volume, so the API
+            # container can still serve it, but object storage is broken and
+            # needs attention - say so rather than reporting a clean success.
+            print(f"Celery task {self.request.id}: DEGRADED - object storage unavailable, "
+                  f"serving from shared volume: {translated_file_path}")
+            result['translated_file_path'] = translated_file_path  # On the shared volume
             result['storage_type'] = 'local'
         
         return result
@@ -494,7 +499,12 @@ def process_guest_translation_task(self, client_ip: str, original_file_path: str
             if upload_result['service'] == 's3':
                 result['s3_key'] = upload_result['key']
         else:
-            result['translated_file_path'] = translated_file_path  # Path on the WORKER dyno
+            # Both uploads failed. The file is on the shared volume, so the API
+            # container can still serve it, but object storage is broken and
+            # needs attention - say so rather than reporting a clean success.
+            print(f"Celery task {self.request.id}: DEGRADED - object storage unavailable, "
+                  f"serving from shared volume: {translated_file_path}")
+            result['translated_file_path'] = translated_file_path  # On the shared volume
             result['storage_type'] = 'local'
         
         return result

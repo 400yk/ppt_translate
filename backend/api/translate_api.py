@@ -130,8 +130,20 @@ def get_translation_status_endpoint(task_id):
                 # For S3 storage, use the presigned URL directly
                 response_data['result']['download_url'] = task.result['download_url']
             elif 'translated_file_path' in task.result:
-                # For local storage, use the download endpoint
-                response_data['result']['download_url'] = f'/api/download/{task_id}'
+                # Local storage fallback. Only advertise a download if this
+                # container can actually see the file: the worker writes it to
+                # the shared volume, but if the upload failed AND the file is
+                # missing here, reporting SUCCESS would hand the user a link
+                # that 404s. Fail loudly instead.
+                if os.path.exists(task.result['translated_file_path']):
+                    response_data['result']['download_url'] = f'/api/download/{task_id}'
+                else:
+                    print(f"Task {task_id}: translated file missing at "
+                          f"{task.result['translated_file_path']} - reporting failure")
+                    response_data['status'] = 'FAILURE'
+                    response_data['message'] = 'Task failed.'
+                    response_data['error'] = 'Translated file could not be stored or retrieved.'
+                    response_data.pop('result', None)
     elif task.state == 'FAILURE':
         response_data['message'] = 'Task failed.'
         # Provide a more generic error or log the details for privacy/security
