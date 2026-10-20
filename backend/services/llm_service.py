@@ -4,6 +4,7 @@ import json
 import ast  # For safe eval fallback
 import re  # Move re import to module level
 import time  # Add for retry delays
+from urllib.parse import quote, quote_plus
 from config import GEMINI_API_URL, GEMINI_API_BATCH_SIZE, GEMINI_API_CHARACTER_BATCH_SIZE, DEEPSEEK_API_URL, DEEPSEEK_MODEL, DEEPSEEK_API_CHARACTER_BATCH_SIZE, DEEPSEEK_API_BATCH_SIZE
 
 # Import OpenAI client for DeepSeek
@@ -16,6 +17,21 @@ except ImportError:
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 DASHSCOPE_API_KEY = os.getenv('DASHSCOPE_API_KEY')
+
+
+def _redact_secrets(value):
+    """Keep provider diagnostics useful without exposing credentials."""
+    message = str(value)
+    for secret in (GEMINI_API_KEY, DASHSCOPE_API_KEY):
+        if secret:
+            for variant in {secret, quote(secret, safe=''), quote_plus(secret)}:
+                message = message.replace(variant, '[REDACTED]')
+    # Also cover old keys in URLs returned by gateways or HTTP exceptions.
+    return re.sub(
+        r'([?&](?:key|api[_-]?key|x-goog-api-key|access_token)=)[^&#\s\'\"]+',
+        r'\1[REDACTED]', message, flags=re.IGNORECASE,
+    )
+
 
 def clean_json_response(json_str):
     """
@@ -192,7 +208,7 @@ def deepseek_batch_translate(texts, src_lang, dest_lang, max_retries=3):
             timeout=120  # Increased timeout for slow responses
         )
     except Exception as e:
-        print(f"ERROR: Failed to initialize DeepSeek client: {e}")
+        print(f"ERROR: Failed to initialize DeepSeek client: {_redact_secrets(e)}")
         return texts
     
     # Join texts as a JSON list to preserve order and mapping
@@ -283,8 +299,8 @@ Output (valid JSON array with exactly {original_count} elements):"""
                     return final_result
                     
                 except Exception as e:
-                    print(f"Error parsing DeepSeek JSON: {e}")
-                    print(f"Cleaned JSON sample: {cleaned_json[:200]}...")
+                    print(f"Error parsing DeepSeek JSON: {_redact_secrets(e)}")
+                    print(f"Cleaned JSON sample: {_redact_secrets(cleaned_json)[:200]}...")
                     
                     # Try additional fallback methods
                     try:
@@ -313,7 +329,7 @@ Output (valid JSON array with exactly {original_count} elements):"""
                         return final_result
                         
                     except Exception as e2:
-                        print(f"All DeepSeek JSON parsing methods failed: {e2}")
+                        print(f"All DeepSeek JSON parsing methods failed: {_redact_secrets(e2)}")
                         
                         # If we haven't exhausted retries, retry the LLM call
                         if attempt < max_retries:
@@ -336,7 +352,7 @@ Output (valid JSON array with exactly {original_count} elements):"""
                     return texts
                     
         except Exception as e:
-            print(f"DeepSeek error on attempt {attempt + 1}: {e}")
+            print(f"DeepSeek error on attempt {attempt + 1}: {_redact_secrets(e)}")
             
             # Check if this is a server error (similar to Gemini 503) or timeout
             error_str = str(e).lower()
@@ -356,7 +372,7 @@ Output (valid JSON array with exactly {original_count} elements):"""
                     return texts
             else:
                 # For other errors, don't retry
-                print(f"DeepSeek: Non-retryable error: {e}")
+                print(f"DeepSeek: Non-retryable error: {_redact_secrets(e)}")
                 return texts
     
     # If we get here, all attempts failed
@@ -391,9 +407,7 @@ Input JSON array:
 Output (valid JSON array with exactly {original_count} elements):"""
     headers = {
         'Content-Type': 'application/json',
-    }
-    params = {
-        'key': GEMINI_API_KEY
+        'x-goog-api-key': GEMINI_API_KEY,
     }
     data = {
         'contents': [{
@@ -447,7 +461,7 @@ Output (valid JSON array with exactly {original_count} elements):"""
     # Retry logic for temporary errors
     for attempt in range(max_retries + 1):  # 0, 1, 2, 3 (total of 4 attempts)
         try:
-            resp = requests.post(GEMINI_API_URL, headers=headers, params=params, json=data, timeout=60)
+            resp = requests.post(GEMINI_API_URL, headers=headers, json=data, timeout=60)
             resp.raise_for_status()
             result = resp.json()
             
@@ -477,8 +491,8 @@ Output (valid JSON array with exactly {original_count} elements):"""
                     
                     return final_result
                 except Exception as e:
-                    print(f"Error parsing cleaned Gemini JSON: {e}")
-                    print(f"Cleaned JSON sample: {cleaned_json[:200]}...")
+                    print(f"Error parsing cleaned Gemini JSON: {_redact_secrets(e)}")
+                    print(f"Cleaned JSON sample: {_redact_secrets(cleaned_json)[:200]}...")
                     
                     # Try additional fallback methods
                     try:
@@ -508,7 +522,7 @@ Output (valid JSON array with exactly {original_count} elements):"""
                         return final_result
                         
                     except Exception as e2:
-                        print(f"All JSON parsing methods failed: {e2}")
+                        print(f"All JSON parsing methods failed: {_redact_secrets(e2)}")
                         
                         # If we haven't exhausted retries, retry the LLM call
                         if attempt < max_retries:
@@ -522,7 +536,7 @@ Output (valid JSON array with exactly {original_count} elements):"""
                         
             elif 'error' in result:
                 error_msg = result.get('error', {}).get('message', 'Unknown error')
-                print(f"Gemini API error: {error_msg}")
+                print(f"Gemini API error: {_redact_secrets(error_msg)}")
                 
                 # Special handling for auth errors - don't retry these
                 if 'API key not valid' in error_msg or '403' in error_msg:
@@ -553,9 +567,9 @@ Output (valid JSON array with exactly {original_count} elements):"""
             status_code = e.response.status_code
             
             # Don't retry authentication errors
-            if status_code == 403:
-                print(f"Gemini API authentication error (403 Forbidden): Please check your API key.")
-                print(f"API Response: {e.response.text}")
+            if status_code in (401, 403):
+                print(f"Gemini API authentication error (HTTP {status_code}): Please check your API key.")
+                print(f"API Response: {_redact_secrets(e.response.text)}")
                 return texts
             
             # Retry on temporary server errors (5xx) and rate limiting (429)
@@ -572,7 +586,7 @@ Output (valid JSON array with exactly {original_count} elements):"""
                 time.sleep(delay)
                 continue
             else:
-                print(f"Gemini HTTP error: {e}")
+                print(f"Gemini HTTP error: {_redact_secrets(e)}")
                 return texts
                 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
@@ -583,12 +597,12 @@ Output (valid JSON array with exactly {original_count} elements):"""
                 time.sleep(delay)
                 continue
             else:
-                print(f"Gemini connection error: {e}")
+                print(f"Gemini connection error: {_redact_secrets(e)}")
                 return texts
                 
         except Exception as e:
             # For unexpected errors, don't retry
-            print(f"Gemini translation error: {e}")
+            print(f"Gemini translation error: {_redact_secrets(e)}")
             return texts
     
     # Final fallback - always return same length with original texts
@@ -726,7 +740,7 @@ def gemini_batch_translate_with_size(texts, src_lang, dest_lang, batch_size=GEMI
                             all_translated.extend(original_batch)
                     
                     except Exception as deepseek_error:
-                        print(f"Batch {batch_number}: DeepSeek fallback failed: {deepseek_error}")
+                        print(f"Batch {batch_number}: DeepSeek fallback failed: {_redact_secrets(deepseek_error)}")
                         failed_batches += 1
                         all_translated.extend(original_batch)
                 
@@ -776,13 +790,13 @@ def gemini_batch_translate_with_size(texts, src_lang, dest_lang, batch_size=GEMI
                         all_translated.extend(original_batch)
                 
                 except Exception as deepseek_error:
-                    print(f"Batch {batch_number}: DeepSeek fallback failed: {deepseek_error}")
+                    print(f"Batch {batch_number}: DeepSeek fallback failed: {_redact_secrets(deepseek_error)}")
                     failed_batches += 1
                     all_translated.extend(original_batch)
                 
         except Exception as e:
             # Catch any unexpected errors in batch processing (including HTTP 503 errors)
-            print(f"Batch {batch_number}: Gemini translation error: {e}")
+            print(f"Batch {batch_number}: Gemini translation error: {_redact_secrets(e)}")
             print(f"Trying DeepSeek fallback for batch {batch_number}...")
             
             # Try DeepSeek as fallback when Gemini fails with exception
@@ -826,7 +840,7 @@ def gemini_batch_translate_with_size(texts, src_lang, dest_lang, batch_size=GEMI
                     all_translated.extend(original_batch)
             
             except Exception as deepseek_error:
-                print(f"Batch {batch_number}: DeepSeek fallback also failed: {deepseek_error}")
+                print(f"Batch {batch_number}: DeepSeek fallback also failed: {_redact_secrets(deepseek_error)}")
                 print(f"Using original texts for this batch and continuing with next batch")
                 failed_batches += 1
                 all_translated.extend(original_batch)
@@ -859,4 +873,4 @@ def gemini_batch_translate_with_size(texts, src_lang, dest_lang, batch_size=GEMI
     translation_rate = (translated_elements / len(texts) * 100) if len(texts) > 0 else 0
     print(f"  Elements translated: {translated_elements}/{len(texts)} ({translation_rate:.1f}%)")
     
-    return all_translated, total_characters 
+    return all_translated, total_characters

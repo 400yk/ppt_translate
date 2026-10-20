@@ -50,7 +50,7 @@ The project uses environment variables for configuration. Copy `backend/.env.exa
 - **API Settings**: Configure the API port and debug mode
 - **Storage Settings**: Configure MinIO, S3, or Azure storage
 - **Celery Settings**: Redis connection for task queue
-- **Translation Settings**: Add your OpenAI or DeepL API keys
+- **Translation Settings**: Configure Gemini and the DashScope fallback; see [server configuration and key rotation](backend/docs/LLM_CONFIGURATION.md)
 - **CORS Settings**: Configure allowed frontend origins
 
 **Never commit your .env file containing sensitive API keys to version control!**

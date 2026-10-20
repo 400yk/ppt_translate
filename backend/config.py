@@ -7,23 +7,22 @@ import tempfile
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Patch Heroku's DATABASE_URL to be compatible with SQLAlchemy
-if 'DATABASE_URL' in os.environ:
-    os.environ['DATABASE_URL'] = os.environ['DATABASE_URL'].replace('postgres://', 'postgresql://', 1)
-
 # Load environment variables with priority
-# 1. .env.local (highest priority, for secrets and local overrides)
-# 2. .env (shared development settings)
+# 1. Existing process environment (deployment settings and rotated secrets)
+# 2. .env.local (local development overrides)
+# 3. .env (shared development settings)
 env_local_path = os.path.join(os.path.dirname(__file__), '.env.local')
 env_path = os.path.join(os.path.dirname(__file__), '.env')
 
-# First load the shared .env file
-if os.path.exists(env_path):
-    load_dotenv(env_path)
-
-# Then load .env.local to override if needed
+# Load higher-priority files first, without replacing process environment values.
 if os.path.exists(env_local_path):
-    load_dotenv(env_local_path, override=True)
+    load_dotenv(env_local_path, override=False)
+if os.path.exists(env_path):
+    load_dotenv(env_path, override=False)
+
+# Normalize the effective URL, including URLs loaded from dotenv files.
+if 'DATABASE_URL' in os.environ:
+    os.environ['DATABASE_URL'] = os.environ['DATABASE_URL'].replace('postgres://', 'postgresql://', 1)
 
 # Database settings
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -83,13 +82,16 @@ DEFAULT_FONT_SIZE = 18
 DEFAULT_TITLE_FONT_SIZE = 24
 
 # API settings
-GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+GEMINI_MODEL = os.getenv('GEMINI_MODEL') or 'gemini-3.1-flash-lite'
+GEMINI_API_BASE_URL = (os.getenv('GEMINI_API_BASE_URL') or 'https://generativelanguage.googleapis.com/v1beta').rstrip('/')
+# Optional full generateContent URL override, for compatible gateways.
+GEMINI_API_URL = os.getenv('GEMINI_API_URL') or f'{GEMINI_API_BASE_URL}/models/{GEMINI_MODEL}:generateContent'
 GEMINI_API_CHARACTER_BATCH_SIZE = 20000  # Maximum characters per batch
 GEMINI_API_BATCH_SIZE = 50  # Keeping for backward compatibility
 
 # DeepSeek API settings (fallback for Gemini)
-DEEPSEEK_API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1'
-DEEPSEEK_MODEL = 'deepseek-v3'  # Fixed model name
+DEEPSEEK_API_URL = (os.getenv('DEEPSEEK_API_URL') or 'https://dashscope.aliyuncs.com/compatible-mode/v1').rstrip('/')
+DEEPSEEK_MODEL = os.getenv('DEEPSEEK_MODEL') or 'deepseek-v4.1-flash-1017'
 DEEPSEEK_API_CHARACTER_BATCH_SIZE = 15000   # Smaller batch size for slow responses
 DEEPSEEK_API_BATCH_SIZE = 30  # Smaller batch size for slow responses
 
@@ -203,4 +205,4 @@ SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
 AWS_SES_REGION = os.getenv('AWS_SES_REGION', 'us-east-1')
 MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
 MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN')
-RESEND_API_KEY = os.getenv('RESEND_API_KEY') 
+RESEND_API_KEY = os.getenv('RESEND_API_KEY')

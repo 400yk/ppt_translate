@@ -58,3 +58,6 @@ backend/db/pgadmin_data/
 
 deploy/
 Self-instructions.md
+
+key_rotation.xlsx
+~$key_rotation.xlsx

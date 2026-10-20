@@ -2,7 +2,7 @@
 
 ## Overview
 
-The translation service now includes a fallback mechanism that automatically uses DeepSeek-V3 when Gemini translation fails. This ensures higher reliability and availability of the translation service.
+The translation service automatically uses the configured OpenAI-compatible fallback when Gemini translation fails.
 
 ## How It Works
 
@@ -14,7 +14,7 @@ The translation service now includes a fallback mechanism that automatically use
    - Other server errors
    - API returning original texts (indicating API issues)
    - Invalid response format
-3. **Fallback Translation**: The system automatically tries DeepSeek-V3 as a fallback
+3. **Fallback Translation**: The system automatically tries the configured fallback model
 4. **Result**: The system uses whichever translation was successful
 
 ### Fallback Scenarios
@@ -30,24 +30,28 @@ The DeepSeek fallback is triggered in the following cases:
 
 ### Environment Variables
 
-Add the following to your `.env` file:
+See [server configuration and key rotation](LLM_CONFIGURATION.md) for deployment
+settings, endpoint selection, environment precedence and restart requirements.
+Add the following to your backend `.env` file for local development:
 
 ```bash
 # Gemini API (Primary)
 GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-3.1-flash-lite
 
 # DeepSeek API (Fallback)
 DASHSCOPE_API_KEY=your_dashscope_api_key_here
+DEEPSEEK_API_URL=https://YOUR_WORKSPACE_ID.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
+DEEPSEEK_MODEL=deepseek-v4.1-flash-1017
 ```
 
 ### API Settings
 
-The following settings are configured in `config.py`:
+Model names and endpoints are read from the environment by `config.py`. Choose
+a model enabled for your key and endpoint region. Batch sizes remain in code:
 
 ```python
 # DeepSeek API settings (fallback for Gemini)
-DEEPSEEK_API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1'
-DEEPSEEK_MODEL = 'deepseek-r1'
 DEEPSEEK_API_CHARACTER_BATCH_SIZE = 15000  # Conservative batch size
 DEEPSEEK_API_BATCH_SIZE = 30  # Conservative batch size
 ```
@@ -141,4 +145,4 @@ Watch the logs for:
 2. **Improved Reliability**: Automatic fallback reduces service disruptions
 3. **Better User Experience**: Users don't experience translation failures
 4. **Diverse API Coverage**: Reduces dependency on a single translation provider
-5. **Graceful Degradation**: System maintains functionality under various failure scenarios 
+5. **Graceful Degradation**: System maintains functionality under various failure scenarios
