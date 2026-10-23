@@ -52,7 +52,7 @@
     "firebase": "^11.3.0",
     "genkit": "^1.0.4",
     "lucide-react": "^0.475.0",
-    "next": "15.2.3",
+    "next": "15.5.28",
     "patch-package": "^8.0.0",
     "pptxgenjs": "*",
     "react": "^18.3.1",
