@@ -47,7 +47,7 @@
     "dotenv": "^16.5.0",
     "firebase": "^11.3.0",
     "lucide-react": "^0.475.0",
-    "next": "15.5.28",
+    "next": "15.5.29",
     "patch-package": "^8.0.0",
     "pptxgenjs": "*",
     "react": "^18.3.1",
